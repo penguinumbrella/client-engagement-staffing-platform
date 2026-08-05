@@ -6,20 +6,25 @@ spring:
             enabled: always
     cloud:
         gateway:
-            mvc:
-                routes:
-                    - id: client
-                      uri: lb://client
-                      predicates:
-                          - Path=/client/**
-                    - id: engagement
-                      uri: lb://engagement
-                      predicates:
-                          - Path=/engagement/**
-                    - id: staffing
-                      uri: lb://staffing
-                      predicates:
-                          - Path=/staffing/**
+            server:
+                webmvc:
+                    routes:
+                        - id: client
+                          uri: lb://client
+                          predicates:
+                              - Path=/client/**
+                        - id: engagement
+                          uri: lb://engagement
+                          predicates:
+                              - Path=/engagement/**
+                          filters:
+                              - StripPrefix=1
+                        - id: staffing
+                          uri: lb://staffing
+                          predicates:
+                              - Path=/staffing/**
+                          filters:
+                              - StripPrefix=1
 
 server:
     port: 8125
