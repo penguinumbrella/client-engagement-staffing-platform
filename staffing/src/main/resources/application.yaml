@@ -1,6 +1,9 @@
 spring:
     application:
         name: staffing
+    output:
+        ansi:
+            enabled: always
 
 server:
     port: 8083

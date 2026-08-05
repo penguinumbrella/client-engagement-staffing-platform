@@ -4,11 +4,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.skillstorm.client.models.clients;
+import com.skillstorm.client.models.Client;
 
-public interface ClientRepository extends JpaRepository<clients, Long> {
+public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    boolean existsByUserId(Long userId);
-    Page<clients> findByUserId(Long userId, Pageable pageable);
+    Page<Client> findByIsActiveTrue(Pageable pageable);
 
 }

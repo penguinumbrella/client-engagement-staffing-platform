@@ -17,7 +17,7 @@ import jakarta.persistence.EnumType;
 
 @Entity
 @Table(name = "clients")
-public class clients {
+public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,10 +45,14 @@ public class clients {
     @NotNull(message = "Relationship status is required")
     private RelationshipStatus relationshipStatus;
 
-    public clients() {
+    @Column(name = "is_active", nullable = false)
+    @NotNull(message = "Active status is required")
+    private Boolean isActive = true;
+
+    public Client() {
     }
 
-    public clients(String companyName, String industry, String primaryContactName, String primaryContactEmail,
+    public Client(String companyName, String industry, String primaryContactName, String primaryContactEmail,
             RelationshipStatus relationshipStatus) {
         this.companyName = companyName;
         this.industry = industry;
@@ -97,6 +101,13 @@ public class clients {
     }
     public void setRelationshipStatus(RelationshipStatus relationshipStatus) {
         this.relationshipStatus = relationshipStatus;
+    }
+
+    public Boolean isActive() {
+        return isActive;
+    }
+    public void setActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
 }

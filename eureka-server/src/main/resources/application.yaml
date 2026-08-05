@@ -1,6 +1,9 @@
 spring:
     application:
         name: eureka-server
+    output:
+        ansi:
+            enabled: always
     cloud:
         config:
             enabled: false

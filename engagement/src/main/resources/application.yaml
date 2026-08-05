@@ -1,6 +1,9 @@
 spring:
     application:
         name: engagement
+    output:
+        ansi:
+            enabled: always
 
 server:
     port: 8082
