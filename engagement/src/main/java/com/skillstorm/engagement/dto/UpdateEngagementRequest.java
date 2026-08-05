@@ -1,0 +1,50 @@
+package com.skillstorm.engagement.dto;
+
+import com.skillstorm.engagement.enums.EngagementStatus;
+import com.skillstorm.engagement.enums.EngagementType;
+
+import java.time.LocalDate;
+
+/**
+ * Partial-update payload. Only status, timeline, and type are editable per spec;
+ * null fields are left unchanged.
+ */
+public class UpdateEngagementRequest {
+
+    private EngagementType engagementType;
+    private LocalDate startDate;
+    private LocalDate targetEndDate;
+    private EngagementStatus status;
+
+    public EngagementType getEngagementType() {
+        return engagementType;
+    }
+
+    public void setEngagementType(EngagementType engagementType) {
+        this.engagementType = engagementType;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getTargetEndDate() {
+        return targetEndDate;
+    }
+
+    public void setTargetEndDate(LocalDate targetEndDate) {
+        this.targetEndDate = targetEndDate;
+    }
+
+    public EngagementStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EngagementStatus status) {
+        this.status = status;
+    }
+}

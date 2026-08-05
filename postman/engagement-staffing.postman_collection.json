@@ -1,0 +1,249 @@
+{
+  "info": {
+    "name": "Engagement & Staffing Services",
+    "description": "Manual verification requests for the Engagement Service (8082) and Staffing Service (8083). No auth headers required. Requires both apps running with a local Postgres instance (engagement_db, staffing_db) and the seed data.sql loaded.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "engagementBaseUrl", "value": "http://localhost:8082" },
+    { "key": "staffingBaseUrl", "value": "http://localhost:8083" }
+  ],
+  "item": [
+    {
+      "name": "Engagement Service",
+      "item": [
+        {
+          "name": "Create Engagement",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"engagementName\": \"New Audit\",\n  \"clientId\": 1,\n  \"engagementType\": \"Audit\",\n  \"startDate\": \"2026-01-01\",\n  \"targetEndDate\": \"2026-06-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{engagementBaseUrl}}/api/engagements" }
+          }
+        },
+        {
+          "name": "List Engagements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{engagementBaseUrl}}/api/engagements" }
+          }
+        },
+        {
+          "name": "Get Engagement by Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{engagementBaseUrl}}/api/engagements/1" }
+          }
+        },
+        {
+          "name": "Update Engagement (status/timeline/type)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"On Hold\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{engagementBaseUrl}}/api/engagements/1" }
+          }
+        },
+        {
+          "name": "Delete Engagement",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{engagementBaseUrl}}/api/engagements/6" }
+          }
+        },
+        {
+          "name": "[Check] Get Deleted/Nonexistent Engagement -> 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{engagementBaseUrl}}/api/engagements/9999" }
+          }
+        },
+        {
+          "name": "[Check] Create Engagement - Invalid Dates -> 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"engagementName\": \"Bad Dates\",\n  \"clientId\": 1,\n  \"engagementType\": \"Audit\",\n  \"startDate\": \"2026-06-01\",\n  \"targetEndDate\": \"2026-01-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{engagementBaseUrl}}/api/engagements" }
+          }
+        },
+        {
+          "name": "[Check] Create Engagement - Invalid Type -> 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"engagementName\": \"Bad Type\",\n  \"clientId\": 1,\n  \"engagementType\": \"Not A Real Type\",\n  \"startDate\": \"2026-01-01\",\n  \"targetEndDate\": \"2026-06-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{engagementBaseUrl}}/api/engagements" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Staffing Service",
+      "item": [
+        {
+          "name": "Create Consultant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jordan Blake\",\n  \"titleRole\": \"Associate\",\n  \"primarySkillArea\": \"Audit\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{staffingBaseUrl}}/api/consultants" }
+          }
+        },
+        {
+          "name": "List Consultants",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{staffingBaseUrl}}/api/consultants" }
+          }
+        },
+        {
+          "name": "Get Consultant by Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{staffingBaseUrl}}/api/consultants/1" }
+          }
+        },
+        {
+          "name": "Update Consultant",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titleRole\": \"Manager\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{staffingBaseUrl}}/api/consultants/1" }
+          }
+        },
+        {
+          "name": "Delete Consultant",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{staffingBaseUrl}}/api/consultants/5" }
+          }
+        },
+        {
+          "name": "[Check] Get Deleted/Nonexistent Consultant -> 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{staffingBaseUrl}}/api/consultants/5" }
+          }
+        },
+        {
+          "name": "Assign Consultant to Engagement",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultantId\": 3,\n  \"engagementId\": 4,\n  \"engagementRole\": \"Lead\",\n  \"assignmentStartDate\": \"2026-08-04\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{staffingBaseUrl}}/api/assignments" }
+          }
+        },
+        {
+          "name": "[Check] Assign Same Pair Again -> 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultantId\": 3,\n  \"engagementId\": 4,\n  \"engagementRole\": \"Lead\",\n  \"assignmentStartDate\": \"2026-08-04\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{staffingBaseUrl}}/api/assignments" }
+          }
+        },
+        {
+          "name": "List Assignments by Consultant",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{staffingBaseUrl}}/api/assignments/consultant/1" }
+          }
+        },
+        {
+          "name": "List Assignments by Engagement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{staffingBaseUrl}}/api/assignments/engagement/1" }
+          }
+        },
+        {
+          "name": "Remove Assignment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{staffingBaseUrl}}/api/assignments/3" }
+          }
+        },
+        {
+          "name": "[Check] Reassign After Removal -> 201 (reactivates)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultantId\": 2,\n  \"engagementId\": 1,\n  \"engagementRole\": \"Lead\",\n  \"assignmentStartDate\": \"2026-08-04\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{staffingBaseUrl}}/api/assignments" }
+          }
+        },
+        {
+          "name": "[Check] Assign - Invalid Role -> 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultantId\": 1,\n  \"engagementId\": 1,\n  \"engagementRole\": \"Manager\",\n  \"assignmentStartDate\": \"2026-08-04\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{staffingBaseUrl}}/api/assignments" }
+          }
+        },
+        {
+          "name": "[Check] Get Nonexistent Consultant -> 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{staffingBaseUrl}}/api/consultants/9999" }
+          }
+        }
+      ]
+    }
+  ]
+}
