@@ -1,4 +1,4 @@
-package com.skillstorm.client.models;
+package com.skillstorm.client.models.enums;
 
 public enum RelationshipStatus {
     PROSPECTIVE,
