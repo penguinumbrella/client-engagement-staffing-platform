@@ -1,12 +1,13 @@
 {
   "info": {
     "name": "Engagement & Staffing Services",
-    "description": "Manual verification requests for the Engagement Service (8082) and Staffing Service (8083). No auth headers required. Requires both apps running with a local Postgres instance (engagement_db, staffing_db) and the seed data.sql loaded.",
+    "description": "Manual verification requests for the Engagement Service (8082) and Staffing Service (8083), plus routing sanity checks through the API Gateway (8125). No auth headers required. Requires all apps running (including Eureka on 8761) with a local Postgres instance (engagement_db, staffing_db) and the seed data.sql loaded. If the 'API Gateway Routing' requests fail while the direct-port requests succeed, check that the target service is still registered in Eureka (see the Eureka Registry Snapshot check) — a service can silently fall out of the registry if its Eureka client can't renew its lease.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     { "key": "engagementBaseUrl", "value": "http://localhost:8082" },
-    { "key": "staffingBaseUrl", "value": "http://localhost:8083" }
+    { "key": "staffingBaseUrl", "value": "http://localhost:8083" },
+    { "key": "gatewayBaseUrl", "value": "http://localhost:8125" }
   ],
   "item": [
     {
@@ -173,6 +174,19 @@
           }
         },
         {
+          "name": "[Check] Assign - Nonexistent Engagement -> 404",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultantId\": 3,\n  \"engagementId\": 9999,\n  \"engagementRole\": \"Lead\",\n  \"assignmentStartDate\": \"2026-08-04\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{staffingBaseUrl}}/api/assignments" }
+          }
+        },
+        {
           "name": "[Check] Assign Same Pair Again -> 409",
           "request": {
             "method": "POST",
@@ -241,6 +255,90 @@
             "method": "GET",
             "header": [],
             "url": { "raw": "{{staffingBaseUrl}}/api/consultants/9999" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "API Gateway Routing",
+      "item": [
+        {
+          "name": "List Engagements (via Gateway)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{gatewayBaseUrl}}/engagement/api/engagements" }
+          }
+        },
+        {
+          "name": "Update Engagement (via Gateway)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"On Hold\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{gatewayBaseUrl}}/engagement/api/engagements/1" }
+          }
+        },
+        {
+          "name": "List Consultants (via Gateway)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{gatewayBaseUrl}}/staffing/api/consultants" }
+          }
+        },
+        {
+          "name": "Update Consultant (via Gateway)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titleRole\": \"Manager\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{gatewayBaseUrl}}/staffing/api/consultants/1" }
+          }
+        },
+        {
+          "name": "Assign Consultant to Engagement (via Gateway)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultantId\": 2,\n  \"engagementId\": 3,\n  \"engagementRole\": \"Associate\",\n  \"assignmentStartDate\": \"2026-08-05\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{gatewayBaseUrl}}/staffing/api/assignments" }
+          }
+        },
+        {
+          "name": "Remove Assignment (via Gateway)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{gatewayBaseUrl}}/staffing/api/assignments/9999" }
+          }
+        },
+        {
+          "name": "[Check] Client via Gateway -> 404 (Client Service not yet implemented)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{gatewayBaseUrl}}/client/api/clients" }
+          }
+        },
+        {
+          "name": "[Check] Eureka Registry Snapshot (confirms STAFFING/ENGAGEMENT/CLIENT are all UP)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "http://localhost:8761/eureka/apps" }
           }
         }
       ]
