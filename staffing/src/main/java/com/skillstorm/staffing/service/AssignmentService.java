@@ -1,5 +1,6 @@
 package com.skillstorm.staffing.service;
 
+import com.skillstorm.staffing.client.EngagementClient;
 import com.skillstorm.staffing.dto.AssignmentResponse;
 import com.skillstorm.staffing.dto.CreateAssignmentRequest;
 import com.skillstorm.staffing.model.Assignment;
@@ -25,18 +26,26 @@ public class AssignmentService {
     private final AssignmentRepository assignmentRepository;
     private final ConsultantRepository consultantRepository;
     private final ConsultantService consultantService;
+    private final EngagementClient engagementClient;
 
     public AssignmentService(AssignmentRepository assignmentRepository,
                               ConsultantRepository consultantRepository,
-                              ConsultantService consultantService) {
+                              ConsultantService consultantService,
+                              EngagementClient engagementClient) {
         this.assignmentRepository = assignmentRepository;
         this.consultantRepository = consultantRepository;
         this.consultantService = consultantService;
+        this.engagementClient = engagementClient;
     }
 
     @Transactional
     public AssignmentResponse assignConsultant(CreateAssignmentRequest request) {
         Consultant consultant = consultantService.findActiveOrThrow(request.getConsultantId());
+
+        if (!engagementClient.engagementExists(request.getEngagementId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Engagement " + request.getEngagementId() + " not found");
+        }
 
         Assignment assignment = assignmentRepository
                 .findByConsultantIdAndEngagementId(request.getConsultantId(), request.getEngagementId())
