@@ -1,0 +1,127 @@
+package com.skillstorm.auth_service.Services;
+
+import java.util.Locale;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.skillstorm.auth_service.Dtos.AuthResponse;
+import com.skillstorm.auth_service.Dtos.LoginRequest;
+import com.skillstorm.auth_service.Dtos.RegisterRequest;
+import com.skillstorm.auth_service.Dtos.UserResponse;
+import com.skillstorm.auth_service.Entities.User;
+import com.skillstorm.auth_service.Enums.UserRole;
+import com.skillstorm.auth_service.Exceptions.DuplicateEmailException;
+import com.skillstorm.auth_service.Repositories.UserRepository;
+
+@Service
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
+    public AuthService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager,
+            JwtService jwtService) {
+
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+    }
+
+    @Transactional
+    public AuthResponse register(RegisterRequest request) {
+        String normalizedEmail = normalizeEmail(request.email());
+
+        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+            throw new DuplicateEmailException(normalizedEmail);
+        }
+
+        String passwordHash = passwordEncoder.encode(request.password());
+
+        User user = new User(
+                request.firstName().trim(),
+                request.lastName().trim(),
+                normalizedEmail,
+                passwordHash,
+                UserRole.CONSULTANT);
+
+        User savedUser = userRepository.save(user);
+
+        return createAuthResponse(savedUser);
+    }
+
+    @Transactional(readOnly = true)
+    public AuthResponse login(LoginRequest request) {
+        String normalizedEmail = normalizeEmail(request.email());
+
+        Authentication authenticationRequest =
+                new UsernamePasswordAuthenticationToken(
+                        normalizedEmail,
+                        request.password());
+
+        Authentication authenticatedUser =
+                authenticationManager.authenticate(authenticationRequest);
+
+        User user = userRepository
+                .findByEmailIgnoreCase(authenticatedUser.getName())
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "User could not be found after authentication."));
+
+        return createAuthResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getCurrentUser(String email) {
+        String normalizedEmail = normalizeEmail(email);
+
+        User user = userRepository
+                .findByEmailIgnoreCase(normalizedEmail)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "User not found."));
+
+        return toUserResponse(user);
+    }
+
+    private AuthResponse createAuthResponse(User user) {
+        JwtService.TokenResult tokenResult =
+                jwtService.generateAccessToken(user);
+
+        return new AuthResponse(
+                tokenResult.accessToken(),
+                "Bearer",
+                tokenResult.expiresIn(),
+                toUserResponse(user));
+    }
+
+    private UserResponse toUserResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getRole(),
+                user.isEnabled(),
+                user.getCreatedAt());
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null) {
+            throw new IllegalArgumentException("Email cannot be null.");
+        }
+
+        return email
+                .trim()
+                .toLowerCase(Locale.ROOT);
+    }
+}
