@@ -1,5 +1,5 @@
 <div class="flex items-start gap-4 p-4">
-  @for (column of columns; track column.status) {
+  @for (column of columns(); track column.status) {
     <app-kanban-column
       [column]="column"
       [connectedTo]="connectedLists"

@@ -1,30 +1,46 @@
-import { Component, signal } from '@angular/core';
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { Component, computed, inject, signal } from '@angular/core';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { KanbanColumn } from '../kanban-column/kanban-column';
 import { EngagementDetail } from '../engagement-detail/engagement-detail';
-import { EngagementCard, EngagementColumn } from '../engagement.model';
-import { EngagementStatus, EngagementType } from '../../../../types/engagement.types';
+import { EngagementCard, EngagementColumn, ConsultantBadge, ClientBadge } from '../engagement.model';
+import { Engagement, EngagementStatus } from '../../../../types/engagement.types';
+import { EngagementRole } from '../../../../types/assignment.types';
+import { EngagementService } from '../../../../services/engagement.service';
 
-const CLIENTS = {
-  fidelity: { companyName: 'Fidelity', initials: 'FI', color: '#4b9c5f' },
-  vanguard: { companyName: 'Vanguard', initials: 'VG', color: '#960b2f' },
-  blackrock: { companyName: 'BlackRock', initials: 'BR', color: '#000000' },
-  charlesSchwab: { companyName: 'Charles Schwab', initials: 'CS', color: '#00a0df' },
-  pnc: { companyName: 'PNC', initials: 'PNC', color: '#f58025' },
-} as const;
+const COLUMN_STATUSES = [
+  EngagementStatus.PLANNED,
+  EngagementStatus.IN_PROGRESS,
+  EngagementStatus.ON_HOLD,
+  EngagementStatus.COMPLETED,
+];
 
-const CONSULTANTS = {
-  jamie: { name: 'Jamie Lee', titleRole: 'Senior Associate', initials: 'JL', color: '#6366f1' },
-  sam: { name: 'Sam Rivera', titleRole: 'Associate', initials: 'SR', color: '#f59e0b' },
-  alex: { name: 'Alex Chen', titleRole: 'Lead Consultant', initials: 'AC', color: '#10b981' },
-  priya: { name: 'Priya Nair', titleRole: 'Senior Associate', initials: 'PN', color: '#ec4899' },
-  jordan: { name: 'Jordan Blake', titleRole: 'Associate', initials: 'JB', color: '#3b82f6' },
-  taylor: { name: 'Taylor Kim', titleRole: 'Senior Associate', initials: 'TK', color: '#a855f7' },
-  morgan: { name: 'Morgan Reyes', titleRole: 'Lead Consultant', initials: 'MR', color: '#ef4444' },
-  casey: { name: 'Casey Nguyen', titleRole: 'Associate', initials: 'CN', color: '#14b8a6' },
-} as const;
+// TODO: replace with real lookups once ClientService/ConsultantService (via client + staffing gateway routes) are wired up.
+// The engagement service only returns `clientId`, and consultant assignments live in the staffing service, so this
+// deterministically fakes both from the engagement's id purely for display until those integrations land.
+const PLACEHOLDER_CLIENTS: ClientBadge[] = [
+  { companyName: 'Fidelity', initials: 'FI', color: '#4b9c5f' },
+  { companyName: 'Vanguard', initials: 'VG', color: '#960b2f' },
+  { companyName: 'BlackRock', initials: 'BR', color: '#000000' },
+  { companyName: 'Charles Schwab', initials: 'CS', color: '#00a0df' },
+  { companyName: 'PNC', initials: 'PNC', color: '#f58025' },
+];
 
-const now = '2026-08-07T00:00:00Z';
+const PLACEHOLDER_CONSULTANTS: Omit<ConsultantBadge, 'projectRole'>[] = [
+  { name: 'Jamie Lee', titleRole: 'Senior Associate', initials: 'JL', color: '#6366f1' },
+  { name: 'Sam Rivera', titleRole: 'Associate', initials: 'SR', color: '#f59e0b' },
+  { name: 'Alex Chen', titleRole: 'Lead Consultant', initials: 'AC', color: '#10b981' },
+];
+
+function toCard(engagement: Engagement): EngagementCard {
+  const client = PLACEHOLDER_CLIENTS[engagement.clientId % PLACEHOLDER_CLIENTS.length];
+  const consultant = PLACEHOLDER_CONSULTANTS[engagement.id % PLACEHOLDER_CONSULTANTS.length];
+
+  return {
+    ...engagement,
+    client,
+    consultants: [{ ...consultant, projectRole: EngagementRole.LEAD }],
+  };
+}
 
 @Component({
   selector: 'app-kanban-board',
@@ -33,161 +49,46 @@ const now = '2026-08-07T00:00:00Z';
   styleUrl: './kanban-board.css',
 })
 export class KanbanBoard {
+  private readonly engagementService = inject(EngagementService);
+
+  private readonly engagements = signal<Engagement[]>([]);
+
   protected readonly selected = signal<EngagementCard | null>(null);
+  protected readonly connectedLists = COLUMN_STATUSES;
 
-  protected readonly columns: EngagementColumn[] = [
-    {
-      status: EngagementStatus.PLANNED,
-      title: 'Planned',
-      engagements: [
-        {
-          id: 1,
-          engagementName: 'ERP Rollout',
-          clientId: 1,
-          engagementType: EngagementType.RISK_CONSULTING,
-          startDate: '2026-09-01',
-          targetEndDate: '2027-01-15',
-          status: EngagementStatus.PLANNED,
-          active: true,
-          createdAt: now,
-          updatedAt: now,
-          client: CLIENTS.fidelity,
-          consultants: [CONSULTANTS.jamie, CONSULTANTS.sam],
-        },
-        {
-          id: 2,
-          engagementName: 'Data Migration',
-          clientId: 2,
-          engagementType: EngagementType.RISK_CONSULTING,
-          startDate: '2026-09-15',
-          targetEndDate: '2026-12-01',
-          status: EngagementStatus.PLANNED,
-          active: true,
-          createdAt: now,
-          updatedAt: now,
-          client: CLIENTS.vanguard,
-          consultants: [CONSULTANTS.sam],
-        },
-      ],
-    },
-    {
-      status: EngagementStatus.IN_PROGRESS,
-      title: 'In Progress',
-      engagements: [
-        {
-          id: 3,
-          engagementName: 'Cloud Modernization',
-          clientId: 3,
-          engagementType: EngagementType.RISK_CONSULTING,
-          startDate: '2026-06-01',
-          targetEndDate: '2026-11-30',
-          status: EngagementStatus.IN_PROGRESS,
-          active: true,
-          createdAt: now,
-          updatedAt: now,
-          client: CLIENTS.blackrock,
-          consultants: [CONSULTANTS.alex, CONSULTANTS.priya, CONSULTANTS.jordan],
-        },
-        {
-          id: 4,
-          engagementName: 'Security Audit',
-          clientId: 4,
-          engagementType: EngagementType.AUDIT,
-          startDate: '2026-07-01',
-          targetEndDate: '2026-10-01',
-          status: EngagementStatus.IN_PROGRESS,
-          active: true,
-          createdAt: now,
-          updatedAt: now,
-          client: CLIENTS.charlesSchwab,
-          consultants: [CONSULTANTS.priya],
-        },
-        {
-          id: 5,
-          engagementName: 'API Integration',
-          clientId: 5,
-          engagementType: EngagementType.RISK_CONSULTING,
-          startDate: '2026-05-15',
-          targetEndDate: '2026-09-30',
-          status: EngagementStatus.IN_PROGRESS,
-          active: true,
-          createdAt: now,
-          updatedAt: now,
-          client: CLIENTS.pnc,
-          consultants: [CONSULTANTS.jordan, CONSULTANTS.taylor],
-        },
-      ],
-    },
-    {
-      status: EngagementStatus.ON_HOLD,
-      title: 'On Hold',
-      engagements: [
-        {
-          id: 6,
-          engagementName: 'Legacy Decommission',
-          clientId: 1,
-          engagementType: EngagementType.TAX_ADVISORY,
-          startDate: '2026-04-01',
-          targetEndDate: '2026-08-01',
-          status: EngagementStatus.ON_HOLD,
-          active: true,
-          createdAt: now,
-          updatedAt: now,
-          client: CLIENTS.fidelity,
-          consultants: [CONSULTANTS.taylor, CONSULTANTS.morgan],
-        },
-      ],
-    },
-    {
-      status: EngagementStatus.COMPLETED,
-      title: 'Completed',
-      engagements: [
-        {
-          id: 7,
-          engagementName: 'Payroll Upgrade',
-          clientId: 2,
-          engagementType: EngagementType.FINANCIAL_ADVISORY,
-          startDate: '2026-01-01',
-          targetEndDate: '2026-05-01',
-          status: EngagementStatus.COMPLETED,
-          active: false,
-          createdAt: now,
-          updatedAt: now,
-          client: CLIENTS.vanguard,
-          consultants: [CONSULTANTS.morgan],
-        },
-        {
-          id: 8,
-          engagementName: 'Onboarding Portal',
-          clientId: 3,
-          engagementType: EngagementType.RISK_CONSULTING,
-          startDate: '2026-02-01',
-          targetEndDate: '2026-06-01',
-          status: EngagementStatus.COMPLETED,
-          active: false,
-          createdAt: now,
-          updatedAt: now,
-          client: CLIENTS.blackrock,
-          consultants: [CONSULTANTS.casey, CONSULTANTS.jamie, CONSULTANTS.sam],
-        },
-      ],
-    },
-  ];
+  constructor() {
+    this.engagementService.getAll().subscribe({
+      next: (engagements) => this.engagements.set(engagements),
+      error: (err) => console.error('Failed to load engagements', err),
+    });
+  }
 
-  protected readonly connectedLists = this.columns.map((c) => c.status);
+  protected readonly columns = computed<EngagementColumn[]>(() => {
+    const cards = this.engagements().map(toCard);
+
+    return COLUMN_STATUSES.map((status) => ({
+      status,
+      title: status,
+      engagements: cards.filter((card) => card.status === status),
+    }));
+  });
 
   protected drop(event: CdkDragDrop<EngagementCard[]>): void {
-    if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    const engagement = event.item.data as EngagementCard;
+    const destinationStatus = event.container.id as EngagementStatus;
+
+    if (engagement.status === destinationStatus) {
       return;
     }
 
-    transferArrayItem(
-      event.previousContainer.data,
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex,
-    );
+    this.engagementService.updateStatus(engagement.id, destinationStatus).subscribe({
+      next: () => {
+        this.engagements.set(
+          this.engagements().map((e) => (e.id === engagement.id ? { ...e, status: destinationStatus } : e)),
+        );
+      },
+      error: (err) => console.error(`Failed to update engagement ${engagement.id} status`, err),
+    });
   }
 
   protected selectEngagement(engagement: EngagementCard): void {
