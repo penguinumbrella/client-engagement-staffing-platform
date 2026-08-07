@@ -4,6 +4,8 @@ import com.skillstorm.engagement.dto.CreateEngagementRequest;
 import com.skillstorm.engagement.dto.EngagementResponse;
 import com.skillstorm.engagement.dto.UpdateEngagementRequest;
 import com.skillstorm.engagement.enums.EngagementStatus;
+import com.skillstorm.engagement.kafka.NotificationEvent;
+import com.skillstorm.engagement.kafka.NotificationEventPublisher;
 import com.skillstorm.engagement.model.Engagement;
 import com.skillstorm.engagement.repository.EngagementRepository;
 import org.springframework.http.HttpStatus;
@@ -17,9 +19,12 @@ import java.util.List;
 public class EngagementService {
 
     private final EngagementRepository engagementRepository;
+    private final NotificationEventPublisher notificationEventPublisher;
 
-    public EngagementService(EngagementRepository engagementRepository) {
+    public EngagementService(EngagementRepository engagementRepository,
+                             NotificationEventPublisher notificationEventPublisher) {
         this.engagementRepository = engagementRepository;
+        this.notificationEventPublisher = notificationEventPublisher;
     }
 
     public EngagementResponse createEngagement(CreateEngagementRequest request) {
@@ -36,7 +41,19 @@ public class EngagementService {
                 status.getLabel()
         );
 
-        return EngagementResponse.from(engagementRepository.save(engagement));
+        Engagement saved = engagementRepository.save(engagement);
+        EngagementResponse response = EngagementResponse.from(saved);
+
+        notificationEventPublisher.publish(new NotificationEvent(
+                "ENGAGEMENT_CREATED",
+                "engagement",
+                saved.getId(),
+                saved.getClientId(),
+                "New engagement",
+                "Engagement \"" + saved.getEngagementName() + "\" was created."
+        ));
+
+        return response;
     }
 
     public List<EngagementResponse> getAllEngagements() {

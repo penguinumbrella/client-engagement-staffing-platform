@@ -3,6 +3,8 @@ package com.skillstorm.staffing.service;
 import com.skillstorm.staffing.client.EngagementClient;
 import com.skillstorm.staffing.dto.AssignmentResponse;
 import com.skillstorm.staffing.dto.CreateAssignmentRequest;
+import com.skillstorm.staffing.kafka.NotificationEvent;
+import com.skillstorm.staffing.kafka.NotificationEventPublisher;
 import com.skillstorm.staffing.model.Assignment;
 import com.skillstorm.staffing.model.Consultant;
 import com.skillstorm.staffing.repository.AssignmentRepository;
@@ -27,15 +29,18 @@ public class AssignmentService {
     private final ConsultantRepository consultantRepository;
     private final ConsultantService consultantService;
     private final EngagementClient engagementClient;
+    private final NotificationEventPublisher notificationEventPublisher;
 
     public AssignmentService(AssignmentRepository assignmentRepository,
                               ConsultantRepository consultantRepository,
                               ConsultantService consultantService,
-                              EngagementClient engagementClient) {
+                              EngagementClient engagementClient,
+                              NotificationEventPublisher notificationEventPublisher) {
         this.assignmentRepository = assignmentRepository;
         this.consultantRepository = consultantRepository;
         this.consultantService = consultantService;
         this.engagementClient = engagementClient;
+        this.notificationEventPublisher = notificationEventPublisher;
     }
 
     @Transactional
@@ -61,6 +66,16 @@ public class AssignmentService {
 
         log.info("Consultant '{}' (id={}) staffed on engagement id={} as {}",
                 consultant.getName(), consultant.getId(), saved.getEngagementId(), saved.getEngagementRole());
+
+        notificationEventPublisher.publish(new NotificationEvent(
+                "ASSIGNMENT_CREATED",
+                "staffing",
+                saved.getId(),
+                saved.getConsultantId(),
+                "New assignment",
+                "You were staffed on engagement " + saved.getEngagementId()
+                        + " as " + saved.getEngagementRole() + "."
+        ));
 
         return AssignmentResponse.from(saved, consultant.getName());
     }
