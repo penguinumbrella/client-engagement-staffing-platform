@@ -1,0 +1,68 @@
+<div class="fixed inset-0 flex items-center justify-center bg-black/40" (click)="close.emit()">
+  <div class="flex w-[640px] max-w-[90vw] overflow-hidden rounded-lg bg-white" (click)="$event.stopPropagation()">
+    <!-- Left: engagement overview -->
+    <div class="min-w-0 flex-1 border-r border-gray-100 p-6">
+      <div class="mb-3 flex items-center gap-2">
+        <span
+          class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+          [style.backgroundColor]="engagement.client.color"
+        >
+          {{ engagement.client.initials }}
+        </span>
+        <span class="text-sm text-gray-700">{{ engagement.client.companyName }}</span>
+      </div>
+
+      <h3 class="m-0 mb-2 text-lg font-semibold">{{ engagement.engagementName }}</h3>
+
+      <div class="mb-4 flex flex-wrap gap-1.5">
+        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+          {{ engagement.engagementType }}
+        </span>
+        <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+          {{ engagement.status }}
+        </span>
+      </div>
+
+      <p class="m-0 mb-2 text-xs font-medium text-gray-500">
+        {{ formatDate(engagement.startDate) }} &ndash; {{ formatDate(engagement.targetEndDate) }}
+      </p>
+
+      <app-range-calendar [startDate]="engagement.startDate" [endDate]="engagement.targetEndDate" />
+    </div>
+
+    <!-- Right: assigned consultants -->
+    <div class="w-56 shrink-0 p-6">
+      <h4 class="m-0 mb-3 text-sm font-semibold text-gray-800">Consultants</h4>
+
+      <ul class="flex flex-col gap-1">
+        @for (consultant of engagement.consultants; track consultant.name) {
+          <li class="rounded-md">
+            <button
+              type="button"
+              class="flex w-full items-center gap-2 rounded-md p-1.5 text-left hover:bg-gray-50"
+              (click)="toggleConsultant(consultant)"
+            >
+              <span
+                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                [style.backgroundColor]="consultant.color"
+              >
+                {{ consultant.initials }}
+              </span>
+              <span class="flex-1 text-xs font-medium text-gray-700">{{ consultant.name }}</span>
+              <span
+                class="text-[10px] text-gray-400 transition-transform"
+                [class.rotate-90]="expandedConsultant() === consultant.name"
+              >
+                ›
+              </span>
+            </button>
+
+            @if (expandedConsultant() === consultant.name) {
+              <p class="m-0 py-1 pl-11 text-[11px] text-gray-500">{{ consultant.titleRole }}</p>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</div>

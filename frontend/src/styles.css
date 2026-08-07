@@ -1,3 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+.cdk-drag-preview {
+  @apply shadow-lg;
+}
+
+.cdk-drag-placeholder {
+  @apply opacity-30;
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 200ms ease;
+}

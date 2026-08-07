@@ -1,0 +1,36 @@
+<div
+  class="cursor-pointer rounded-md bg-white p-3 shadow-sm"
+  cdkDrag
+  [cdkDragData]="engagement"
+  (click)="select.emit(engagement)"
+>
+  <p class="m-0 mb-2 text-sm font-semibold">{{ engagement.engagementName }}</p>
+
+  <div class="mb-2 flex items-center gap-2">
+    <span
+      class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+      [style.backgroundColor]="engagement.client.color"
+    >
+      {{ engagement.client.initials }}
+    </span>
+    <span class="text-xs text-gray-700">{{ engagement.client.companyName }}</span>
+  </div>
+
+  <span
+    class="mb-2 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600"
+  >
+    {{ engagement.engagementType }}
+  </span>
+
+  <div class="flex -space-x-2">
+    @for (consultant of engagement.consultants; track consultant.name) {
+      <span
+        class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold text-white"
+        [style.backgroundColor]="consultant.color"
+        [title]="consultant.name"
+      >
+        {{ consultant.initials }}
+      </span>
+    }
+  </div>
+</div>
