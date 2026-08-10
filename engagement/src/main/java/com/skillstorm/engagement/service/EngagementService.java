@@ -35,6 +35,7 @@ public class EngagementService {
                 request.getTargetEndDate(),
                 status.getLabel()
         );
+        engagement.setSummary(request.getSummary());
 
         return EngagementResponse.from(engagementRepository.save(engagement));
     }
@@ -58,8 +59,14 @@ public class EngagementService {
     public EngagementResponse updateEngagement(Long id, UpdateEngagementRequest request) {
         Engagement engagement = findActiveOrThrow(id);
 
+        if (request.getEngagementName() != null) {
+            engagement.setEngagementName(request.getEngagementName());
+        }
         if (request.getEngagementType() != null) {
             engagement.setEngagementType(request.getEngagementType().getLabel());
+        }
+        if (request.getSummary() != null) {
+            engagement.setSummary(request.getSummary());
         }
         if (request.getStatus() != null) {
             engagement.setStatus(request.getStatus().getLabel());

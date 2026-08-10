@@ -1,15 +1,17 @@
+/** Values are the backend's `@JsonValue` labels (see engagement service's EngagementStatus enum), not the Java constant names. */
 export enum EngagementStatus {
-  PLANNED = 'PLANNED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  ON_HOLD = 'ON_HOLD',
-  COMPLETED = 'COMPLETED',
+  PLANNED = 'Planned',
+  IN_PROGRESS = 'In Progress',
+  ON_HOLD = 'On Hold',
+  COMPLETED = 'Completed',
 }
 
+/** Values are the backend's `@JsonValue` labels (see engagement service's EngagementType enum), not the Java constant names. */
 export enum EngagementType {
-  AUDIT = 'AUDIT',
-  TAX_ADVISORY = 'TAX_ADVISORY',
-  RISK_CONSULTING = 'RISK_CONSULTING',
-  FINANCIAL_ADVISORY = 'FINANCIAL_ADVISORY',
+  AUDIT = 'Audit',
+  TAX_ADVISORY = 'Tax Advisory',
+  RISK_CONSULTING = 'Risk Consulting',
+  FINANCIAL_ADVISORY = 'Financial Advisory',
 }
 
 export interface Engagement {
@@ -17,10 +19,32 @@ export interface Engagement {
   engagementName: string;
   clientId: number;
   engagementType: EngagementType;
+  summary?: string;
   startDate: string;
   targetEndDate: string;
   status: EngagementStatus;
   active: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+/** Matches engagement service's CreateEngagementRequest. */
+export interface CreateEngagementRequest {
+  engagementName: string;
+  clientId: number;
+  engagementType: EngagementType;
+  summary?: string;
+  startDate: string;
+  targetEndDate: string;
+  status?: EngagementStatus;
+}
+
+/** Matches engagement service's UpdateEngagementRequest — partial update, only these fields are editable; omitted/null fields are left unchanged server-side. */
+export interface UpdateEngagementRequest {
+  engagementName?: string;
+  engagementType?: EngagementType;
+  summary?: string;
+  startDate?: string;
+  targetEndDate?: string;
+  status?: EngagementStatus;
 }

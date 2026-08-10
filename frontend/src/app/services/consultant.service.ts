@@ -1,0 +1,21 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Consultant } from '../types/consultant.types';
+
+/**
+ * Talks to the `staffing` service exclusively through the api-gateway
+ * (`/staffing/**` -> StripPrefix=1 -> staffing service's `/api/consultants`).
+ * Never call the staffing service's own port directly.
+ */
+@Injectable({ providedIn: 'root' })
+export class ConsultantService {
+  private readonly baseUrl = `${environment.apiGatewayUrl}/staffing/api/consultants`;
+
+  constructor(private readonly http: HttpClient) {}
+
+  getAll(): Observable<Consultant[]> {
+    return this.http.get<Consultant[]>(this.baseUrl);
+  }
+}

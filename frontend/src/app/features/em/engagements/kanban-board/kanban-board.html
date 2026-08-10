@@ -1,14 +1,28 @@
 <div class="flex items-start gap-4 p-4">
-  @for (column of columns; track column.status) {
+  @for (column of columns(); track column.status) {
     <app-kanban-column
       [column]="column"
       [connectedTo]="connectedLists"
       (dropped)="drop($event)"
       (select)="selectEngagement($event)"
+      (add)="startCreate($event)"
     />
   }
 </div>
 
 @if (selected(); as engagement) {
-  <app-engagement-detail [engagement]="engagement" (close)="closeDetail()" />
+  <app-engagement-detail
+    [engagement]="engagement"
+    (close)="closeDetail()"
+    (updateSummary)="updateSummary(engagement.id, $event)"
+    (updateName)="updateName(engagement.id, $event)"
+    (updateDates)="updateDates(engagement.id, $event)"
+    (updateType)="updateType(engagement.id, $event)"
+    (updateStatus)="updateStatus(engagement.id, $event)"
+    (assigned)="refreshConsultants(engagement.id)"
+  />
+}
+
+@if (creatingStatus(); as status) {
+  <app-engagement-detail [initialStatus]="status" (close)="cancelCreate()" (create)="submitCreate($event)" />
 }

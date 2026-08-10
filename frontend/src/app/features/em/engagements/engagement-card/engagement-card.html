@@ -4,17 +4,17 @@
   [cdkDragData]="engagement"
   (click)="select.emit(engagement)"
 >
-  <p class="m-0 mb-2 text-sm font-semibold">{{ engagement.engagementName }}</p>
-
-  <div class="mb-2 flex items-center gap-2">
+  <div class="mb-1.5 flex items-center gap-1.5">
     <span
-      class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+      class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8px] font-bold text-white"
       [style.backgroundColor]="engagement.client.color"
     >
       {{ engagement.client.initials }}
     </span>
-    <span class="text-xs text-gray-700">{{ engagement.client.companyName }}</span>
+    <span class="text-[11px] text-gray-500">{{ engagement.client.companyName }}</span>
   </div>
+
+  <p class="m-0 mb-2 text-sm font-semibold">{{ engagement.engagementName }}</p>
 
   <span
     class="mb-2 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600"

@@ -18,6 +18,8 @@ public class CreateEngagementRequest {
     @NotNull(message = "engagementType is required")
     private EngagementType engagementType;
 
+    private String summary;
+
     @NotNull(message = "startDate is required")
     private LocalDate startDate;
 
@@ -48,6 +50,14 @@ public class CreateEngagementRequest {
 
     public void setEngagementType(EngagementType engagementType) {
         this.engagementType = engagementType;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
 
     public LocalDate getStartDate() {
