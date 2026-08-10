@@ -11,7 +11,16 @@
 </div>
 
 @if (selected(); as engagement) {
-  <app-engagement-detail [engagement]="engagement" (close)="closeDetail()" />
+  <app-engagement-detail
+    [engagement]="engagement"
+    (close)="closeDetail()"
+    (updateSummary)="updateSummary(engagement.id, $event)"
+    (updateName)="updateName(engagement.id, $event)"
+    (updateDates)="updateDates(engagement.id, $event)"
+    (updateType)="updateType(engagement.id, $event)"
+    (updateStatus)="updateStatus(engagement.id, $event)"
+    (assigned)="refreshConsultants(engagement.id)"
+  />
 }
 
 @if (creatingStatus(); as status) {

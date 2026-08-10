@@ -41,6 +41,7 @@ export interface CreateEngagementRequest {
 
 /** Matches engagement service's UpdateEngagementRequest — partial update, only these fields are editable; omitted/null fields are left unchanged server-side. */
 export interface UpdateEngagementRequest {
+  engagementName?: string;
   engagementType?: EngagementType;
   summary?: string;
   startDate?: string;

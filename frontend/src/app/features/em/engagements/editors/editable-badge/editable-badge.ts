@@ -1,0 +1,52 @@
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+/**
+ * A pill-shaped badge that turns into a native `<select>` on click, letting the
+ * caller swap between a fixed set of string options (e.g. engagement type/status)
+ * with a single click. Value/options are plain strings so this works for any
+ * string-backed enum without the component needing to know which one.
+ */
+@Component({
+  selector: 'app-editable-badge',
+  imports: [FormsModule],
+  templateUrl: './editable-badge.html',
+  styleUrl: './editable-badge.css',
+})
+export class EditableBadge {
+  @Input({ required: true }) value!: string;
+  @Input({ required: true }) options: string[] = [];
+  @Input() badgeClass = 'bg-gray-100 text-gray-600 hover:bg-gray-200';
+  @Input() selectClass = 'border-gray-200 text-gray-600';
+  @Output() valueChange = new EventEmitter<string>();
+
+  @ViewChild('draftSelect') private draftSelect?: ElementRef<HTMLSelectElement>;
+
+  protected editing = false;
+  protected draft = '';
+
+  protected startEdit(): void {
+    this.draft = this.value;
+    this.editing = true;
+    // The HTML `autofocus` attribute is only honored reliably the first time an element
+    // is auto-focused; browsers suppress it on later dynamic insertions once the user has
+    // already interacted with the page. Focusing imperatively after render works every time.
+    setTimeout(() => {
+      const select = this.draftSelect?.nativeElement;
+      select?.focus();
+      select?.showPicker?.();
+    });
+  }
+
+  protected save(): void {
+    if (!this.editing) {
+      return;
+    }
+    this.editing = false;
+    this.valueChange.emit(this.draft);
+  }
+
+  protected cancelEdit(): void {
+    this.editing = false;
+  }
+}

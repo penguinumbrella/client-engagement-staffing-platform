@@ -53,6 +53,9 @@ public class EngagementService {
     public EngagementResponse updateEngagement(Long id, UpdateEngagementRequest request) {
         Engagement engagement = findActiveOrThrow(id);
 
+        if (request.getEngagementName() != null) {
+            engagement.setEngagementName(request.getEngagementName());
+        }
         if (request.getEngagementType() != null) {
             engagement.setEngagementType(request.getEngagementType().getLabel());
         }
