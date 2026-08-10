@@ -43,6 +43,11 @@ public class EngagementController {
         return ResponseEntity.ok(engagementService.getEngagementById(id));
     }
 
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<EngagementResponse>> getByClient(@PathVariable Long clientId) {
+        return ResponseEntity.ok(engagementService.getEngagementsByClientId(clientId));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<EngagementResponse> update(@PathVariable Long id,
                                                        @Valid @RequestBody UpdateEngagementRequest request) {

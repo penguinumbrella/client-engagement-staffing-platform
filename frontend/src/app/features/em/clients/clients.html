@@ -1,1 +1,33 @@
-<p>clients works!</p>
+<div class="p-4">
+  <button
+    type="button"
+    (click)="openCreate()"
+    class="mb-4 rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+  >
+    Create Client
+  </button>
+
+  <h1 class="m-0 mb-4 text-lg font-semibold text-gray-900">Clients</h1>
+
+  @if (loading()) {
+    <p class="text-sm text-gray-500">Loading clients…</p>
+  } @else if (error()) {
+    <p class="text-sm text-red-600">{{ error() }}</p>
+  } @else if (clients().length === 0) {
+    <p class="text-sm text-gray-500">No clients found.</p>
+  } @else {
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      @for (client of clients(); track client.id) {
+        <app-client-card [client]="client" (edit)="openEdit($event)" (delete)="openDelete($event)" />
+      }
+    </div>
+  }
+
+  <app-client-form
+    [mode]="formMode()"
+    [client]="selectedClient()"
+    [(visible)]="formVisible"
+    (saved)="onSaved()"
+    (deleted)="onDeleted()"
+  />
+</div>

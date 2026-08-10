@@ -2,19 +2,20 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { Clients } from './clients';
+import { ClientForm } from './client-form';
 
-describe('Clients', () => {
-  let component: Clients;
-  let fixture: ComponentFixture<Clients>;
+describe('ClientForm', () => {
+  let component: ClientForm;
+  let fixture: ComponentFixture<ClientForm>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Clients],
+      imports: [ClientForm],
       providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Clients);
+    fixture = TestBed.createComponent(ClientForm);
+    fixture.componentRef.setInput('mode', 'create');
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

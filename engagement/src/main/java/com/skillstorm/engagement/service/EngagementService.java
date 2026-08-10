@@ -49,6 +49,12 @@ public class EngagementService {
         return EngagementResponse.from(findActiveOrThrow(id));
     }
 
+    public List<EngagementResponse> getEngagementsByClientId(Long clientId) {
+        return engagementRepository.findByClientIdAndActiveTrue(clientId).stream()
+                .map(EngagementResponse::from)
+                .toList();
+    }
+
     public EngagementResponse updateEngagement(Long id, UpdateEngagementRequest request) {
         Engagement engagement = findActiveOrThrow(id);
 
