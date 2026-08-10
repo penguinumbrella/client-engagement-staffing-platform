@@ -2,12 +2,12 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 
 import { ClientService } from '../../../services/ClientService';
 import { Client } from '../../../types/client.types';
-import { ClientCard } from './client-card/client-card';
 import { ClientForm, ClientFormMode } from './client-form/client-form';
+import { ClientTable } from './client-table/client-table';
 
 @Component({
   selector: 'app-clients',
-  imports: [ClientCard, ClientForm],
+  imports: [ClientTable, ClientForm],
   templateUrl: './clients.html',
   styleUrl: './clients.css',
 })

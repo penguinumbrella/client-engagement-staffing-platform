@@ -9,7 +9,7 @@ import { Page } from '../types/pagination.types';
 @Injectable({ providedIn: 'root' })
 export class ClientService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/client/clients`;
+  private readonly baseUrl = `${environment.apiGatewayUrl}/client/clients`;
 
   getAllClients(page = 0): Observable<Page<Client>> {
     const params = new HttpParams().set('page', page);
