@@ -35,6 +35,7 @@ public class EngagementService {
                 request.getTargetEndDate(),
                 status.getLabel()
         );
+        engagement.setSummary(request.getSummary());
 
         return EngagementResponse.from(engagementRepository.save(engagement));
     }
@@ -54,6 +55,9 @@ public class EngagementService {
 
         if (request.getEngagementType() != null) {
             engagement.setEngagementType(request.getEngagementType().getLabel());
+        }
+        if (request.getSummary() != null) {
+            engagement.setSummary(request.getSummary());
         }
         if (request.getStatus() != null) {
             engagement.setStatus(request.getStatus().getLabel());

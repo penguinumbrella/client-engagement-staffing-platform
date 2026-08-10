@@ -3,7 +3,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { KanbanColumn } from '../kanban-column/kanban-column';
 import { EngagementDetail } from '../engagement-detail/engagement-detail';
 import { EngagementCard, EngagementColumn, ConsultantBadge, ClientBadge } from '../engagement.model';
-import { Engagement, EngagementStatus } from '../../../../types/engagement.types';
+import { CreateEngagementRequest, Engagement, EngagementStatus } from '../../../../types/engagement.types';
 import { EngagementRole } from '../../../../types/assignment.types';
 import { EngagementService } from '../../../../services/engagement.service';
 
@@ -54,6 +54,7 @@ export class KanbanBoard {
   private readonly engagements = signal<Engagement[]>([]);
 
   protected readonly selected = signal<EngagementCard | null>(null);
+  protected readonly creatingStatus = signal<EngagementStatus | null>(null);
   protected readonly connectedLists = COLUMN_STATUSES;
 
   constructor() {
@@ -97,5 +98,23 @@ export class KanbanBoard {
 
   protected closeDetail(): void {
     this.selected.set(null);
+  }
+
+  protected startCreate(status: EngagementStatus): void {
+    this.creatingStatus.set(status);
+  }
+
+  protected cancelCreate(): void {
+    this.creatingStatus.set(null);
+  }
+
+  protected submitCreate(request: CreateEngagementRequest): void {
+    this.engagementService.create(request).subscribe({
+      next: (engagement) => {
+        this.engagements.set([...this.engagements(), engagement]);
+        this.creatingStatus.set(null);
+      },
+      error: (err) => console.error('Failed to create engagement', err),
+    });
   }
 }

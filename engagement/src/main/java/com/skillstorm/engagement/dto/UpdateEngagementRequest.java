@@ -6,12 +6,13 @@ import com.skillstorm.engagement.enums.EngagementType;
 import java.time.LocalDate;
 
 /**
- * Partial-update payload. Only status, timeline, and type are editable per spec;
+ * Partial-update payload. Only status, timeline, type, and summary are editable per spec;
  * null fields are left unchanged.
  */
 public class UpdateEngagementRequest {
 
     private EngagementType engagementType;
+    private String summary;
     private LocalDate startDate;
     private LocalDate targetEndDate;
     private EngagementStatus status;
@@ -22,6 +23,14 @@ public class UpdateEngagementRequest {
 
     public void setEngagementType(EngagementType engagementType) {
         this.engagementType = engagementType;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
 
     public LocalDate getStartDate() {

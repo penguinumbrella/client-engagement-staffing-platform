@@ -1,78 +1,181 @@
 <div class="fixed inset-0 flex items-center justify-center bg-black/40" (click)="close.emit()">
   <div class="flex h-[720px] max-h-[90vh] w-[640px] max-w-[90vw] overflow-hidden rounded-lg bg-white" (click)="$event.stopPropagation()">
-    <!-- Left: engagement overview -->
-    <div class="min-w-0 flex-1 overflow-y-auto border-r border-gray-100 p-6">
-      <div class="mb-3 flex items-center gap-2">
-        <span
-          class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-          [style.backgroundColor]="engagement.client.color"
-        >
-          {{ engagement.client.initials }}
-        </span>
-        <span class="text-sm text-gray-700">{{ engagement.client.companyName }}</span>
-      </div>
+    @if (isCreateMode) {
+      <form class="flex w-full flex-col gap-3 overflow-y-auto p-6" #engagementForm="ngForm" (ngSubmit)="submit()">
+        <h3 class="m-0 mb-2 text-lg font-semibold">New Engagement</h3>
 
-      <h3 class="m-0 mb-2 text-lg font-semibold">{{ engagement.engagementName }}</h3>
+        <label class="flex flex-col gap-1 text-xs font-medium text-gray-600">
+          Engagement Name
+          <input
+            class="rounded-md border border-gray-200 px-2 py-1.5 text-sm text-gray-800"
+            type="text"
+            name="engagementName"
+            [(ngModel)]="form.engagementName"
+            required
+          />
+        </label>
 
-      <div class="mb-4 flex flex-wrap gap-1.5">
-        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
-          {{ engagement.engagementType }}
-        </span>
-        <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
-          {{ engagement.status }}
-        </span>
-      </div>
+        <label class="flex flex-col gap-1 text-xs font-medium text-gray-600">
+          Client ID
+          <input
+            class="rounded-md border border-gray-200 px-2 py-1.5 text-sm text-gray-800"
+            type="number"
+            name="clientId"
+            [(ngModel)]="form.clientId"
+            required
+          />
+        </label>
 
-      <p class="m-0 mb-3 text-xs font-medium text-gray-500">
-        {{ formatDate(engagement.startDate) }} &ndash; {{ formatDate(engagement.targetEndDate) }}
-      </p>
-
-      <p class="m-0 text-xs leading-relaxed text-gray-600">{{ engagement.description }}</p>
-    </div>
-
-    <!-- Right: assigned consultants -->
-    <div class="w-56 shrink-0 overflow-y-auto p-6">
-      <h4 class="m-0 mb-3 text-sm font-semibold text-gray-800">Consultants</h4>
-
-      <ul class="flex flex-col gap-1">
-        @for (group of roleGroups; track group.role) {
-          <li class="rounded-md">
-            <button
-              type="button"
-              class="flex w-full items-center gap-2 rounded-md p-1.5 text-left hover:bg-gray-50"
-              (click)="toggleRole(group.role)"
+        <div class="flex gap-3">
+          <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-gray-600">
+            Engagement Type
+            <select
+              class="rounded-md border border-gray-200 px-2 py-1.5 text-sm text-gray-800"
+              name="engagementType"
+              [(ngModel)]="form.engagementType"
+              required
             >
-              <span class="flex-1 text-xs font-semibold text-gray-800">{{ group.label }}</span>
-              <span class="text-[10px] text-gray-400">{{ group.consultants.length }}</span>
-              <span
-                class="text-[10px] text-gray-400 transition-transform"
-                [class.rotate-90]="isExpanded(group.role)"
-              >
-                ›
-              </span>
-            </button>
+              @for (type of engagementTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </label>
 
-            @if (isExpanded(group.role)) {
-              <ul class="flex flex-col gap-1 py-1 pl-2">
-                @for (consultant of group.consultants; track consultant.name) {
-                  <li class="flex items-center gap-2 rounded-md p-1.5">
-                    <span
-                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                      [style.backgroundColor]="consultant.color"
-                    >
-                      {{ consultant.initials }}
-                    </span>
-                    <div class="flex flex-col">
-                      <span class="text-xs font-medium text-gray-700">{{ consultant.name }}</span>
-                      <span class="text-[10px] text-gray-400">{{ consultant.titleRole }}</span>
-                    </div>
-                  </li>
-                }
-              </ul>
-            }
-          </li>
-        }
-      </ul>
-    </div>
+          <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-gray-600">
+            Status
+            <select
+              class="rounded-md border border-gray-200 px-2 py-1.5 text-sm text-gray-800"
+              name="status"
+              [(ngModel)]="form.status"
+            >
+              @for (s of statuses; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="flex gap-3">
+          <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-gray-600">
+            Start Date
+            <input
+              class="rounded-md border border-gray-200 px-2 py-1.5 text-sm text-gray-800"
+              type="date"
+              name="startDate"
+              [(ngModel)]="form.startDate"
+              required
+            />
+          </label>
+
+          <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-gray-600">
+            Target End Date
+            <input
+              class="rounded-md border border-gray-200 px-2 py-1.5 text-sm text-gray-800"
+              type="date"
+              name="targetEndDate"
+              [(ngModel)]="form.targetEndDate"
+              required
+            />
+          </label>
+        </div>
+
+        <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-gray-600">
+          Summary
+          <textarea
+            class="min-h-[100px] flex-1 rounded-md border border-gray-200 px-2 py-1.5 text-sm text-gray-800"
+            name="summary"
+            [(ngModel)]="form.summary"
+          ></textarea>
+        </label>
+
+        <div class="mt-auto flex justify-end gap-2 pt-2">
+          <button type="button" class="rounded-md px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50" (click)="close.emit()">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            [disabled]="engagementForm.invalid"
+          >
+            Create
+          </button>
+        </div>
+      </form>
+    } @else if (engagement; as engagement) {
+      <!-- Left: engagement overview -->
+      <div class="min-w-0 flex-1 overflow-y-auto border-r border-gray-100 p-6">
+        <div class="mb-3 flex items-center gap-2">
+          <span
+            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+            [style.backgroundColor]="engagement.client.color"
+          >
+            {{ engagement.client.initials }}
+          </span>
+          <span class="text-sm text-gray-700">{{ engagement.client.companyName }}</span>
+        </div>
+
+        <h3 class="m-0 mb-2 text-lg font-semibold">{{ engagement.engagementName }}</h3>
+
+        <div class="mb-4 flex flex-wrap gap-1.5">
+          <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+            {{ engagement.engagementType }}
+          </span>
+          <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+            {{ engagement.status }}
+          </span>
+        </div>
+
+        <p class="m-0 mb-3 text-xs font-medium text-gray-500">
+          {{ formatDate(engagement.startDate) }} &ndash; {{ formatDate(engagement.targetEndDate) }}
+        </p>
+
+        <p class="m-0 text-xs leading-relaxed text-gray-600">{{ engagement.summary }}</p>
+      </div>
+
+      <!-- Right: assigned consultants -->
+      <div class="w-56 shrink-0 overflow-y-auto p-6">
+        <h4 class="m-0 mb-3 text-sm font-semibold text-gray-800">Consultants</h4>
+
+        <ul class="flex flex-col gap-1">
+          @for (group of roleGroups; track group.role) {
+            <li class="rounded-md">
+              <button
+                type="button"
+                class="flex w-full items-center gap-2 rounded-md p-1.5 text-left hover:bg-gray-50"
+                (click)="toggleRole(group.role)"
+              >
+                <span class="flex-1 text-xs font-semibold text-gray-800">{{ group.label }}</span>
+                <span class="text-[10px] text-gray-400">{{ group.consultants.length }}</span>
+                <span
+                  class="text-[10px] text-gray-400 transition-transform"
+                  [class.rotate-90]="isExpanded(group.role)"
+                >
+                  ›
+                </span>
+              </button>
+
+              @if (isExpanded(group.role)) {
+                <ul class="flex flex-col gap-1 py-1 pl-2">
+                  @for (consultant of group.consultants; track consultant.name) {
+                    <li class="flex items-center gap-2 rounded-md p-1.5">
+                      <span
+                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                        [style.backgroundColor]="consultant.color"
+                      >
+                        {{ consultant.initials }}
+                      </span>
+                      <div class="flex flex-col">
+                        <span class="text-xs font-medium text-gray-700">{{ consultant.name }}</span>
+                        <span class="text-[10px] text-gray-400">{{ consultant.titleRole }}</span>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
   </div>
 </div>

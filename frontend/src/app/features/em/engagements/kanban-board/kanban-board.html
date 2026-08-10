@@ -5,10 +5,15 @@
       [connectedTo]="connectedLists"
       (dropped)="drop($event)"
       (select)="selectEngagement($event)"
+      (add)="startCreate($event)"
     />
   }
 </div>
 
 @if (selected(); as engagement) {
   <app-engagement-detail [engagement]="engagement" (close)="closeDetail()" />
+}
+
+@if (creatingStatus(); as status) {
+  <app-engagement-detail [initialStatus]="status" (close)="cancelCreate()" (create)="submitCreate($event)" />
 }
