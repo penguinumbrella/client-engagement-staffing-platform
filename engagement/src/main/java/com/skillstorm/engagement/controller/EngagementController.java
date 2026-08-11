@@ -59,4 +59,9 @@ public class EngagementController {
         engagementService.deleteEngagement(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<EngagementResponse> cancel(@PathVariable Long id) {
+        return ResponseEntity.ok(engagementService.cancelEngagement(id));
+    }
 }

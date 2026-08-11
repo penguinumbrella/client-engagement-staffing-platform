@@ -1,19 +1,18 @@
-package com.skillstorm.engagement.enums;
+package com.skillstorm.staffing.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum EngagementStatus {
+public enum AssignmentStatus {
 
-    PLANNED("Planned"),
-    IN_PROGRESS("In Progress"),
-    ON_HOLD("On Hold"),
+    ACTIVE("Active"),
+    PENDING("Pending"),
     COMPLETED("Completed"),
     CANCELLED("Cancelled");
 
     private final String label;
 
-    EngagementStatus(String label) {
+    AssignmentStatus(String label) {
         this.label = label;
     }
 
@@ -23,12 +22,12 @@ public enum EngagementStatus {
     }
 
     @JsonCreator
-    public static EngagementStatus fromValue(String value) {
-        for (EngagementStatus status : values()) {
+    public static AssignmentStatus fromValue(String value) {
+        for (AssignmentStatus status : values()) {
             if (status.label.equalsIgnoreCase(value) || status.name().equalsIgnoreCase(value)) {
                 return status;
             }
         }
-        throw new IllegalArgumentException("Unknown engagement status: " + value);
+        throw new IllegalArgumentException("Unknown assignment status: " + value);
     }
 }

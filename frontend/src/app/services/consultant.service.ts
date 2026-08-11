@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Consultant } from '../types/consultant.types';
+import { Consultant, CreateConsultantRequest } from '../types/consultant.types';
 
 /**
  * Talks to the `staffing` service exclusively through the api-gateway
@@ -17,5 +17,9 @@ export class ConsultantService {
 
   getAll(): Observable<Consultant[]> {
     return this.http.get<Consultant[]>(this.baseUrl);
+  }
+
+  create(request: CreateConsultantRequest): Observable<Consultant> {
+    return this.http.post<Consultant>(this.baseUrl, request);
   }
 }

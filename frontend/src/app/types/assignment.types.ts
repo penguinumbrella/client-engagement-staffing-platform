@@ -5,6 +5,14 @@ export enum EngagementRole {
   ASSOCIATE = 'Associate',
 }
 
+/** Values are the backend's `@JsonValue` labels (see staffing service's AssignmentStatus enum), not the Java constant names. */
+export enum AssignmentStatus {
+  ACTIVE = 'Active',
+  PENDING = 'Pending',
+  COMPLETED = 'Completed',
+  CANCELLED = 'Cancelled',
+}
+
 export interface Assignment {
   id: number;
   consultantId: number;
@@ -12,6 +20,9 @@ export interface Assignment {
   engagementId: number;
   engagementRole: EngagementRole;
   assignmentStartDate: string;
+  assignmentEndDate: string;
+  status: AssignmentStatus;
+  statusOverridden: boolean;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -23,4 +34,11 @@ export interface CreateAssignmentRequest {
   engagementId: number;
   engagementRole: EngagementRole;
   assignmentStartDate: string;
+  assignmentEndDate: string;
+  status?: AssignmentStatus;
+}
+
+/** Matches staffing service's UpdateAssignmentStatusRequest. Manually setting status marks it overridden — future engagement-status cascades won't touch it again. */
+export interface UpdateAssignmentStatusRequest {
+  status: AssignmentStatus;
 }
