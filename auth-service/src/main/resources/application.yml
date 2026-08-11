@@ -2,6 +2,10 @@ spring:
   application:
     name: auth-service
 
+  output:
+    ansi:
+      enabled: always
+
   datasource:
     url: ${AUTH_DB_URL:jdbc:postgresql://localhost:5432/auth_db}
     username: ${AUTH_DB_USERNAME:auth_service_user}
