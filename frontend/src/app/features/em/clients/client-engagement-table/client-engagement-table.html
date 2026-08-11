@@ -16,15 +16,11 @@
     }
   </div>
 
-  <div class="grid min-h-[60px] grid-cols-4 gap-3">
-    @for (client of filteredClients(); track client.id) {
-      <app-client-card
-        [client]="client"
-        (select)="select.emit($event)"
-        (delete)="delete.emit($event)"
-      />
+  <div class="grid min-h-[60px] grid-cols-2 gap-3">
+    @for (engagement of filteredEngagements(); track engagement.id) {
+      <app-client-engagement-card [engagement]="engagement" />
     } @empty {
-      <p class="col-span-4 m-0 px-1 py-4 text-center text-xs text-gray-400">No clients found.</p>
+      <p class="col-span-2 m-0 px-1 py-4 text-center text-xs text-gray-400">No engagements found.</p>
     }
   </div>
 </div>

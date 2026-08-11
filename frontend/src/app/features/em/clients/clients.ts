@@ -1,13 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 
 import { ClientService } from '../../../services/ClientService';
-import { Client } from '../../../types/client.types';
+import { Client, RelationshipStatus } from '../../../types/client.types';
+import { ClientDetail } from './client-detail/client-detail';
 import { ClientForm, ClientFormMode } from './client-form/client-form';
 import { ClientTable } from './client-table/client-table';
 
 @Component({
   selector: 'app-clients',
-  imports: [ClientTable, ClientForm],
+  imports: [ClientTable, ClientForm, ClientDetail],
   templateUrl: './clients.html',
   styleUrl: './clients.css',
 })
@@ -22,6 +23,8 @@ export class Clients implements OnInit {
   readonly formMode = signal<ClientFormMode>('create');
   readonly selectedClient = signal<Client | null>(null);
 
+  readonly detailClient = signal<Client | null>(null);
+
   ngOnInit(): void {
     this.loadClients();
   }
@@ -30,10 +33,6 @@ export class Clients implements OnInit {
     this.formMode.set('create');
     this.selectedClient.set(null);
     this.formVisible.set(true);
-  }
-
-  openEdit(id: number): void {
-    this.openForm('update', id);
   }
 
   openDelete(id: number): void {
@@ -46,6 +45,51 @@ export class Clients implements OnInit {
 
   onDeleted(): void {
     this.loadClients();
+  }
+
+  openDetail(client: Client): void {
+    this.detailClient.set(client);
+  }
+
+  closeDetail(): void {
+    this.detailClient.set(null);
+  }
+
+  updateCompanyName(id: number, companyName: string): void {
+    this.patchClient(id, { companyName });
+  }
+
+  updateRelationshipStatus(id: number, relationshipStatus: RelationshipStatus): void {
+    this.patchClient(id, { relationshipStatus });
+  }
+
+  updateIndustry(id: number, industry: string): void {
+    this.patchClient(id, { industry });
+  }
+
+  updatePrimaryContactName(id: number, primaryContactName: string): void {
+    this.patchClient(id, { primaryContactName });
+  }
+
+  updatePrimaryContactEmail(id: number, primaryContactEmail: string): void {
+    this.patchClient(id, { primaryContactEmail });
+  }
+
+  private patchClient(id: number, patch: Partial<Client>): void {
+    const current = this.clients().find((c) => c.id === id);
+    if (!current) return;
+
+    this.clientService.updateClient(id, { ...current, ...patch }).subscribe({
+      next: (updated) => {
+        this.clients.set(this.clients().map((c) => (c.id === id ? updated : c)));
+
+        const detail = this.detailClient();
+        if (detail && detail.id === id) {
+          this.detailClient.set(updated);
+        }
+      },
+      error: (err) => console.error(`Failed to update client ${id}`, err),
+    });
   }
 
   private openForm(mode: ClientFormMode, id: number): void {

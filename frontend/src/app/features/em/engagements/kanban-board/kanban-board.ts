@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { KanbanColumn } from '../kanban-column/kanban-column';
 import { EngagementDetail } from '../engagement-detail/engagement-detail';
-import { EngagementCard, EngagementColumn, ConsultantBadge, ClientBadge } from '../engagement.model';
+import { EngagementCard, EngagementColumn, ConsultantBadge, ClientBadge } from '../engagement-detail/engagement.model';
 import { CreateEngagementRequest, Engagement, EngagementStatus, EngagementType } from '../../../../types/engagement.types';
 import { Consultant } from '../../../../types/consultant.types';
 import { EngagementService } from '../../../../services/engagement.service';

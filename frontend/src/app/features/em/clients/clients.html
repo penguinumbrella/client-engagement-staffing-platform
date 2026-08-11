@@ -14,7 +14,7 @@
   } @else if (error()) {
     <p class="text-sm text-red-600">{{ error() }}</p>
   } @else {
-    <app-client-table [clients]="clients()" (edit)="openEdit($event)" (delete)="openDelete($event)" />
+    <app-client-table [clients]="clients()" (select)="openDetail($event)" (delete)="openDelete($event)" />
   }
 
   <app-client-form
@@ -24,4 +24,16 @@
     (saved)="onSaved()"
     (deleted)="onDeleted()"
   />
+
+  @if (detailClient(); as client) {
+    <app-client-detail
+      [client]="client"
+      (close)="closeDetail()"
+      (updateCompanyName)="updateCompanyName(client.id!, $event)"
+      (updateRelationshipStatus)="updateRelationshipStatus(client.id!, $event)"
+      (updateIndustry)="updateIndustry(client.id!, $event)"
+      (updatePrimaryContactName)="updatePrimaryContactName(client.id!, $event)"
+      (updatePrimaryContactEmail)="updatePrimaryContactEmail(client.id!, $event)"
+    />
+  }
 </div>

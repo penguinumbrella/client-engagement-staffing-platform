@@ -11,7 +11,6 @@ export class ClientCard {
   client = input.required<Client>();
 
   select = output<Client>();
-  edit = output<number>();
   delete = output<number>();
 
   readonly statusClasses = computed(() => {

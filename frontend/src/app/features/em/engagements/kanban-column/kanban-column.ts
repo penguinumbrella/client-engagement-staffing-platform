@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CdkDropList, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { EngagementCard as EngagementCardComponent } from '../engagement-card/engagement-card';
-import { EngagementCard, EngagementColumn } from '../engagement.model';
+import { EngagementCard, EngagementColumn } from '../engagement-detail/engagement.model';
 import { EngagementStatus } from '../../../../types/engagement.types';
 
 @Component({
