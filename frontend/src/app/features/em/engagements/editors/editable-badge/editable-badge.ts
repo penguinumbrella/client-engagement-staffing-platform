@@ -18,6 +18,8 @@ export class EditableBadge {
   @Input({ required: true }) options: string[] = [];
   @Input() badgeClass = 'bg-gray-100 text-gray-600 hover:bg-gray-200';
   @Input() selectClass = 'border-gray-200 text-gray-600';
+  /** Optional per-value PrimeIcons class (e.g. `'pi-check-circle'`), shown before the label. */
+  @Input() icon: ((value: string) => string) | null = null;
   @Output() valueChange = new EventEmitter<string>();
 
   @ViewChild('draftSelect') private draftSelect?: ElementRef<HTMLSelectElement>;

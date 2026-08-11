@@ -4,6 +4,7 @@ export enum EngagementStatus {
   IN_PROGRESS = 'In Progress',
   ON_HOLD = 'On Hold',
   COMPLETED = 'Completed',
+  CANCELLED = 'Cancelled',
 }
 
 /** Values are the backend's `@JsonValue` labels (see engagement service's EngagementType enum), not the Java constant names. */

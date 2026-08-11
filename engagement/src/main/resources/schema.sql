@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS engagements (
     summary TEXT,
     start_date DATE NOT NULL,
     target_end_date DATE NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'Planned', -- Planned, In Progress, On Hold, Completed
+    status VARCHAR(50) NOT NULL DEFAULT 'Planned', -- Planned, In Progress, On Hold, Completed, Cancelled
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

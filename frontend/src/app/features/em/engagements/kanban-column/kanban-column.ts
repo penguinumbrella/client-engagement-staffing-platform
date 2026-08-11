@@ -3,6 +3,7 @@ import { CdkDropList, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { EngagementCard as EngagementCardComponent } from '../engagement-card/engagement-card';
 import { EngagementCard, EngagementColumn } from '../engagement-detail/engagement.model';
 import { EngagementStatus } from '../../../../types/engagement.types';
+import { engagementStatusIcon, engagementStatusIconColor } from '../engagement-status-icon';
 
 @Component({
   selector: 'app-kanban-column',
@@ -16,4 +17,7 @@ export class KanbanColumn {
   @Output() dropped = new EventEmitter<CdkDragDrop<EngagementCard[]>>();
   @Output() select = new EventEmitter<EngagementCard>();
   @Output() add = new EventEmitter<EngagementStatus>();
+
+  protected readonly statusIcon = engagementStatusIcon;
+  protected readonly statusIconColor = engagementStatusIconColor;
 }

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Assignment, CreateAssignmentRequest } from '../types/assignment.types';
+import { Assignment, CreateAssignmentRequest, UpdateAssignmentStatusRequest } from '../types/assignment.types';
 
 /**
  * Talks to the `staffing` service exclusively through the api-gateway
@@ -19,7 +19,20 @@ export class AssignmentService {
     return this.http.get<Assignment[]>(`${this.baseUrl}/engagement/${engagementId}`);
   }
 
+  /** Every assignment ever created for this engagement, active or not. */
+  getHistoryByEngagement(engagementId: number): Observable<Assignment[]> {
+    return this.http.get<Assignment[]>(`${this.baseUrl}/engagement/${engagementId}/history`);
+  }
+
+  getByConsultant(consultantId: number): Observable<Assignment[]> {
+    return this.http.get<Assignment[]>(`${this.baseUrl}/consultant/${consultantId}`);
+  }
+
   create(request: CreateAssignmentRequest): Observable<Assignment> {
     return this.http.post<Assignment>(this.baseUrl, request);
+  }
+
+  updateStatus(id: number, request: UpdateAssignmentStatusRequest): Observable<Assignment> {
+    return this.http.patch<Assignment>(`${this.baseUrl}/${id}/status`, request);
   }
 }

@@ -16,3 +16,9 @@ export interface Consultant {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface CreateConsultantRequest {
+  name: string;
+  titleRole: string;
+  primarySkillArea: SkillArea;
+}

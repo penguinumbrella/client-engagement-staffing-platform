@@ -14,11 +14,14 @@
   </select>
 } @else {
   <span
-    class="cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-medium"
+    class="inline-flex cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
     [class]="badgeClass"
     title="Click to edit"
     (click)="startEdit()"
   >
+    @if (icon) {
+      <i class="pi {{ icon(value) }} text-[10px]"></i>
+    }
     {{ value }}
   </span>
 }

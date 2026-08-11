@@ -42,4 +42,8 @@ export class EngagementService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  cancel(id: number): Observable<Engagement> {
+    return this.http.post<Engagement>(`${this.baseUrl}/${id}/cancel`, {});
+  }
 }

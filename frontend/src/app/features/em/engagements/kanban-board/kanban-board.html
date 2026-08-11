@@ -20,9 +20,16 @@
     (updateType)="updateType(engagement.id, $event)"
     (updateStatus)="updateStatus(engagement.id, $event)"
     (assigned)="refreshConsultants(engagement.id)"
+    (delete)="onEngagementDeleted(engagement.id)"
+    (cancelled)="onEngagementCancelled($event)"
   />
 }
 
 @if (creatingStatus(); as status) {
-  <app-engagement-detail [initialStatus]="status" (close)="cancelCreate()" (create)="submitCreate($event)" />
+  <app-engagement-detail
+    [initialStatus]="status"
+    [clients]="clients()"
+    (close)="cancelCreate()"
+    (create)="submitCreate($event)"
+  />
 }

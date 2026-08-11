@@ -1,5 +1,6 @@
 package com.skillstorm.staffing.dto;
 
+import com.skillstorm.staffing.enums.AssignmentStatus;
 import com.skillstorm.staffing.enums.EngagementRole;
 import jakarta.validation.constraints.NotNull;
 
@@ -18,6 +19,11 @@ public class CreateAssignmentRequest {
 
     @NotNull(message = "assignmentStartDate is required")
     private LocalDate assignmentStartDate;
+
+    @NotNull(message = "assignmentEndDate is required")
+    private LocalDate assignmentEndDate;
+
+    private AssignmentStatus status;
 
     public Long getConsultantId() {
         return consultantId;
@@ -49,5 +55,21 @@ public class CreateAssignmentRequest {
 
     public void setAssignmentStartDate(LocalDate assignmentStartDate) {
         this.assignmentStartDate = assignmentStartDate;
+    }
+
+    public LocalDate getAssignmentEndDate() {
+        return assignmentEndDate;
+    }
+
+    public void setAssignmentEndDate(LocalDate assignmentEndDate) {
+        this.assignmentEndDate = assignmentEndDate;
+    }
+
+    public AssignmentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AssignmentStatus status) {
+        this.status = status;
     }
 }

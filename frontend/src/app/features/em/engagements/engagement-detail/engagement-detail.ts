@@ -5,12 +5,18 @@ import { EditDatesModal } from '../editors/edit-dates-modal/edit-dates-modal';
 import { EditableBadge } from '../editors/editable-badge/editable-badge';
 import { EditableTitle } from '../editors/editable-title/editable-title';
 import { EditableSummary } from '../editors/editable-summary/editable-summary';
-import { Assignment, EngagementRole } from '../../../../types/assignment.types';
+import { Assignment, AssignmentStatus, EngagementRole } from '../../../../types/assignment.types';
 import { Consultant } from '../../../../types/consultant.types';
-import { CreateEngagementRequest, EngagementStatus, EngagementType } from '../../../../types/engagement.types';
+import { Client } from '../../../../types/client.types';
+import { CreateEngagementRequest, Engagement, EngagementStatus, EngagementType } from '../../../../types/engagement.types';
 import { AssignmentService } from '../../../../services/assignment.service';
 import { ConsultantService } from '../../../../services/consultant.service';
+import { EngagementService } from '../../../../services/engagement.service';
 import { initialsOf, colorOf } from '../../../../shared/avatar';
+import { engagementStatusIcon } from '../engagement-status-icon';
+
+const NON_CANCELLABLE_STATUSES = new Set<EngagementStatus>([EngagementStatus.COMPLETED, EngagementStatus.CANCELLED]);
+const STAFFED_ASSIGNMENT_STATUSES = new Set<AssignmentStatus>([AssignmentStatus.ACTIVE, AssignmentStatus.PENDING]);
 
 interface RoleGroup {
   role: EngagementRole;
@@ -24,6 +30,12 @@ const ROLE_LABELS: Record<EngagementRole, string> = {
   [EngagementRole.ASSOCIATE]: 'Associate',
 };
 
+const ROLE_ORDER: Record<EngagementRole, number> = {
+  [EngagementRole.LEAD]: 0,
+  [EngagementRole.SENIOR_ASSOCIATE]: 1,
+  [EngagementRole.ASSOCIATE]: 2,
+};
+
 @Component({
   selector: 'app-engagement-detail',
   imports: [FormsModule, EditDatesModal, EditableBadge, EditableTitle, EditableSummary],
@@ -33,9 +45,11 @@ const ROLE_LABELS: Record<EngagementRole, string> = {
 export class EngagementDetail implements OnInit {
   private readonly assignmentService = inject(AssignmentService);
   private readonly consultantService = inject(ConsultantService);
+  private readonly engagementService = inject(EngagementService);
 
   @Input() engagement: EngagementCard | null = null;
   @Input() initialStatus: EngagementStatus = EngagementStatus.PLANNED;
+  @Input() clients: Client[] = [];
   @Output() close = new EventEmitter<void>();
   @Output() create = new EventEmitter<CreateEngagementRequest>();
   @Output() updateSummary = new EventEmitter<string>();
@@ -44,10 +58,15 @@ export class EngagementDetail implements OnInit {
   @Output() updateType = new EventEmitter<EngagementType>();
   @Output() updateStatus = new EventEmitter<EngagementStatus>();
   @Output() assigned = new EventEmitter<void>();
+  @Output() delete = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<Engagement>();
 
   protected readonly engagementTypes = Object.values(EngagementType);
   protected readonly statuses = Object.values(EngagementStatus);
+  /** Cancellation has its own dedicated flow (with a staffing-impact preview) — never a casual badge edit. */
+  protected readonly editableStatuses = this.statuses.filter((s) => s !== EngagementStatus.CANCELLED);
   protected readonly engagementRoles = Object.values(EngagementRole);
+  protected readonly statusIcon = engagementStatusIcon;
 
   protected readonly expandedRoles = signal<Set<EngagementRole>>(new Set());
   protected readonly assignments = signal<Assignment[]>([]);
@@ -69,12 +88,13 @@ export class EngagementDetail implements OnInit {
       role,
       label: ROLE_LABELS[role],
       assignments,
-    }));
+    })).sort((a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role]);
   });
 
   protected form: CreateEngagementRequest = this.emptyForm();
 
   protected editingDates = false;
+  protected menuOpen = false;
 
   protected addingConsultant = false;
   protected newConsultantId: number | null = null;
@@ -87,6 +107,115 @@ export class EngagementDetail implements OnInit {
   protected get availableConsultants(): Consultant[] {
     const assignedIds = new Set(this.assignments().map((a) => a.consultantId));
     return this.allConsultants().filter((c) => !assignedIds.has(c.id));
+  }
+
+  // --- Delete: reserved for engagements with zero staffing footprint, ever. ---
+  protected readonly deleteModalOpen = signal(false);
+  protected readonly deleteHistory = signal<Assignment[] | null>(null);
+  protected readonly historyLoading = signal(false);
+  protected readonly deleting = signal(false);
+  protected readonly deleteError = signal<string | null>(null);
+  protected deleteConfirmName = '';
+
+  protected get canDelete(): boolean {
+    const history = this.deleteHistory();
+    return history !== null && history.length === 0;
+  }
+
+  protected get deleteNameConfirmed(): boolean {
+    return this.engagement !== null && this.deleteConfirmName.trim() === this.engagement.engagementName;
+  }
+
+  protected openDeleteModal(): void {
+    if (!this.engagement) {
+      return;
+    }
+
+    this.deleteError.set(null);
+    this.deleteConfirmName = '';
+    this.deleteHistory.set(null);
+    this.deleteModalOpen.set(true);
+
+    this.historyLoading.set(true);
+    this.assignmentService.getHistoryByEngagement(this.engagement.id).subscribe({
+      next: (history) => {
+        this.deleteHistory.set(history);
+        this.historyLoading.set(false);
+      },
+      error: (err) => {
+        this.historyLoading.set(false);
+        this.deleteError.set('Failed to check assignment history. Please try again.');
+        console.error('Failed to load assignment history', err);
+      },
+    });
+  }
+
+  protected closeDeleteModal(): void {
+    this.deleteModalOpen.set(false);
+  }
+
+  protected performDelete(): void {
+    if (!this.engagement || !this.canDelete || !this.deleteNameConfirmed) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.deleteError.set(null);
+
+    this.engagementService.delete(this.engagement.id).subscribe({
+      next: () => {
+        this.deleting.set(false);
+        this.deleteModalOpen.set(false);
+        this.delete.emit();
+      },
+      error: (err) => {
+        this.deleting.set(false);
+        this.deleteError.set(err?.error?.message ?? 'Failed to delete engagement. Please try again.');
+      },
+    });
+  }
+
+  // --- Cancel: the everyday "this isn't happening" action. Keeps the record and its history. ---
+  protected readonly cancelModalOpen = signal(false);
+  protected readonly cancelling = signal(false);
+  protected readonly cancelError = signal<string | null>(null);
+
+  protected get canCancel(): boolean {
+    return this.engagement !== null && !NON_CANCELLABLE_STATUSES.has(this.engagement.status);
+  }
+
+  protected get staffedAssignments(): Assignment[] {
+    return this.assignments().filter((a) => STAFFED_ASSIGNMENT_STATUSES.has(a.status));
+  }
+
+  protected openCancelModal(): void {
+    this.cancelError.set(null);
+    this.cancelModalOpen.set(true);
+  }
+
+  protected closeCancelModal(): void {
+    this.cancelModalOpen.set(false);
+  }
+
+  protected performCancel(): void {
+    if (!this.engagement || !this.canCancel) {
+      return;
+    }
+
+    this.cancelling.set(true);
+    this.cancelError.set(null);
+
+    this.engagementService.cancel(this.engagement.id).subscribe({
+      next: (updated) => {
+        this.cancelling.set(false);
+        this.cancelModalOpen.set(false);
+        this.cancelled.emit(updated);
+      },
+      error: (err) => {
+        this.cancelling.set(false);
+        this.cancelError.set(err?.error?.message ?? 'Failed to cancel engagement. Please try again.');
+      },
+    });
   }
 
   ngOnInit(): void {
@@ -147,6 +276,7 @@ export class EngagementDetail implements OnInit {
         engagementId: this.engagement.id,
         engagementRole: this.newConsultantRole,
         assignmentStartDate: new Date().toISOString().slice(0, 10),
+        assignmentEndDate: this.engagement.targetEndDate,
       })
       .subscribe({
         next: () => {
