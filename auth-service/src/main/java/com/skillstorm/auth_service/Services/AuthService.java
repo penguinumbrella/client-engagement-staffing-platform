@@ -1,7 +1,9 @@
 package com.skillstorm.auth_service.Services;
 
 import java.util.Locale;
+import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -9,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.skillstorm.auth_service.Dtos.AuthResponse;
 import com.skillstorm.auth_service.Dtos.LoginRequest;
@@ -82,13 +85,15 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponse getCurrentUser(String email) {
-        String normalizedEmail = normalizeEmail(email);
+    public UserResponse getCurrentUser(UUID userId) {
 
         User user = userRepository
-                .findByEmailIgnoreCase(normalizedEmail)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "User not found."));
+                .findById(userId)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "User not found."
+                        )
+                );
 
         return toUserResponse(user);
     }
@@ -123,5 +128,21 @@ public class AuthService {
         return email
                 .trim()
                 .toLowerCase(Locale.ROOT);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getUserByEmail(String email) {
+
+        String normalizedEmail = normalizeEmail(email);
+
+        User user = userRepository
+                .findByEmailIgnoreCase(normalizedEmail)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "User not found: " + normalizedEmail
+                        )
+                );
+
+        return toUserResponse(user);
     }
 }

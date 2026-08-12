@@ -1,0 +1,45 @@
+spring:
+    application:
+        name: staffing
+    output:
+        ansi:
+            enabled: always
+    datasource:
+        url: ${STAFFING_DB_URL}
+        username: ${DB_USERNAME:postgres}
+        password: ${DB_PASSWORD:postgres}
+        driver-class-name: org.postgresql.Driver
+    jpa:
+        hibernate:
+            ddl-auto: none
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
+    sql:
+        init:
+            mode: always
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    public-key-location: classpath:keys/public.pem
+    config:
+        import: optional:file:.env[.properties]
+
+server:
+    port: 8083
+
+eureka:
+    client:
+        fetch-registry: true
+        register-with-eureka: true
+        service-url:
+            default-zone: http://localhost:8761/eureka/
+        registry-fetch-interval-seconds: 5
+    instance:
+        hostname: localhost
+        ip-address: 127.0.0.1
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${server.port}
+        leaseRenewalIntervalInSeconds: 10
