@@ -4,14 +4,16 @@
       <i class="pi {{ statusIcon(column.status) }} {{ statusIconColor(column.status) }} text-xs"></i>
       {{ column.title }}
     </h2>
-    <button
-      type="button"
-      class="flex h-5 w-5 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700"
-      title="Add engagement"
-      (click)="add.emit(column.status)"
-    >
-      +
-    </button>
+    @if (column.status !== cancelledStatus) {
+      <button
+        type="button"
+        class="flex h-5 w-5 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+        title="Add engagement"
+        (click)="add.emit(column.status)"
+      >
+        +
+      </button>
+    }
   </div>
   <div
     class="flex min-h-[60px] flex-col gap-2"

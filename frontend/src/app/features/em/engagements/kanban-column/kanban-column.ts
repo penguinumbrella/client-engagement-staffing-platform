@@ -20,4 +20,5 @@ export class KanbanColumn {
 
   protected readonly statusIcon = engagementStatusIcon;
   protected readonly statusIconColor = engagementStatusIconColor;
+  protected readonly cancelledStatus = EngagementStatus.CANCELLED;
 }

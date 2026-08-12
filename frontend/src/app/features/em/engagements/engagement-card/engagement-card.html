@@ -12,10 +12,6 @@
       {{ engagement.client.initials }}
     </span>
     <span class="flex-1 text-[11px] text-gray-500">{{ engagement.client.companyName }}</span>
-    <i
-      class="pi {{ statusIcon(engagement.status) }} {{ statusIconColor(engagement.status) }} text-[11px]"
-      [title]="engagement.status"
-    ></i>
   </div>
 
   <p class="m-0 mb-2 text-sm font-semibold">{{ engagement.engagementName }}</p>
