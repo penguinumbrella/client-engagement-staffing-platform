@@ -24,6 +24,7 @@ export class Clients implements OnInit {
   readonly selectedClient = signal<Client | null>(null);
 
   readonly detailClient = signal<Client | null>(null);
+  readonly detailVisible = signal(false);
 
   ngOnInit(): void {
     this.loadClients();
@@ -49,10 +50,7 @@ export class Clients implements OnInit {
 
   openDetail(client: Client): void {
     this.detailClient.set(client);
-  }
-
-  closeDetail(): void {
-    this.detailClient.set(null);
+    this.detailVisible.set(true);
   }
 
   updateCompanyName(id: number, companyName: string): void {
