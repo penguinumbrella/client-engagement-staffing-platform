@@ -27,7 +27,6 @@ export class ClientTable {
   clients = input<Client[]>([]);
 
   select = output<Client>();
-  edit = output<number>();
   delete = output<number>();
 
   readonly tabs = TABS;

@@ -1,0 +1,16 @@
+<div class="flex h-36 flex-col rounded-md bg-white p-3 shadow-sm">
+  <div class="mb-2 flex items-start justify-between gap-2">
+    <p class="m-0 line-clamp-2 text-sm font-semibold text-gray-900">{{ engagement().engagementName }}</p>
+    <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium" [class]="statusClasses()">
+      {{ engagement().status }}
+    </span>
+  </div>
+
+  <span class="mt-2 mb-2 inline-block w-fit rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+    {{ engagement().engagementType }}
+  </span>
+
+  <div class="mt-auto text-xs text-gray-500">
+    <p class="m-0">{{ formatDate(engagement().startDate) }} &ndash; {{ formatDate(engagement().targetEndDate) }}</p>
+  </div>
+</div>

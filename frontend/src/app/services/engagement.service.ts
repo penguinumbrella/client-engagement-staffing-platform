@@ -23,6 +23,10 @@ export class EngagementService {
     return this.http.get<Engagement>(`${this.baseUrl}/${id}`);
   }
 
+  getByClient(clientId: number): Observable<Engagement[]> {
+    return this.http.get<Engagement[]>(`${this.baseUrl}/client/${clientId}`);
+  }
+
   create(request: CreateEngagementRequest): Observable<Engagement> {
     return this.http.post<Engagement>(this.baseUrl, request);
   }

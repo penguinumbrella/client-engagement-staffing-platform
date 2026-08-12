@@ -1,6 +1,6 @@
 import { Component, computed, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EngagementCard } from '../engagement.model';
+import { EngagementCard } from './engagement.model';
 import { EditDatesModal } from '../editors/edit-dates-modal/edit-dates-modal';
 import { EditableBadge } from '../editors/editable-badge/editable-badge';
 import { EditableTitle } from '../editors/editable-title/editable-title';
