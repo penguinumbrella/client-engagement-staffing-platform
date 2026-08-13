@@ -1,0 +1,14 @@
+<div class="flex items-start gap-4 p-4">
+  @for (column of columns; track column.status) {
+    <app-kanban-column
+      [column]="column"
+      [connectedTo]="connectedLists"
+      (dropped)="drop($event)"
+      (select)="selectEngagement($event)"
+    />
+  }
+</div>
+
+@if (selected(); as engagement) {
+  <app-engagement-detail [engagement]="engagement" (close)="closeDetail()" />
+}
