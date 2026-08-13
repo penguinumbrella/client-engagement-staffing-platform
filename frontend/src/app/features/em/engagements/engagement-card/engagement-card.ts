@@ -12,7 +12,4 @@ import { engagementStatusIcon, engagementStatusIconColor } from '../engagement-s
 export class EngagementCard {
   @Input({ required: true }) engagement!: EngagementCardModel;
   @Output() select = new EventEmitter<EngagementCardModel>();
-
-  protected readonly statusIcon = engagementStatusIcon;
-  protected readonly statusIconColor = engagementStatusIconColor;
 }

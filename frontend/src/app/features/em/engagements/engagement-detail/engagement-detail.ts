@@ -5,6 +5,7 @@ import { EditDatesModal } from '../editors/edit-dates-modal/edit-dates-modal';
 import { EditableBadge } from '../editors/editable-badge/editable-badge';
 import { EditableTitle } from '../editors/editable-title/editable-title';
 import { EditableSummary } from '../editors/editable-summary/editable-summary';
+import { ConsultantDetail } from '../../consultants/consultant-detail/consultant-detail';
 import { Assignment, AssignmentStatus, EngagementRole } from '../../../../types/assignment.types';
 import { Consultant } from '../../../../types/consultant.types';
 import { Client } from '../../../../types/client.types';
@@ -38,7 +39,7 @@ const ROLE_ORDER: Record<EngagementRole, number> = {
 
 @Component({
   selector: 'app-engagement-detail',
-  imports: [FormsModule, EditDatesModal, EditableBadge, EditableTitle, EditableSummary],
+  imports: [FormsModule, EditDatesModal, EditableBadge, EditableTitle, EditableSummary, ConsultantDetail],
   templateUrl: './engagement-detail.html',
   styleUrl: './engagement-detail.css',
 })
@@ -100,6 +101,9 @@ export class EngagementDetail implements OnInit {
   protected newConsultantId: number | null = null;
   protected newConsultantRole: EngagementRole = EngagementRole.ASSOCIATE;
 
+  protected readonly consultantDetailVisible = signal(false);
+  protected readonly selectedConsultant = signal<Consultant | null>(null);
+
   protected get isCreateMode(): boolean {
     return this.engagement === null;
   }
@@ -109,18 +113,13 @@ export class EngagementDetail implements OnInit {
     return this.allConsultants().filter((c) => !assignedIds.has(c.id));
   }
 
-  // --- Delete: reserved for engagements with zero staffing footprint, ever. ---
+  // --- Delete: permanent, but always available — unstaffs any remaining assignments first. ---
   protected readonly deleteModalOpen = signal(false);
   protected readonly deleteHistory = signal<Assignment[] | null>(null);
   protected readonly historyLoading = signal(false);
   protected readonly deleting = signal(false);
   protected readonly deleteError = signal<string | null>(null);
   protected deleteConfirmName = '';
-
-  protected get canDelete(): boolean {
-    const history = this.deleteHistory();
-    return history !== null && history.length === 0;
-  }
 
   protected get deleteNameConfirmed(): boolean {
     return this.engagement !== null && this.deleteConfirmName.trim() === this.engagement.engagementName;
@@ -155,7 +154,7 @@ export class EngagementDetail implements OnInit {
   }
 
   protected performDelete(): void {
-    if (!this.engagement || !this.canDelete || !this.deleteNameConfirmed) {
+    if (!this.engagement || !this.deleteNameConfirmed) {
       return;
     }
 
@@ -294,6 +293,50 @@ export class EngagementDetail implements OnInit {
 
   protected colorFor(name: string): string {
     return colorOf(name);
+  }
+
+  protected readonly unstaffTarget = signal<Assignment | null>(null);
+  protected readonly unstaffing = signal(false);
+  protected readonly unstaffError = signal<string | null>(null);
+
+  protected confirmUnstaff(assignment: Assignment): void {
+    this.unstaffError.set(null);
+    this.unstaffTarget.set(assignment);
+  }
+
+  protected cancelUnstaff(): void {
+    this.unstaffTarget.set(null);
+  }
+
+  protected performUnstaff(): void {
+    const target = this.unstaffTarget();
+    if (!target) {
+      return;
+    }
+
+    this.unstaffing.set(true);
+    this.unstaffError.set(null);
+
+    this.assignmentService.remove(target.id).subscribe({
+      next: () => {
+        this.unstaffing.set(false);
+        this.unstaffTarget.set(null);
+        this.loadConsultantsPanel();
+      },
+      error: (err) => {
+        this.unstaffing.set(false);
+        this.unstaffError.set(err?.error?.message ?? 'Failed to unstaff consultant. Please try again.');
+      },
+    });
+  }
+
+  protected openConsultant(consultantId: number): void {
+    const consultant = this.allConsultants().find((c) => c.id === consultantId);
+    if (!consultant) {
+      return;
+    }
+    this.selectedConsultant.set(consultant);
+    this.consultantDetailVisible.set(true);
   }
 
   private loadConsultantsPanel(): void {

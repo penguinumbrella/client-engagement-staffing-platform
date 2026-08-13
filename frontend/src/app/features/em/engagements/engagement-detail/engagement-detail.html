@@ -174,10 +174,11 @@
         </div>
 
         <p
-          class="m-0 mb-3 inline-block cursor-pointer rounded-md p-1 text-xs font-medium text-gray-500 hover:bg-gray-50"
+          class="m-0 mb-3 inline-flex cursor-pointer items-center gap-1.5 rounded-md p-1 text-xs font-medium text-gray-500 hover:bg-gray-50"
           title="Click to edit"
           (click)="startEditDates()"
         >
+          <i class="pi pi-calendar text-[11px]"></i>
           {{ formatDate(engagement.startDate) }} &ndash; {{ formatDate(engagement.targetEndDate) }}
         </p>
 
@@ -209,16 +210,27 @@
               @if (isExpanded(group.role)) {
                 <ul class="flex flex-col gap-1 py-1 pl-2">
                   @for (assignment of group.assignments; track assignment.id) {
-                    <li class="flex items-center gap-2 rounded-md p-1.5">
+                    <li
+                      class="group flex cursor-pointer items-center gap-2 rounded-md p-1.5 hover:bg-gray-50"
+                      (click)="openConsultant(assignment.consultantId)"
+                    >
                       <span
                         class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
                         [style.backgroundColor]="colorFor(assignment.consultantName)"
                       >
                         {{ initials(assignment.consultantName) }}
                       </span>
-                      <div class="flex flex-col">
-                        <span class="text-xs font-medium text-gray-700">{{ assignment.consultantName }}</span>
-                      </div>
+                      <span class="flex-1 text-left text-xs font-medium text-gray-700 group-hover:text-indigo-600">
+                        {{ assignment.consultantName }}
+                      </span>
+                      <button
+                        type="button"
+                        title="Unstaff"
+                        (click)="$event.stopPropagation(); confirmUnstaff(assignment)"
+                        class="invisible flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-red-50 hover:text-red-600 group-hover:visible"
+                      >
+                        <i class="pi pi-trash text-[11px]"></i>
+                      </button>
                     </li>
                   }
                 </ul>
@@ -282,6 +294,45 @@
   </div>
 </div>
 
+<app-consultant-detail [consultant]="selectedConsultant()" [(visible)]="consultantDetailVisible" />
+
+@if (unstaffTarget(); as target) {
+  <div class="fixed inset-0 z-60 flex items-center justify-center bg-black/50" (click)="cancelUnstaff()">
+    <div class="w-105 max-w-[90vw] rounded-lg bg-white p-5 shadow-xl" (click)="$event.stopPropagation()">
+      <div class="mb-3 flex items-center gap-2">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">!</span>
+        <h3 class="m-0 text-sm font-semibold text-gray-900">Unstaff {{ target.consultantName }}?</h3>
+      </div>
+
+      <p class="mb-3 text-xs text-gray-700">
+        This removes {{ target.consultantName }}'s assignment from this engagement. This can't be undone.
+      </p>
+
+      @if (unstaffError()) {
+        <p class="mb-3 text-xs text-red-600">{{ unstaffError() }}</p>
+      }
+
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          (click)="cancelUnstaff()"
+          class="rounded-md px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          [disabled]="unstaffing()"
+          (click)="performUnstaff()"
+          class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {{ unstaffing() ? 'Removing…' : 'Unstaff' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
 @if (editingDates && engagement; as eng) {
   <app-edit-dates-modal
     [startDate]="eng.startDate"
@@ -301,52 +352,23 @@
 
       @if (historyLoading()) {
         <p class="mb-3 text-xs text-gray-500">Checking assignment history…</p>
-      } @else if (!canDelete) {
-        <p class="mb-2 text-xs text-gray-700">
-          This engagement has staffing history and can't be permanently deleted — deleting would erase real
-          record of consultants having worked on it:
-        </p>
-
-        <ul class="mb-3 flex max-h-40 flex-col gap-1 overflow-y-auto">
-          @for (a of deleteHistory(); track a.id) {
-            <li class="rounded-md bg-gray-50 px-2 py-1.5 text-xs text-gray-700">
-              <span class="font-medium">{{ a.consultantName }}</span> — {{ a.engagementRole }}
-              <span class="ml-1 text-gray-400">({{ a.status }})</span>
-            </li>
-          }
-        </ul>
-
-        <p class="mb-3 text-xs text-gray-500">
-          Use <span class="font-medium">Cancel Engagement</span> instead — it keeps this history intact.
-        </p>
-
-        @if (deleteError()) {
-          <p class="mb-3 text-xs text-red-600">{{ deleteError() }}</p>
-        }
-
-        <div class="flex justify-end gap-2">
-          <button
-            type="button"
-            (click)="closeDeleteModal()"
-            class="rounded-md px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
-          >
-            Close
-          </button>
-          @if (canCancel) {
-            <button
-              type="button"
-              (click)="closeDeleteModal(); openCancelModal()"
-              class="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
-            >
-              Cancel Engagement Instead
-            </button>
-          }
-        </div>
       } @else {
         <p class="mb-2 text-xs text-red-600">
-          This engagement has never been staffed. Deleting it permanently removes the record — this cannot be
-          undone.
+          Deleting this engagement permanently removes it — this cannot be undone.
         </p>
+
+        @if (deleteHistory() && deleteHistory()!.length > 0) {
+          <p class="mb-1 text-xs font-medium text-gray-600">
+            The following consultant(s) will be unstaffed:
+          </p>
+          <ul class="mb-3 flex max-h-40 flex-col gap-1 overflow-y-auto">
+            @for (a of deleteHistory(); track a.id) {
+              <li class="rounded-md bg-gray-50 px-2 py-1.5 text-xs text-gray-700">
+                <span class="font-medium">{{ a.consultantName }}</span> — {{ a.engagementRole }}
+              </li>
+            }
+          </ul>
+        }
 
         <label class="mb-3 flex flex-col gap-1 text-xs font-medium text-gray-600">
           Type <span class="font-semibold text-gray-800">{{ eng.engagementName }}</span> to confirm

@@ -40,6 +40,7 @@ export class KanbanBoard {
   protected readonly selected = signal<EngagementCard | null>(null);
   protected readonly creatingStatus = signal<EngagementStatus | null>(null);
   protected readonly connectedLists = COLUMN_STATUSES;
+  protected readonly cancelledStatus = EngagementStatus.CANCELLED;
 
   constructor() {
     this.consultantService.getAll().subscribe({

@@ -10,6 +10,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Engagements', path: '/em/engagements' },
   { label: 'Clients', path: '/em/clients' },
   { label: 'Consultants', path: '/em/consultants' },
+  { label: 'My Engagements', path: '/my-engagements' },
 ];
 
 @Component({

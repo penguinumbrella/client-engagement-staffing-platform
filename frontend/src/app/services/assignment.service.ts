@@ -35,4 +35,8 @@ export class AssignmentService {
   updateStatus(id: number, request: UpdateAssignmentStatusRequest): Observable<Assignment> {
     return this.http.patch<Assignment>(`${this.baseUrl}/${id}/status`, request);
   }
+
+  remove(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
 }
