@@ -1,0 +1,186 @@
+<p>register works!</p>
+<div class="auth-container">
+
+  <div class="auth-card">
+
+    <h1>Create Account</h1>
+
+    <p>
+      Client Engagement & Staffing Platform
+    </p>
+
+
+    <form
+      [formGroup]="registerForm"
+      (ngSubmit)="register()"
+    >
+
+      <div class="form-group">
+
+        <label for="firstName">
+          First Name
+        </label>
+
+        <input
+          id="firstName"
+          type="text"
+          formControlName="firstName"
+        >
+
+        @if (
+          registerForm.controls.firstName.touched &&
+          registerForm.controls.firstName.hasError('required')
+        ) {
+          <small class="error">
+            First name is required.
+          </small>
+        }
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="lastName">
+          Last Name
+        </label>
+
+        <input
+          id="lastName"
+          type="text"
+          formControlName="lastName"
+        >
+
+        @if (
+          registerForm.controls.lastName.touched &&
+          registerForm.controls.lastName.hasError('required')
+        ) {
+          <small class="error">
+            Last name is required.
+          </small>
+        }
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="email">
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+        >
+
+        @if (
+          registerForm.controls.email.touched &&
+          registerForm.controls.email.invalid
+        ) {
+          <small class="error">
+            Enter a valid email address.
+          </small>
+        }
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="password">
+          Password
+        </label>
+
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+        >
+
+        @if (
+          registerForm.controls.password.touched &&
+          registerForm.controls.password.hasError('required')
+        ) {
+          <small class="error">
+            Password is required.
+          </small>
+        }
+
+        @if (
+          registerForm.controls.password.touched &&
+          registerForm.controls.password.hasError('minlength')
+        ) {
+          <small class="error">
+            Password must be at least 12 characters.
+          </small>
+        }
+
+        @if (
+          registerForm.controls.password.touched &&
+          registerForm.controls.password.hasError('maxlength')
+        ) {
+          <small class="error">
+            Password cannot exceed 72 characters.
+          </small>
+        }
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="confirmPassword">
+          Confirm Password
+        </label>
+
+        <input
+          id="confirmPassword"
+          type="password"
+          formControlName="confirmPassword"
+        >
+
+        @if (
+          registerForm.controls.confirmPassword.touched &&
+          registerForm.hasError('passwordMismatch')
+        ) {
+          <small class="error">
+            Passwords do not match.
+          </small>
+        }
+
+      </div>
+
+
+      @if (errorMessage) {
+        <div class="error-message">
+          {{ errorMessage }}
+        </div>
+      }
+
+
+      <button
+        type="submit"
+        [disabled]="loading"
+      >
+        {{
+          loading
+            ? 'Creating Account...'
+            : 'Create Account'
+        }}
+      </button>
+
+    </form>
+
+
+    <p>
+      Already have an account?
+      <a routerLink="/login">
+        Sign in
+      </a>
+    </p>
+
+  </div>
+
+</div>

@@ -2,6 +2,7 @@ package com.skillstorm.api_gateway.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,17 +19,31 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
 
+            .cors(Customizer.withDefaults())
+
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                session.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS
+                )
             )
 
             .authorizeHttpRequests(auth -> auth
 
-                // Login/register accessible without JWT
-                .requestMatchers("/api/auth/**").permitAll()
+                // Allow browser CORS preflight requests
+                .requestMatchers(
+                    HttpMethod.OPTIONS,
+                    "/**"
+                ).permitAll()
 
-                // Health endpoint
-                .requestMatchers("/actuator/health/**").permitAll()
+                // Login and registration do not require JWT
+                .requestMatchers(
+                    "/auth/**"
+                ).permitAll()
+
+                // Eureka / health checks
+                .requestMatchers(
+                    "/actuator/health/**"
+                ).permitAll()
 
                 // Everything else requires JWT
                 .anyRequest().authenticated()

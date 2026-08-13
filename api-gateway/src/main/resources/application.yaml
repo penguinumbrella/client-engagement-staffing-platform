@@ -33,7 +33,9 @@ spring:
                         - id: auth
                           uri: lb://auth-service
                           predicates:
-                            - Path=/api/auth/**
+                            - Path=/auth/**
+                          filters:
+                              - StripPrefix=1
 
 server:
     port: 8125
