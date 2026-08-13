@@ -1,7 +1,9 @@
 package com.skillstorm.staffing.controller;
 
 import com.skillstorm.staffing.dto.AssignmentResponse;
+import com.skillstorm.staffing.dto.CascadeAssignmentStatusRequest;
 import com.skillstorm.staffing.dto.CreateAssignmentRequest;
+import com.skillstorm.staffing.dto.UpdateAssignmentStatusRequest;
 import com.skillstorm.staffing.service.AssignmentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +28,9 @@ public class AssignmentController {
 
     private final AssignmentService assignmentService;
 
-    public AssignmentController(AssignmentService assignmentService) {
+    public AssignmentController(
+            AssignmentService assignmentService) {
+
         this.assignmentService = assignmentService;
     }
 
@@ -45,21 +50,56 @@ public class AssignmentController {
     }
 
     @GetMapping("/consultant/{consultantId}")
-    public ResponseEntity<List<AssignmentResponse>> getByConsultant(@PathVariable Long consultantId) {
-        return ResponseEntity.ok(assignmentService.getAssignmentsByConsultant(consultantId));
+    public ResponseEntity<List<AssignmentResponse>> getByConsultant(
+            @PathVariable Long consultantId) {
+
+        return ResponseEntity.ok(
+                assignmentService.getAssignmentsByConsultant(
+                        consultantId
+                )
+        );
     }
 
     @GetMapping("/engagement/{engagementId}")
-    public ResponseEntity<List<AssignmentResponse>> getByEngagement(@PathVariable Long engagementId) {
-        return ResponseEntity.ok(assignmentService.getAssignmentsByEngagement(engagementId));
+    public ResponseEntity<List<AssignmentResponse>> getByEngagement(
+            @PathVariable Long engagementId) {
+
+        return ResponseEntity.ok(
+                assignmentService.getAssignmentsByEngagement(
+                        engagementId
+                )
+        );
+    }
+
+    /**
+     * Internal endpoint: called by the engagement service to check
+     * whether an engagement has any staffing history.
+     */
+    @GetMapping("/engagement/{engagementId}/history")
+    public ResponseEntity<List<AssignmentResponse>> getHistoryByEngagement(
+            @PathVariable Long engagementId) {
+
+        return ResponseEntity.ok(
+                assignmentService.getAssignmentHistoryByEngagement(
+                        engagementId
+                )
+        );
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remove(@PathVariable Long id) {
+    public ResponseEntity<Void> remove(
+            @PathVariable Long id) {
+
         assignmentService.removeAssignment(id);
+
         return ResponseEntity.noContent().build();
     }
 
+    /*
+     * Consultant-specific endpoint.
+     * Uses the JWT subject UUID to find the logged-in consultant's
+     * assigned engagement IDs.
+     */
     @GetMapping("/me/engagement-ids")
     public ResponseEntity<List<Long>> getMyEngagementIds(
             @AuthenticationPrincipal Jwt jwt) {
@@ -68,12 +108,21 @@ public class AssignmentController {
                 UUID.fromString(jwt.getSubject());
 
         return ResponseEntity.ok(
-                assignmentService.getEngagementIdsForUser(userId)
+                assignmentService.getEngagementIdsForUser(
+                        userId
+                )
         );
     }
 
+    /*
+     * Consultant-specific endpoint.
+     * Checks whether the logged-in consultant is assigned
+     * to a specific engagement.
+     */
     @GetMapping("/me/engagements/{engagementId}/exists")
-    public ResponseEntity<Boolean> isAssignedToEngagement(@PathVariable Long engagementId, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<Boolean> isAssignedToEngagement(
+            @PathVariable Long engagementId,
+            @AuthenticationPrincipal Jwt jwt) {
 
         UUID userId =
                 UUID.fromString(jwt.getSubject());
@@ -84,5 +133,50 @@ public class AssignmentController {
                         engagementId
                 )
         );
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<AssignmentResponse> updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateAssignmentStatusRequest request) {
+
+        return ResponseEntity.ok(
+                assignmentService.updateStatus(
+                        id,
+                        request
+                )
+        );
+    }
+
+    /**
+     * Internal endpoint: called by the engagement service
+     * after an engagement status transition.
+     */
+    @PatchMapping("/engagement/{engagementId}/cascade-status")
+    public ResponseEntity<Void> cascadeStatus(
+            @PathVariable Long engagementId,
+            @Valid @RequestBody CascadeAssignmentStatusRequest request) {
+
+        assignmentService.cascadeStatusFromEngagement(
+                engagementId,
+                request.getEngagementStatus()
+        );
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Internal endpoint: called by the engagement service
+     * after an engagement is cancelled or deleted.
+     */
+    @DeleteMapping("/engagement/{engagementId}")
+    public ResponseEntity<Void> cascadeDelete(
+            @PathVariable Long engagementId) {
+
+        assignmentService.cascadeRemoveFromEngagement(
+                engagementId
+        );
+
+        return ResponseEntity.noContent().build();
     }
 }

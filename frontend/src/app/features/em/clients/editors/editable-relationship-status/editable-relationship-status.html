@@ -1,0 +1,23 @@
+@if (editing) {
+  <select
+    #draftSelect
+    class="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 outline-none"
+    name="draft"
+    [(ngModel)]="draft"
+    (change)="save()"
+    (blur)="cancelEdit()"
+  >
+    @for (status of statuses; track status) {
+      <option [value]="status">{{ status }}</option>
+    }
+  </select>
+} @else {
+  <span
+    class="cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-medium"
+    [class]="badgeClass"
+    title="Click to edit"
+    (click)="startEdit()"
+  >
+    {{ value }}
+  </span>
+}

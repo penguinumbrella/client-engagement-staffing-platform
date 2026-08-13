@@ -26,22 +26,22 @@
             "type": "java",
             "name": "Spring Boot-EngagementApplication<engagement>",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/engagement",
             "mainClass": "com.skillstorm.engagement.EngagementApplication",
             "projectName": "engagement",
             "args": "",
-            "envFile": "${workspaceFolder}/.env",
+            "envFile": "${workspaceFolder}/engagement/.env",
             "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=60203 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=engagement"
         },
         {
             "type": "java",
             "name": "Spring Boot-StaffingApplication<staffing>",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/staffing",
             "mainClass": "com.skillstorm.staffing.StaffingApplication",
             "projectName": "staffing",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/staffing/.env"
         },
         {
             "type": "java",

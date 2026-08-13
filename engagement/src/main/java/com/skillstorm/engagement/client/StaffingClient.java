@@ -1,5 +1,7 @@
 package com.skillstorm.engagement.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.core.ParameterizedTypeReference;
@@ -7,12 +9,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @Component
 public class StaffingClient {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(StaffingClient.class);
 
     private final RestClient restClient;
     private final LoadBalancerClient loadBalancerClient;
@@ -25,19 +31,15 @@ public class StaffingClient {
         this.loadBalancerClient = loadBalancerClient;
     }
 
-    public List<Long> getCurrentUserEngagementIds(
-            String token) {
+    public List<Long> getCurrentUserEngagementIds(String token) {
 
-        ServiceInstance instance =
-                getStaffingInstance();
+        ServiceInstance instance = getStaffingInstance();
 
         List<Long> engagementIds =
                 restClient
                         .get()
-                        .uri(
-                                instance.getUri()
-                                        + "/api/assignments/me/engagement-ids"
-                        )
+                        .uri(instance.getUri()
+                                + "/api/assignments/me/engagement-ids")
                         .header(
                                 HttpHeaders.AUTHORIZATION,
                                 "Bearer " + token
@@ -57,8 +59,7 @@ public class StaffingClient {
             Long engagementId,
             String token) {
 
-        ServiceInstance instance =
-                getStaffingInstance();
+        ServiceInstance instance = getStaffingInstance();
 
         Boolean assigned =
                 restClient
@@ -79,6 +80,77 @@ public class StaffingClient {
         return Boolean.TRUE.equals(assigned);
     }
 
+    public void cascadeAssignmentStatus(
+            Long engagementId,
+            String engagementStatus) {
+
+        ServiceInstance instance =
+                loadBalancerClient.choose("staffing");
+
+        if (instance == null) {
+            log.warn(
+                    "Staffing service is not available; skipped assignment status cascade for engagement id={}",
+                    engagementId
+            );
+            return;
+        }
+
+        try {
+            restClient.patch()
+                    .uri(
+                            instance.getUri()
+                                    + "/api/assignments/engagement/{engagementId}/cascade-status",
+                            engagementId
+                    )
+                    .body(
+                            new CascadeAssignmentStatusRequest(
+                                    engagementStatus
+                            )
+                    )
+                    .retrieve()
+                    .toBodilessEntity();
+
+        } catch (RestClientException ex) {
+            log.warn(
+                    "Failed to cascade assignment status for engagement id={}: {}",
+                    engagementId,
+                    ex.getMessage()
+            );
+        }
+    }
+
+    public void cascadeEngagementCancelled(Long engagementId) {
+
+        ServiceInstance instance =
+                loadBalancerClient.choose("staffing");
+
+        if (instance == null) {
+            log.warn(
+                    "Staffing service is not available; skipped assignment cascade cancel for engagement id={}",
+                    engagementId
+            );
+            return;
+        }
+
+        try {
+            restClient.delete()
+                    .uri(
+                            instance.getUri()
+                                    + "/api/assignments/engagement/{engagementId}",
+                            engagementId
+                    )
+                    .retrieve()
+                    .toBodilessEntity();
+
+        } catch (RestClientException ex) {
+            log.warn(
+                    "Failed to cascade cancel assignments for engagement id={}: {}",
+                    engagementId,
+                    ex.getMessage()
+            );
+        }
+    }
+
     private ServiceInstance getStaffingInstance() {
 
         ServiceInstance instance =
@@ -92,5 +164,9 @@ public class StaffingClient {
         }
 
         return instance;
+    }
+
+    private record CascadeAssignmentStatusRequest(
+            String engagementStatus) {
     }
 }

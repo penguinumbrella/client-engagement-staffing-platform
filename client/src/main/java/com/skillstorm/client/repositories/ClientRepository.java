@@ -10,4 +10,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Page<Client> findByIsActiveTrue(Pageable pageable);
 
+    boolean existsByCompanyNameIgnoreCase(String companyName);
+
 }

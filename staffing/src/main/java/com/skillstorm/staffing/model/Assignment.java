@@ -32,6 +32,15 @@ public class Assignment {
     @Column(name = "assignment_start_date", nullable = false)
     private LocalDate assignmentStartDate;
 
+    @Column(name = "assignment_end_date", nullable = false)
+    private LocalDate assignmentEndDate;
+
+    @Column(name = "status", nullable = false)
+    private String status = "Active";
+
+    @Column(name = "status_overridden", nullable = false)
+    private boolean statusOverridden = false;
+
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
@@ -89,6 +98,30 @@ public class Assignment {
 
     public void setAssignmentStartDate(LocalDate assignmentStartDate) {
         this.assignmentStartDate = assignmentStartDate;
+    }
+
+    public LocalDate getAssignmentEndDate() {
+        return assignmentEndDate;
+    }
+
+    public void setAssignmentEndDate(LocalDate assignmentEndDate) {
+        this.assignmentEndDate = assignmentEndDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public boolean isStatusOverridden() {
+        return statusOverridden;
+    }
+
+    public void setStatusOverridden(boolean statusOverridden) {
+        this.statusOverridden = statusOverridden;
     }
 
     public boolean isActive() {

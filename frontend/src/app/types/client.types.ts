@@ -5,11 +5,10 @@ export enum RelationshipStatus {
 }
 
 export interface Client {
-  id: number;
+  id?: number;
   companyName: string;
   industry: string;
   primaryContactName: string;
   primaryContactEmail: string;
   relationshipStatus: RelationshipStatus;
-  isActive: boolean;
 }

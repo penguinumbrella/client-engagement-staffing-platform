@@ -1,0 +1,18 @@
+@if (editing) {
+  <textarea
+    #draftTextarea
+    class="m-0 min-h-[100px] w-full rounded-md border border-indigo-300 p-1 text-xs leading-relaxed text-gray-800 outline-none"
+    name="draft"
+    [(ngModel)]="draft"
+    (blur)="save()"
+    (keydown.escape)="cancelEdit()"
+  ></textarea>
+} @else {
+  <p
+    class="m-0 cursor-pointer rounded-md p-1 text-xs leading-relaxed text-gray-600 hover:bg-gray-50"
+    title="Click to edit"
+    (click)="startEdit()"
+  >
+    {{ value || 'Click to add a summary…' }}
+  </p>
+}

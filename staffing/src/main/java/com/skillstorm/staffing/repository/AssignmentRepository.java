@@ -12,6 +12,10 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
 
     List<Assignment> findByEngagementIdAndActiveTrue(Long engagementId);
 
+    List<Assignment> findByEngagementId(Long engagementId);
+
+    List<Assignment> findByEngagementIdAndActiveTrueAndStatusOverriddenFalse(Long engagementId);
+
     Optional<Assignment> findByConsultantIdAndEngagementId(Long consultantId, Long engagementId);
 
     boolean existsByConsultantIdAndEngagementIdAndActiveTrue(Long consultantId, Long engagementId);

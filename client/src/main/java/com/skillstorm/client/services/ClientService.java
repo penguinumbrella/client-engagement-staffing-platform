@@ -2,12 +2,16 @@ package com.skillstorm.client.services;
 
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.skillstorm.client.clients.EngagementClient;
 import com.skillstorm.client.dtos.ClientRequest;
 import com.skillstorm.client.dtos.ClientResponse;
 import com.skillstorm.client.mappers.ClientMapper;
@@ -19,11 +23,13 @@ public class ClientService {
 
     private final ClientRepository clientRepo;
     private final ClientMapper clientMapper;
+    private final EngagementClient engagementClient;
     private static final int PAGE_SIZE = 10;
-    
-    public ClientService(ClientRepository clientRepo, ClientMapper clientMapper) {
+
+    public ClientService(ClientRepository clientRepo, ClientMapper clientMapper, EngagementClient engagementClient) {
         this.clientRepo = clientRepo;
         this.clientMapper = clientMapper;
+        this.engagementClient = engagementClient;
     }
 
     public ResponseEntity<Page<ClientResponse>> getAllClients(int page) {
@@ -42,10 +48,14 @@ public class ClientService {
     }
 
     public ResponseEntity<ClientResponse> createClient(ClientRequest dto) {
-        
-        Client client = this.clientRepo.save(new Client(dto.companyName(), dto.industry(), dto.primaryContactName(), dto.primaryContactEmail(), dto.relationshipStatus()));
 
-        return ResponseEntity.status(201).body(this.clientMapper.toDto(client));
+        try {
+            Client client = this.clientRepo.save(new Client(dto.companyName(), dto.industry(), dto.primaryContactName(), dto.primaryContactEmail(), dto.relationshipStatus()));
+            return ResponseEntity.status(201).body(this.clientMapper.toDto(client));
+        } catch (DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "A client named '" + dto.companyName() + "' already exists.");
+        }
     }
 
     public ResponseEntity<ClientResponse> updateClient(Long id, ClientRequest dto) {
@@ -59,9 +69,13 @@ public class ClientService {
             if(dto.primaryContactEmail() != null) temp.setPrimaryContactEmail(dto.primaryContactEmail());
             if(dto.relationshipStatus() != null) temp.setRelationshipStatus(dto.relationshipStatus());
 
-            Client updated = this.clientRepo.save(temp);
-
-            return ResponseEntity.ok().body(this.clientMapper.toDto(updated));
+            try {
+                Client updated = this.clientRepo.save(temp);
+                return ResponseEntity.ok().body(this.clientMapper.toDto(updated));
+            } catch (DataIntegrityViolationException ex) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "A client named '" + dto.companyName() + "' already exists.");
+            }
         }
         return ResponseEntity.notFound().build();
     }
@@ -71,17 +85,13 @@ public class ClientService {
 
         if(current.isPresent() && current.get().isActive()) {
 
-        /**
-         * Later 409 Logic for Client Engagements
-         *
-         *   try {
-         *      logic for checking Engagement Service
-         *      return ResponseEntity.status(409).build();
-         *   } catch (fallback logic) {
-         *      return ResponseEntity.status(503).build();
-         *   }
-         *
-         */
+            try {
+                if (engagementClient.hasActiveEngagements(id)) {
+                    return ResponseEntity.status(409).build();
+                }
+            } catch (ResponseStatusException ex) {
+                return ResponseEntity.status(ex.getStatusCode()).build();
+            }
 
             Client temp = current.get();
             temp.setActive(false);

@@ -51,6 +51,8 @@ public class EngagementService {
                 status.getLabel()
         );
 
+        engagement.setSummary(request.getSummary());
+
         return EngagementResponse.from(
                 engagementRepository.save(engagement)
         );
@@ -65,13 +67,11 @@ public class EngagementService {
                 .toList();
     }
 
-    public List<EngagementResponse>
-            getEngagementsForCurrentConsultant(
-                    String token) {
+    public List<EngagementResponse> getEngagementsForCurrentConsultant(
+            String token) {
 
         List<Long> engagementIds =
-                staffingClient
-                        .getCurrentUserEngagementIds(token);
+                staffingClient.getCurrentUserEngagementIds(token);
 
         if (engagementIds.isEmpty()) {
             return List.of();
@@ -92,10 +92,9 @@ public class EngagementService {
         );
     }
 
-    public EngagementResponse
-            getEngagementByIdForConsultant(
-                    Long engagementId,
-                    String token) {
+    public EngagementResponse getEngagementByIdForConsultant(
+            Long engagementId,
+            String token) {
 
         boolean assigned =
                 staffingClient.isCurrentUserAssigned(
@@ -112,18 +111,52 @@ public class EngagementService {
         return getEngagementById(engagementId);
     }
 
+    public List<EngagementResponse> getEngagementsByClientId(
+            Long clientId) {
+
+        return engagementRepository
+                .findByClientIdAndActiveTrue(clientId)
+                .stream()
+                .map(EngagementResponse::from)
+                .toList();
+    }
+
     public EngagementResponse updateEngagement(
             Long id,
             UpdateEngagementRequest request) {
 
-        Engagement engagement =
-                findActiveOrThrow(id);
+        Engagement engagement = findActiveOrThrow(id);
+
+        if (request.getEngagementName() != null) {
+            engagement.setEngagementName(
+                    request.getEngagementName()
+            );
+        }
 
         if (request.getEngagementType() != null) {
             engagement.setEngagementType(
                     request.getEngagementType().getLabel()
             );
         }
+
+        if (request.getSummary() != null) {
+            engagement.setSummary(
+                    request.getSummary()
+            );
+        }
+
+        if (request.getStatus() == EngagementStatus.CANCELLED) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Use the cancel endpoint to cancel an engagement, not a status update"
+            );
+        }
+
+        boolean statusChanged =
+                request.getStatus() != null
+                        && !request.getStatus()
+                                .getLabel()
+                                .equals(engagement.getStatus());
 
         if (request.getStatus() != null) {
             engagement.setStatus(
@@ -148,24 +181,73 @@ public class EngagementService {
                 engagement.getTargetEndDate()
         );
 
-        return EngagementResponse.from(
-                engagementRepository.save(engagement)
-        );
+        Engagement saved =
+                engagementRepository.save(engagement);
+
+        if (statusChanged) {
+            staffingClient.cascadeAssignmentStatus(
+                    saved.getId(),
+                    saved.getStatus()
+            );
+        }
+
+        return EngagementResponse.from(saved);
     }
 
+    /**
+     * Deleting an engagement unstaffs any remaining assignments
+     * before the engagement itself is marked inactive.
+     */
     public void deleteEngagement(Long id) {
 
-        Engagement engagement =
-                findActiveOrThrow(id);
+        Engagement engagement = findActiveOrThrow(id);
+
+        staffingClient.cascadeEngagementCancelled(id);
 
         engagement.setActive(false);
 
         engagementRepository.save(engagement);
     }
 
+    /**
+     * Cancels an engagement while keeping the record and its history.
+     * Remaining staffing assignments are cancelled/deactivated.
+     */
+    public EngagementResponse cancelEngagement(Long id) {
+
+        Engagement engagement = findActiveOrThrow(id);
+
+        if (EngagementStatus.COMPLETED
+                .getLabel()
+                .equals(engagement.getStatus())
+                || EngagementStatus.CANCELLED
+                .getLabel()
+                .equals(engagement.getStatus())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Only active engagements can be cancelled"
+            );
+        }
+
+        engagement.setStatus(
+                EngagementStatus.CANCELLED.getLabel()
+        );
+
+        Engagement saved =
+                engagementRepository.save(engagement);
+
+        staffingClient.cascadeEngagementCancelled(
+                saved.getId()
+        );
+
+        return EngagementResponse.from(saved);
+    }
+
     private Engagement findActiveOrThrow(Long id) {
 
-        return engagementRepository.findById(id)
+        return engagementRepository
+                .findById(id)
                 .filter(Engagement::isActive)
                 .orElseThrow(() ->
                         new ResponseStatusException(

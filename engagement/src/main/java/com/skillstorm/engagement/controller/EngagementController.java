@@ -27,9 +27,7 @@ public class EngagementController {
 
     private final EngagementService engagementService;
 
-    public EngagementController(
-            EngagementService engagementService) {
-
+    public EngagementController(EngagementService engagementService) {
         this.engagementService = engagementService;
     }
 
@@ -40,9 +38,7 @@ public class EngagementController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(
-                        engagementService.createEngagement(request)
-                );
+                .body(engagementService.createEngagement(request));
     }
 
     @GetMapping
@@ -50,17 +46,15 @@ public class EngagementController {
             @AuthenticationPrincipal Jwt jwt) {
 
         if (isEngagementManager(jwt)) {
-
             return ResponseEntity.ok(
                     engagementService.getAllEngagements()
             );
         }
 
         return ResponseEntity.ok(
-                engagementService
-                        .getEngagementsForCurrentConsultant(
-                                jwt.getTokenValue()
-                        )
+                engagementService.getEngagementsForCurrentConsultant(
+                        jwt.getTokenValue()
+                )
         );
     }
 
@@ -70,18 +64,26 @@ public class EngagementController {
             @AuthenticationPrincipal Jwt jwt) {
 
         if (isEngagementManager(jwt)) {
-
             return ResponseEntity.ok(
                     engagementService.getEngagementById(id)
             );
         }
 
         return ResponseEntity.ok(
-                engagementService
-                        .getEngagementByIdForConsultant(
-                                id,
-                                jwt.getTokenValue()
-                        )
+                engagementService.getEngagementByIdForConsultant(
+                        id,
+                        jwt.getTokenValue()
+                )
+        );
+    }
+
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<EngagementResponse>> getByClient(
+            @PathVariable Long clientId) {
+
+        return ResponseEntity.ok(
+                engagementService.getEngagementsByClientId(clientId)
         );
     }
 
@@ -107,6 +109,16 @@ public class EngagementController {
         engagementService.deleteEngagement(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<EngagementResponse> cancel(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                engagementService.cancelEngagement(id)
+        );
     }
 
     private boolean isEngagementManager(Jwt jwt) {
