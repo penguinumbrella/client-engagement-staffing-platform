@@ -29,7 +29,6 @@ export class AssignEngagementForm implements OnInit {
   assigned = output<Assignment>();
 
   readonly engagementRoles = Object.values(EngagementRole);
-  readonly assignmentStatuses = Object.values(AssignmentStatus);
   readonly engagements = signal<Engagement[]>([]);
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);

@@ -3,7 +3,6 @@
     <app-kanban-column
       [column]="column"
       [connectedTo]="connectedLists"
-      [class.ml-auto]="column.status === cancelledStatus"
       [class.border-l]="column.status === cancelledStatus"
       [class.border-gray-200]="column.status === cancelledStatus"
       [class.pl-4]="column.status === cancelledStatus"

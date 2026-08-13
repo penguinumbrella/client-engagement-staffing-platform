@@ -64,18 +64,6 @@
         </label>
       </div>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
-        Status
-        <select
-          formControlName="status"
-          class="rounded border border-gray-300 px-2 py-1 text-sm"
-        >
-          @for (status of assignmentStatuses; track status) {
-            <option [value]="status">{{ status }}</option>
-          }
-        </select>
-      </label>
-
       @if (errorMessage()) {
         <p class="m-0 text-xs text-red-600">{{ errorMessage() }}</p>
       }

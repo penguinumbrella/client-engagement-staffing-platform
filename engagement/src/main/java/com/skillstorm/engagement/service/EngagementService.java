@@ -100,17 +100,13 @@ public class EngagementService {
     }
 
     /**
-     * Hard delete is reserved for engagements with zero staffing footprint, ever — anything with
-     * assignment history (even fully cancelled) had a real-world effect and must be cancelled
-     * instead so that history is preserved.
+     * Deleting an engagement unstaffs any remaining assignments (same cascade as cancellation)
+     * before the engagement itself is removed.
      */
     public void deleteEngagement(Long id) {
         Engagement engagement = findActiveOrThrow(id);
 
-        if (!staffingClient.getAssignmentHistory(id).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "This engagement has assignment history and cannot be deleted — cancel it instead");
-        }
+        staffingClient.cascadeEngagementCancelled(id);
 
         engagement.setActive(false);
         engagementRepository.save(engagement);
