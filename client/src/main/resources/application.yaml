@@ -1,4 +1,6 @@
 spring:
+    config:
+        import: optional:file:.env[.properties]
     application:
         name: client
     output:
@@ -27,6 +29,19 @@ eureka:
     client:
         fetch-registry: true
         register-with-eureka: true
+        registry-fetch-interval-seconds: 5
+    instance:
+        instance-id: ${spring.application.name}:${server.port}
+        leaseRenewalIntervalInSeconds: 10
+
+---
+spring:
+    config:
+        activate:
+            on-profile: default
+
+eureka:
+    client:
         service-url:
             default-zone: http://localhost:8761/eureka/
         registry-fetch-interval-seconds: 5

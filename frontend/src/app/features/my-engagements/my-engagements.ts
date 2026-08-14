@@ -42,7 +42,7 @@ export class MyEngagements {
       error: (err) => console.error('Failed to load consultants', err),
     });
 
-    this.clientService.getAllClients().subscribe({
+    this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
       error: (err) => console.error('Failed to load clients', err),
     });

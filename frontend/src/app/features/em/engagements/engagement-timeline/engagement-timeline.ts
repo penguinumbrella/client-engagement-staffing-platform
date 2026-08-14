@@ -56,7 +56,7 @@ export class EngagementTimeline {
   protected readonly pxPerDay = signal(DEFAULT_PX_PER_DAY);
 
   constructor() {
-    this.clientService.getAllClients().subscribe({
+    this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
       error: (err) => console.error('Failed to load clients', err),
     });

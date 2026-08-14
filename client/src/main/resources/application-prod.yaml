@@ -1,31 +1,11 @@
 spring:
-    application:
-        name: client
-    output:
-        ansi:
-            enabled: always
-    datasource:
-        url: ${DB_URL}
-        username: ${DB_USERNAME}
-        password: ${DB_PASSWORD}
-    jpa:
-        hibernate:
-            ddl-auto: update
-        show-sql: true
-        properties:
-            hibernate:
-                format_sql: true
-        defer-datasource-initialization: true
-    sql:
-        init:
-            mode: always
-
-server:
-    port: 8081
+    config:
+        activate:
+            on-profile: prod
 
 eureka:
     client:
-        fetch-registry: true
-        register-with-eureka: true
         service-url:
             default-zone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
+    instance:
+        prefer-ip-address: true
