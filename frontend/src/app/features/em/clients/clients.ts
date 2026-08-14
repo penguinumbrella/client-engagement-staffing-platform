@@ -101,7 +101,7 @@ export class Clients implements OnInit {
 
   private loadClients(): void {
     this.loading.set(true);
-    this.clientService.getAllClients().subscribe({
+    this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => {
         this.clients.set(page.content);
         this.loading.set(false);

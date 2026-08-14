@@ -75,7 +75,7 @@ class ClientServiceTest {
         when(clientRepo.findByIsActiveTrue(any(Pageable.class))).thenReturn(clientPage);
         when(clientMapper.toDto(activeClient)).thenReturn(clientResponse);
 
-        ResponseEntity<Page<ClientResponse>> result = clientService.getAllClients(0);
+        ResponseEntity<Page<ClientResponse>> result = clientService.getAllClients(0, 10);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(1, result.getBody().getTotalElements());

@@ -66,7 +66,7 @@ class ClientControllerTest {
     @Test
     void getAllClients_returnsOk() throws Exception {
         Page<ClientResponse> page = new PageImpl<>(List.of(clientResponse));
-        when(clientService.getAllClients(0)).thenReturn(ResponseEntity.ok(page));
+        when(clientService.getAllClients(0, 10)).thenReturn(ResponseEntity.ok(page));
 
         mockMvc.perform(get("/clients"))
                 .andExpect(status().isOk())
