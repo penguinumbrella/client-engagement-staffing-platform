@@ -12,5 +12,7 @@ public interface ConsultantRepository
 
     List<Consultant> findByActiveTrue();
 
+    Optional<Consultant> findByUserId(UUID userId);
+
     Optional<Consultant> findByUserIdAndActiveTrue(UUID userId);
 }

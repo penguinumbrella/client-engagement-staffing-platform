@@ -1,5 +1,5 @@
 -- Reset seed data on every startup so local/dev environments stay consistent
-TRUNCATE TABLE assignments, consultants RESTART IDENTITY CASCADE;
+--TRUNCATE TABLE assignments, consultants RESTART IDENTITY CASCADE;
 
 -- INSERT INTO consultants (name, title_role, primary_skill_area, user_id, is_active) VALUES
 -- ('Gina Vance', 'Senior Associate', 'Technology', 'user_gina_vance', TRUE),

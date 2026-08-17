@@ -17,7 +17,9 @@ spring:
                         - id: client
                           uri: lb://client
                           predicates:
-                              - Path=/clients,/clients/**
+                              - Path=/client/**
+                          filters:
+                              - StripPrefix=1
                         - id: engagement
                           uri: lb://engagement
                           predicates:

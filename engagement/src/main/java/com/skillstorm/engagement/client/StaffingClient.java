@@ -81,8 +81,9 @@ public class StaffingClient {
     }
 
     public void cascadeAssignmentStatus(
-            Long engagementId,
-            String engagementStatus) {
+        Long engagementId,
+        String engagementStatus,
+        String token){
 
         ServiceInstance instance =
                 loadBalancerClient.choose("staffing");
@@ -97,18 +98,22 @@ public class StaffingClient {
 
         try {
             restClient.patch()
-                    .uri(
-                            instance.getUri()
-                                    + "/api/assignments/engagement/{engagementId}/cascade-status",
-                            engagementId
-                    )
-                    .body(
-                            new CascadeAssignmentStatusRequest(
-                                    engagementStatus
-                            )
-                    )
-                    .retrieve()
-                    .toBodilessEntity();
+                .uri(
+                        instance.getUri()
+                                + "/api/assignments/engagement/{engagementId}/cascade-status",
+                        engagementId
+                )
+                .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + token
+                )
+                .body(
+                        new CascadeAssignmentStatusRequest(
+                                engagementStatus
+                        )
+                )
+                .retrieve()
+                .toBodilessEntity();
 
         } catch (RestClientException ex) {
             log.warn(
@@ -119,7 +124,7 @@ public class StaffingClient {
         }
     }
 
-    public void cascadeEngagementCancelled(Long engagementId) {
+    public void cascadeEngagementCancelled(Long engagementId, String token) {
 
         ServiceInstance instance =
                 loadBalancerClient.choose("staffing");
@@ -134,13 +139,17 @@ public class StaffingClient {
 
         try {
             restClient.delete()
-                    .uri(
-                            instance.getUri()
-                                    + "/api/assignments/engagement/{engagementId}",
-                            engagementId
-                    )
-                    .retrieve()
-                    .toBodilessEntity();
+                .uri(
+                        instance.getUri()
+                                + "/api/assignments/engagement/{engagementId}",
+                        engagementId
+                )
+                .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + token
+                )
+                .retrieve()
+                .toBodilessEntity();
 
         } catch (RestClientException ex) {
             log.warn(

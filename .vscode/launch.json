@@ -30,7 +30,7 @@
             "mainClass": "com.skillstorm.engagement.EngagementApplication",
             "projectName": "engagement",
             "args": "",
-            "envFile": "${workspaceFolder}/engagement/.env",
+            "envFile": "${workspaceFolder}/.env",
             "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=60203 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=engagement"
         },
         {
@@ -41,7 +41,7 @@
             "mainClass": "com.skillstorm.staffing.StaffingApplication",
             "projectName": "staffing",
             "args": "",
-            "envFile": "${workspaceFolder}/staffing/.env"
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "type": "java",

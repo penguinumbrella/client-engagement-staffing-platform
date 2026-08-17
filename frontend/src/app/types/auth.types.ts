@@ -10,6 +10,8 @@ export interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
+  titleRole: string;
+  primarySkillArea: string;
 }
 
 export type AuthUser = Omit<User, 'updatedAt'>;

@@ -4,11 +4,13 @@ import com.skillstorm.staffing.client.AuthClient;
 import com.skillstorm.staffing.dto.AuthUserResponse;
 import com.skillstorm.staffing.dto.ConsultantResponse;
 import com.skillstorm.staffing.dto.CreateConsultantRequest;
+import com.skillstorm.staffing.dto.ProvisionConsultantRequest;
 import com.skillstorm.staffing.dto.UpdateConsultantRequest;
 import com.skillstorm.staffing.model.Consultant;
 import com.skillstorm.staffing.repository.ConsultantRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -37,6 +39,14 @@ public class ConsultantService {
                         request.getEmail(),
                         token
                 );
+        
+        if (consultantRepository.findByUserId(authUser.id()).isPresent()) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "A consultant profile already exists for this user"
+                );
+        }
 
         if (!authUser.enabled()) {
                 throw new ResponseStatusException(
@@ -140,4 +150,29 @@ public class ConsultantService {
                         )
                 );
     }
+
+    @Transactional
+    public ConsultantResponse provisionConsultant(UUID userId, ProvisionConsultantRequest request) {
+
+        return consultantRepository
+                .findByUserId(userId)
+                .map(ConsultantResponse::from)
+                .orElseGet(() -> {
+
+                        Consultant consultant = new Consultant(
+                                request.firstName().trim()
+                                        + " "
+                                        + request.lastName().trim(),
+                                request.titleRole().trim(),
+                                request.primarySkillArea().getLabel(),
+                                userId
+                        );
+
+                        Consultant saved =
+                                consultantRepository.save(consultant);
+
+                        return ConsultantResponse.from(saved);
+                });
+    }
+
 }

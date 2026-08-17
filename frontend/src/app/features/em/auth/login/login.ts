@@ -70,10 +70,20 @@ export class Login {
 
         this.loading = false;
 
-        if (response.user.role === UserRole.ENGAGEMENT_MANAGER) {
-          this.router.navigate(['/em/clients']);
+        if (
+          response.user.role ===
+          UserRole.ENGAGEMENT_MANAGER
+        ) {
+
+          this.router.navigate([
+            '/em/clients'
+          ]);
+
         } else {
-          this.router.navigate(['/em/engagements']);
+
+          this.router.navigate([
+            '/my-engagements'
+          ]);
         }
       },
 

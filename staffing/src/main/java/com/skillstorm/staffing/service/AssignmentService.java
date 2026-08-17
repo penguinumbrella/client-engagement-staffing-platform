@@ -465,4 +465,50 @@ public class AssignmentService {
                     null;
         };
     }
+    public List<AssignmentResponse> getAssignmentsForUser(UUID userId) {
+
+        Consultant consultant =
+                consultantRepository
+                        .findByUserIdAndActiveTrue(userId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "No active consultant linked to authenticated user"
+                                )
+                        );
+
+        return assignmentRepository
+                .findByConsultantIdAndActiveTrue(
+                        consultant.getId()
+                )
+                .stream()
+                .map(assignment ->
+                        AssignmentResponse.from(
+                                assignment,
+                                consultant.getName()
+                        )
+                )
+                .toList();
+    }
+
+    public List<AssignmentResponse> getTeamForCurrentUser(UUID userId, Long engagementId) {
+
+        boolean assigned =
+                isUserAssignedToEngagement(
+                        userId,
+                        engagementId
+                );
+
+        if (!assigned) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "You are not assigned to this engagement"
+                );
+        }
+
+        return getAssignmentsByEngagement(
+                engagementId
+        );
+    }
 }

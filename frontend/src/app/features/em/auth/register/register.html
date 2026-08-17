@@ -1,4 +1,3 @@
-<p>register works!</p>
 <div class="auth-container">
 
   <div class="auth-card">
@@ -15,6 +14,7 @@
       (ngSubmit)="register()"
     >
 
+      <!-- FIRST NAME -->
       <div class="form-group">
 
         <label for="firstName">
@@ -39,6 +39,7 @@
       </div>
 
 
+      <!-- LAST NAME -->
       <div class="form-group">
 
         <label for="lastName">
@@ -63,6 +64,7 @@
       </div>
 
 
+      <!-- EMAIL -->
       <div class="form-group">
 
         <label for="email">
@@ -87,6 +89,65 @@
       </div>
 
 
+      <!-- TITLE / ROLE -->
+      <div class="form-group">
+
+        <label for="titleRole">
+          Title
+        </label>
+
+        <input
+          id="titleRole"
+          type="text"
+          formControlName="titleRole"
+          placeholder="Example: Associate"
+        >
+
+        @if (
+          registerForm.controls.titleRole.touched &&
+          registerForm.controls.titleRole.hasError('required')
+        ) {
+          <small class="error">
+            Title is required.
+          </small>
+        }
+
+      </div>
+
+
+      <!-- SKILL AREA -->
+      <div class="form-group">
+
+        <label for="primarySkillArea">
+          Primary Skill Area
+        </label>
+
+        <select
+          id="primarySkillArea"
+          formControlName="primarySkillArea"
+        >
+          <option value="">Select a skill area</option>
+          <option value="Audit">Audit</option>
+          <option value="Tax">Tax</option>
+          <option value="Risk">Risk</option>
+          <option value="Technology">Technology</option>
+          <option value="Strategy">Strategy</option>
+
+        </select>
+
+        @if (
+          registerForm.controls.primarySkillArea.touched &&
+          registerForm.controls.primarySkillArea.hasError('required')
+        ) {
+          <small class="error">
+            Primary skill area is required.
+          </small>
+        }
+
+      </div>
+
+
+      <!-- PASSWORD -->
       <div class="form-group">
 
         <label for="password">
@@ -129,6 +190,7 @@
       </div>
 
 
+      <!-- CONFIRM PASSWORD -->
       <div class="form-group">
 
         <label for="confirmPassword">
@@ -140,6 +202,15 @@
           type="password"
           formControlName="confirmPassword"
         >
+
+        @if (
+          registerForm.controls.confirmPassword.touched &&
+          registerForm.controls.confirmPassword.hasError('required')
+        ) {
+          <small class="error">
+            Confirm your password.
+          </small>
+        }
 
         @if (
           registerForm.controls.confirmPassword.touched &&
@@ -176,6 +247,7 @@
 
     <p>
       Already have an account?
+
       <a routerLink="/login">
         Sign in
       </a>

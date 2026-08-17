@@ -2,6 +2,7 @@ package com.skillstorm.staffing.controller;
 
 import com.skillstorm.staffing.dto.ConsultantResponse;
 import com.skillstorm.staffing.dto.CreateConsultantRequest;
+import com.skillstorm.staffing.dto.ProvisionConsultantRequest;
 import com.skillstorm.staffing.dto.UpdateConsultantRequest;
 import com.skillstorm.staffing.service.ConsultantService;
 import jakarta.validation.Valid;
@@ -96,5 +97,22 @@ public class ConsultantController {
         consultantService.deleteConsultant(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('CONSULTANT')")
+    @PostMapping("/provision")
+    public ResponseEntity<ConsultantResponse> provision(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody ProvisionConsultantRequest request) {
+
+        UUID userId =
+                UUID.fromString(jwt.getSubject());
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        consultantService.provisionConsultant(
+                                userId,
+                                request
+                        )
+                );
     }
 }

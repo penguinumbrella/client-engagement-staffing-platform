@@ -61,7 +61,7 @@ class ConsultantControllerTest {
         request.setTitleRole("Senior Consultant");
         request.setPrimarySkillArea(SkillArea.AUDIT);
 
-        when(consultantService.createConsultant(any(CreateConsultantRequest.class))).thenReturn(sampleResponse(1L));
+        when(consultantService.createConsultant(any(CreateConsultantRequest.class),"token")).thenReturn(sampleResponse(1L));
 
         mockMvc.perform(post("/api/consultants")
                         .contentType(MediaType.APPLICATION_JSON)

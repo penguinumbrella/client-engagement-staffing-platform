@@ -21,6 +21,26 @@
       </label>
 
       <label class="flex flex-col gap-1 text-xs text-gray-700">
+        Email
+
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="jane.doe@example.com"
+          class="rounded border border-gray-300 px-2 py-1 text-sm"
+        />
+
+        @if (
+          form.get('email')?.invalid &&
+          form.get('email')?.touched
+        ) {
+          <small class="p-error">
+            A valid email is required
+          </small>
+        }
+      </label>
+
+      <label class="flex flex-col gap-1 text-xs text-gray-700">
         Title / Role
         <input
           type="text"

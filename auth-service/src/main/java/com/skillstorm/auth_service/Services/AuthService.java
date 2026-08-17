@@ -15,12 +15,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.skillstorm.auth_service.Dtos.AuthResponse;
 import com.skillstorm.auth_service.Dtos.LoginRequest;
+import com.skillstorm.auth_service.Dtos.ProvisionConsultantRequest;
 import com.skillstorm.auth_service.Dtos.RegisterRequest;
 import com.skillstorm.auth_service.Dtos.UserResponse;
 import com.skillstorm.auth_service.Entities.User;
 import com.skillstorm.auth_service.Enums.UserRole;
 import com.skillstorm.auth_service.Exceptions.DuplicateEmailException;
 import com.skillstorm.auth_service.Repositories.UserRepository;
+import com.skillstorm.auth_service.clients.StaffingClient;
 
 @Service
 public class AuthService {
@@ -29,17 +31,20 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final StaffingClient staffingClient;
 
     public AuthService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            AuthenticationManager authenticationManager,
-            JwtService jwtService) {
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        AuthenticationManager authenticationManager,
+        JwtService jwtService,
+        StaffingClient staffingClient) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.staffingClient = staffingClient;
     }
 
     @Transactional
@@ -59,9 +64,23 @@ public class AuthService {
                 passwordHash,
                 UserRole.CONSULTANT);
 
-        User savedUser = userRepository.save(user);
+        User savedUser =
+        userRepository.save(user);
 
-        return createAuthResponse(savedUser);
+        AuthResponse authResponse =
+                createAuthResponse(savedUser);
+
+        staffingClient.provisionConsultant(
+                new ProvisionConsultantRequest(
+                        savedUser.getFirstName(),
+                        savedUser.getLastName(),
+                        request.titleRole(),
+                        request.primarySkillArea()
+                ),
+                authResponse.accessToken()
+        );
+
+        return authResponse;
     }
 
     @Transactional(readOnly = true)

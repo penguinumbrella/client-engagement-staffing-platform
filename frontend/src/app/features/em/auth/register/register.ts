@@ -6,27 +6,39 @@ import {
   ValidationErrors,
   Validators
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+
+import {
+  Router,
+  RouterLink
+} from '@angular/router';
 
 import { Auth } from '../auth';
 
+
 @Component({
   selector: 'app-register',
+
   imports: [
     ReactiveFormsModule,
     RouterLink
   ],
+
   templateUrl: './register.html',
   styleUrl: './register.css'
 })
 export class Register {
 
   private readonly fb = inject(FormBuilder);
+
   private readonly auth = inject(Auth);
+
   private readonly router = inject(Router);
 
+
   loading = false;
+
   errorMessage = '';
+
 
   registerForm = this.fb.nonNullable.group(
     {
@@ -53,6 +65,21 @@ export class Register {
           Validators.required,
           Validators.email,
           Validators.maxLength(254)
+        ]
+      ],
+
+      titleRole: [
+        '',
+        [
+          Validators.required,
+          Validators.maxLength(100)
+        ]
+      ],
+
+      primarySkillArea: [
+        '',
+        [
+          Validators.required
         ]
       ],
 
@@ -89,9 +116,11 @@ export class Register {
     const confirmPassword =
       control.get('confirmPassword')?.value;
 
+
     if (password === confirmPassword) {
       return null;
     }
+
 
     return {
       passwordMismatch: true
@@ -102,7 +131,9 @@ export class Register {
   register(): void {
 
     if (this.registerForm.invalid) {
+
       this.registerForm.markAllAsTouched();
+
       return;
     }
 
@@ -111,19 +142,31 @@ export class Register {
       firstName,
       lastName,
       email,
-      password
+      password,
+      titleRole,
+      primarySkillArea
     } = this.registerForm.getRawValue();
 
 
     this.loading = true;
+
     this.errorMessage = '';
 
 
     this.auth.register({
+
       firstName,
+
       lastName,
+
       email,
-      password
+
+      password,
+
+      titleRole,
+
+      primarySkillArea
+
     }).subscribe({
 
       next: response => {
@@ -138,12 +181,17 @@ export class Register {
 
         this.loading = false;
 
-        this.router.navigate(['/']);
+
+        this.router.navigate([
+          '/my-engagements'
+        ]);
       },
+
 
       error: error => {
 
         this.loading = false;
+
 
         if (error.status === 409) {
 
@@ -155,6 +203,11 @@ export class Register {
           this.errorMessage =
             'Please check the information you entered.';
 
+        } else if (error.status === 503) {
+
+          this.errorMessage =
+            'The staffing service is currently unavailable. Please try again.';
+
         } else {
 
           this.errorMessage =
@@ -162,6 +215,7 @@ export class Register {
 
         }
       }
+
     });
   }
 }

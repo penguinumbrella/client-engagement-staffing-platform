@@ -17,25 +17,35 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
+
         http
             .csrf(csrf -> csrf.disable())
 
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                session.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS
+                )
             )
 
             .authorizeHttpRequests(auth -> auth
 
-                // Health/ERROR endpoint
-                .requestMatchers("/actuator/health/**","/error")
+                /*
+                 * PUBLIC
+                 */
+                .requestMatchers(
+                    "/actuator/health/**",
+                    "/error"
+                )
                     .permitAll()
+
 
                 /*
                  * CONSULTANTS
                  *
-                 * All authenticated users can view the consultant roster
-                 * and individual consultant records.
+                 * Any authenticated user can view consultants.
                  */
                 .requestMatchers(
                     HttpMethod.GET,
@@ -44,8 +54,21 @@ public class SecurityConfig {
                 )
                     .authenticated()
 
+
                 /*
-                 * Only Engagement Managers can create consultants.
+                 * A newly registered consultant can provision
+                 * their own consultant profile.
+                 */
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/api/consultants/provision"
+                )
+                    .hasRole("CONSULTANT")
+
+
+                /*
+                 * Only Engagement Managers can manually
+                 * create consultant records.
                  */
                 .requestMatchers(
                     HttpMethod.POST,
@@ -53,6 +76,7 @@ public class SecurityConfig {
                     "/api/consultants/**"
                 )
                     .hasRole("ENGAGEMENT_MANAGER")
+
 
                 /*
                  * Only Engagement Managers can update consultants.
@@ -63,6 +87,7 @@ public class SecurityConfig {
                 )
                     .hasRole("ENGAGEMENT_MANAGER")
 
+
                 /*
                  * Only Engagement Managers can delete consultants.
                  */
@@ -72,21 +97,51 @@ public class SecurityConfig {
                 )
                     .hasRole("ENGAGEMENT_MANAGER")
 
+
                 /*
-                 * ASSIGNMENTS
+                 * ASSIGNMENTS - CURRENT USER
                  *
-                 * Only Engagement Managers can currently look up arbitrary
-                 * consultant or engagement assignments.
+                 * Consultants need access to their own assignments,
+                 * engagement IDs, and team lookup endpoints.
                  */
                 .requestMatchers(
+                    "/api/assignments/me",
                     "/api/assignments/me/**"
-                ).authenticated()
+                )
+                    .authenticated()
+
+
+                /*
+                 * ASSIGNMENTS - MANAGER LOOKUPS
+                 *
+                 * Arbitrary consultant/engagement assignment
+                 * lookup is manager-only.
+                 */
                 .requestMatchers(
                     HttpMethod.GET,
                     "/api/assignments/consultant/**",
                     "/api/assignments/engagement/**"
                 )
                     .hasRole("ENGAGEMENT_MANAGER")
+
+
+                /*
+                 * ASSIGNMENTS - STATUS UPDATES
+                 *
+                 * Includes:
+                 *
+                 * PATCH /api/assignments/{id}/status
+                 *
+                 * PATCH
+                 * /api/assignments/engagement/{engagementId}/cascade-status
+                 */
+                .requestMatchers(
+                    HttpMethod.PATCH,
+                    "/api/assignments/*/status",
+                    "/api/assignments/engagement/*/cascade-status"
+                )
+                    .hasRole("ENGAGEMENT_MANAGER")
+
 
                 /*
                  * Only Engagement Managers can create assignments.
@@ -98,8 +153,10 @@ public class SecurityConfig {
                 )
                     .hasRole("ENGAGEMENT_MANAGER")
 
+
                 /*
-                 * Only Engagement Managers can remove assignments.
+                 * Only Engagement Managers can remove assignments
+                 * or cascade engagement removal.
                  */
                 .requestMatchers(
                     HttpMethod.DELETE,
@@ -107,7 +164,10 @@ public class SecurityConfig {
                 )
                     .hasRole("ENGAGEMENT_MANAGER")
 
-                // Anything we forgot to explicitly allow is blocked.
+
+                /*
+                 * Block anything we did not explicitly allow.
+                 */
                 .anyRequest()
                     .denyAll()
             )
@@ -123,14 +183,30 @@ public class SecurityConfig {
         return http.build();
     }
 
+
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
 
         JwtGrantedAuthoritiesConverter authoritiesConverter =
             new JwtGrantedAuthoritiesConverter();
 
-        authoritiesConverter.setAuthoritiesClaimName("roles");
-        authoritiesConverter.setAuthorityPrefix("ROLE_");
+        /*
+         * JWT:
+         *
+         * "roles": ["CONSULTANT"]
+         *
+         * becomes:
+         *
+         * ROLE_CONSULTANT
+         */
+        authoritiesConverter.setAuthoritiesClaimName(
+            "roles"
+        );
+
+        authoritiesConverter.setAuthorityPrefix(
+            "ROLE_"
+        );
+
 
         JwtAuthenticationConverter converter =
             new JwtAuthenticationConverter();

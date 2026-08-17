@@ -95,6 +95,17 @@ public class AssignmentController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<List<AssignmentResponse>> getMine(@AuthenticationPrincipal Jwt jwt) {
+
+        UUID userId =
+                UUID.fromString(jwt.getSubject());
+
+        return ResponseEntity.ok(
+                assignmentService.getAssignmentsForUser(userId)
+        );
+    }
+
     /*
      * Consultant-specific endpoint.
      * Uses the JWT subject UUID to find the logged-in consultant's
@@ -178,5 +189,24 @@ public class AssignmentController {
         );
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me/engagements/{engagementId}/team")
+    public ResponseEntity<List<AssignmentResponse>> getMyEngagementTeam(
+        @PathVariable Long engagementId,
+        @AuthenticationPrincipal Jwt jwt) {
+
+        UUID userId =
+                UUID.fromString(
+                        jwt.getSubject()
+                );
+
+        return ResponseEntity.ok(
+                assignmentService
+                        .getTeamForCurrentUser(
+                                userId,
+                                engagementId
+                        )
+        );
     }
 }

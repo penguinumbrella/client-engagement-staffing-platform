@@ -1,6 +1,6 @@
-package com.skillstorm.staffing.client;
+package com.skillstorm.auth_service.clients;
 
-import com.skillstorm.staffing.dto.AuthUserResponse;
+import com.skillstorm.auth_service.Dtos.ProvisionConsultantRequest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.http.HttpHeaders;
@@ -10,12 +10,12 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
-public class AuthClient {
+public class StaffingClient {
 
     private final RestClient restClient;
     private final LoadBalancerClient loadBalancerClient;
 
-    public AuthClient(
+    public StaffingClient(
             RestClient.Builder builder,
             LoadBalancerClient loadBalancerClient) {
 
@@ -23,30 +23,32 @@ public class AuthClient {
         this.loadBalancerClient = loadBalancerClient;
     }
 
-    public AuthUserResponse getUserByEmail(String email, String token) {
+    public void provisionConsultant(
+            ProvisionConsultantRequest request,
+            String token) {
 
         ServiceInstance instance =
-                loadBalancerClient.choose("auth-service");
+                loadBalancerClient.choose("staffing");
 
         if (instance == null) {
-                throw new ResponseStatusException(
-                        HttpStatus.SERVICE_UNAVAILABLE,
-                        "Auth service is not available"
-                );
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Staffing service is not available"
+            );
         }
 
-        return restClient
-                .get()
+        restClient
+                .post()
                 .uri(
                         instance.getUri()
-                                + "/api/users/by-email?email={email}",
-                        email
+                                + "/api/consultants/provision"
                 )
                 .header(
                         HttpHeaders.AUTHORIZATION,
                         "Bearer " + token
                 )
+                .body(request)
                 .retrieve()
-                .body(AuthUserResponse.class);
+                .toBodilessEntity();
     }
 }
