@@ -45,7 +45,7 @@ class EngagementClientTest {
     void engagementExists_throwsServiceUnavailableWhenNoInstanceAvailable() {
         when(loadBalancerClient.choose(eq("engagement"))).thenReturn(null);
 
-        assertThatThrownBy(() -> engagementClient.engagementExists(1L))
+        assertThatThrownBy(() -> engagementClient.engagementExists(1L,"test"))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Engagement service is not available");
     }
@@ -63,7 +63,7 @@ class EngagementClientTest {
                 "engagement-1", "engagement", "localhost", server.getAddress().getPort(), false);
         when(loadBalancerClient.choose(eq("engagement"))).thenReturn(instance);
 
-        assertThat(engagementClient.engagementExists(1L)).isTrue();
+        assertThat(engagementClient.engagementExists(1L,"test")).isTrue();
     }
 
     @Test
@@ -79,7 +79,7 @@ class EngagementClientTest {
                 "engagement-1", "engagement", "localhost", server.getAddress().getPort(), false);
         when(loadBalancerClient.choose(eq("engagement"))).thenReturn(instance);
 
-        assertThat(engagementClient.engagementExists(99L)).isFalse();
+        assertThat(engagementClient.engagementExists(99L,"test")).isFalse();
     }
 
     @Test
@@ -87,7 +87,7 @@ class EngagementClientTest {
         ServiceInstance instance = new DefaultServiceInstance("engagement-1", "engagement", "localhost", 1, false);
         when(loadBalancerClient.choose(eq("engagement"))).thenReturn(instance);
 
-        assertThatThrownBy(() -> engagementClient.engagementExists(1L))
+        assertThatThrownBy(() -> engagementClient.engagementExists(1L,"test"))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Unable to reach engagement service");
     }

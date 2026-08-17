@@ -1,19 +1,6 @@
 <div class="mx-auto max-w-4xl p-6">
   <div class="mb-6 flex items-center justify-between gap-4">
     <h2 class="m-0 text-lg font-semibold text-gray-800">My Engagements</h2>
-
-    <label class="flex items-center gap-2 text-xs font-medium text-gray-500">
-      <span class="whitespace-nowrap">Viewing as (temp, until login is wired up):</span>
-      <select
-        class="rounded-md border border-gray-200 px-2 py-1.5 text-sm text-gray-800"
-        [ngModel]="currentConsultant.currentId()"
-        (ngModelChange)="currentConsultant.setCurrent($event)"
-      >
-        @for (c of currentConsultant.all(); track c.id) {
-          <option [ngValue]="c.id">{{ c.name }}</option>
-        }
-      </select>
-    </label>
   </div>
 
   @if (loading()) {

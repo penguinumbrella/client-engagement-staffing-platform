@@ -1,14 +1,17 @@
 spring:
     application:
         name: engagement
+
     output:
         ansi:
             enabled: always
+
     datasource:
-        url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:engagement_db}
+        url: ${ENGAGEMENT_DB_URL}
         username: ${DB_USERNAME:postgres}
         password: ${DB_PASSWORD:postgres}
         driver-class-name: org.postgresql.Driver
+
     jpa:
         hibernate:
             ddl-auto: none
@@ -16,9 +19,19 @@ spring:
         properties:
             hibernate:
                 format_sql: true
+
     sql:
         init:
             mode: ${SQL_INIT_MODE:always}
+
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    public-key-location: classpath:keys/public.pem
+
+    config:
+        import: optional:file:.env[.properties]
 
 server:
     port: ${SERVER_PORT:${PORT:8082}}
@@ -30,6 +43,7 @@ eureka:
         service-url:
             default-zone: ${EUREKA_URL:http://localhost:8761/eureka/}
         registry-fetch-interval-seconds: 5
+
     instance:
         prefer-ip-address: true
         instance-id: ${spring.application.name}:${server.port}

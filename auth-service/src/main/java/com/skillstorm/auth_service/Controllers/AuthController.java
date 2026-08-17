@@ -1,5 +1,7 @@
 package com.skillstorm.auth_service.Controllers;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -52,15 +54,13 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(
-            @AuthenticationPrincipal Jwt jwt) {
+                @AuthenticationPrincipal Jwt jwt) {
 
-        /*
-         * JwtService placed the user's email in the JWT subject.
-         * jwt.getSubject() therefore returns that email.
-         */
-        UserResponse response =
-                authService.getCurrentUser(jwt.getSubject());
+        UUID userId =
+                UUID.fromString(jwt.getSubject());
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                authService.getCurrentUser(userId)
+        );
     }
 }

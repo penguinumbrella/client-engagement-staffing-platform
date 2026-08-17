@@ -2,6 +2,7 @@ package com.skillstorm.client.controllers;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,18 +40,28 @@ public class ClientController {
         return clientService.getClientById(id);
     }
 
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @PostMapping
-    public ResponseEntity<ClientResponse> createClient(@Valid @RequestBody ClientRequest dto) {
+    public ResponseEntity<ClientResponse> createClient(
+            @Valid @RequestBody ClientRequest dto) {
+
         return clientService.createClient(dto);
     }
 
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @PutMapping("/{id}")
-    public ResponseEntity<ClientResponse> updateClient(@PathVariable Long id, @RequestBody ClientRequest dto) {
+    public ResponseEntity<ClientResponse> updateClient(
+            @PathVariable Long id,
+            @RequestBody ClientRequest dto) {
+
         return clientService.updateClient(id, dto);
     }
 
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteClient(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteClient(
+            @PathVariable Long id) {
+
         return clientService.deleteClient(id);
     }
 

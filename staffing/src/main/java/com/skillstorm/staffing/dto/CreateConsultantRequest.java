@@ -9,6 +9,9 @@ public class CreateConsultantRequest {
     @NotBlank(message = "name is required")
     private String name;
 
+    @NotBlank(message = "email is required")
+    private String email;
+
     @NotBlank(message = "titleRole is required")
     private String titleRole;
 
@@ -19,8 +22,16 @@ public class CreateConsultantRequest {
         return name;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getTitleRole() {

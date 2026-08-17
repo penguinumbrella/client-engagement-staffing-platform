@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS consultants (
     name VARCHAR(255) NOT NULL,
     title_role VARCHAR(100) NOT NULL,
     primary_skill_area VARCHAR(100) NOT NULL, -- Audit, Tax, Risk, Technology, Strategy
-    user_id VARCHAR(255) UNIQUE, -- Links to the Spring Security user login account
+    user_id UUID UNIQUE NOT NULL, -- Links to the Spring Security user login account
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

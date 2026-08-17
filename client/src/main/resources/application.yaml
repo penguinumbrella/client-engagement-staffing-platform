@@ -1,13 +1,11 @@
 spring:
-    config:
-        import: optional:file:.env[.properties]
     application:
         name: client
     output:
         ansi:
             enabled: always
     datasource:
-        url: ${DB_URL}
+        url: ${CLIENT_DB_URL}
         username: ${DB_USERNAME}
         password: ${DB_PASSWORD}
     jpa:
@@ -21,6 +19,13 @@ spring:
     sql:
         init:
             mode: always
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    public-key-location: classpath:keys/public.pem
+    config:
+        import: optional:file:.env[.properties]
 
 server:
     port: 8081

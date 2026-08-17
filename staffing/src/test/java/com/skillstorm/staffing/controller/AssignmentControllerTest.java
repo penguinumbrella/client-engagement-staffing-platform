@@ -68,7 +68,7 @@ class AssignmentControllerTest {
         request.setAssignmentStartDate(LocalDate.of(2026, 1, 1));
         request.setAssignmentEndDate(LocalDate.of(2026, 6, 1));
 
-        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class))).thenReturn(sampleResponse(1L));
+        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class),"token")).thenReturn(sampleResponse(1L));
 
         mockMvc.perform(post("/api/assignments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -94,7 +94,7 @@ class AssignmentControllerTest {
         request.setAssignmentStartDate(LocalDate.of(2026, 1, 1));
         request.setAssignmentEndDate(LocalDate.of(2026, 6, 1));
 
-        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class)))
+        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class),"token"))
                 .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Consultant 1 is already staffed on engagement 10"));
 
         mockMvc.perform(post("/api/assignments")

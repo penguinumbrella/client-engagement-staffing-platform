@@ -4,6 +4,11 @@ spring:
     output:
         ansi:
             enabled: always
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    public-key-location: classpath:keys/public.pem
     cloud:
         gateway:
             server:
@@ -25,6 +30,12 @@ spring:
                           uri: lb://staffing
                           predicates:
                               - Path=/staffing/**
+                          filters:
+                              - StripPrefix=1
+                        - id: auth
+                          uri: lb://auth-service
+                          predicates:
+                            - Path=/auth/**
                           filters:
                               - StripPrefix=1
 

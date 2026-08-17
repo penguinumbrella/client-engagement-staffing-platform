@@ -1,5 +1,6 @@
 package com.skillstorm.engagement.service;
 
+import com.skillstorm.engagement.client.ClientClient;
 import com.skillstorm.engagement.client.StaffingClient;
 import com.skillstorm.engagement.dto.CreateEngagementRequest;
 import com.skillstorm.engagement.dto.EngagementResponse;
@@ -7,7 +8,9 @@ import com.skillstorm.engagement.dto.UpdateEngagementRequest;
 import com.skillstorm.engagement.enums.EngagementStatus;
 import com.skillstorm.engagement.model.Engagement;
 import com.skillstorm.engagement.repository.EngagementRepository;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,16 +22,43 @@ public class EngagementService {
 
     private final EngagementRepository engagementRepository;
     private final StaffingClient staffingClient;
+    private final ClientClient clientClient;
 
-    public EngagementService(EngagementRepository engagementRepository, StaffingClient staffingClient) {
+    public EngagementService(
+            EngagementRepository engagementRepository,
+            StaffingClient staffingClient,
+            ClientClient clientClient) {
+
         this.engagementRepository = engagementRepository;
         this.staffingClient = staffingClient;
+        this.clientClient = clientClient;
     }
 
-    public EngagementResponse createEngagement(CreateEngagementRequest request) {
-        validateTimeline(request.getStartDate(), request.getTargetEndDate());
 
-        EngagementStatus status = request.getStatus() != null ? request.getStatus() : EngagementStatus.PLANNED;
+    /*
+     * CREATE
+     *
+     * Before saving the engagement, confirm that the
+     * referenced client actually exists.
+     */
+    public EngagementResponse createEngagement(
+            CreateEngagementRequest request,
+            String token) {
+
+        clientClient.validateClientExists(
+                request.getClientId(),
+                token
+        );
+
+        validateTimeline(
+                request.getStartDate(),
+                request.getTargetEndDate()
+        );
+
+        EngagementStatus status =
+                request.getStatus() != null
+                        ? request.getStatus()
+                        : EngagementStatus.PLANNED;
 
         Engagement engagement = new Engagement(
                 request.getEngagementName(),
@@ -38,110 +68,372 @@ public class EngagementService {
                 request.getTargetEndDate(),
                 status.getLabel()
         );
-        engagement.setSummary(request.getSummary());
 
-        return EngagementResponse.from(engagementRepository.save(engagement));
+        engagement.setSummary(
+                request.getSummary()
+        );
+
+        Engagement saved =
+                engagementRepository.save(engagement);
+
+        return EngagementResponse.from(saved);
     }
 
+
+    /*
+     * MANAGER:
+     * View every active engagement.
+     */
     public List<EngagementResponse> getAllEngagements() {
-        return engagementRepository.findByActiveTrue().stream()
+
+        return engagementRepository
+                .findByActiveTrue()
+                .stream()
                 .map(EngagementResponse::from)
                 .toList();
     }
 
-    public EngagementResponse getEngagementById(Long id) {
-        return EngagementResponse.from(findActiveOrThrow(id));
-    }
 
-    public List<EngagementResponse> getEngagementsByClientId(Long clientId) {
-        return engagementRepository.findByClientIdAndActiveTrue(clientId).stream()
+    /*
+     * CONSULTANT:
+     * View only engagements assigned to the
+     * currently authenticated consultant.
+     */
+    public List<EngagementResponse> getEngagementsForCurrentConsultant(
+            String token) {
+
+        List<Long> engagementIds =
+                staffingClient.getCurrentUserEngagementIds(
+                        token
+                );
+
+        if (engagementIds.isEmpty()) {
+            return List.of();
+        }
+
+        return engagementRepository
+                .findAllById(engagementIds)
+                .stream()
+                .filter(Engagement::isActive)
                 .map(EngagementResponse::from)
                 .toList();
     }
 
-    public EngagementResponse updateEngagement(Long id, UpdateEngagementRequest request) {
-        Engagement engagement = findActiveOrThrow(id);
+
+    /*
+     * MANAGER:
+     * Get any active engagement by ID.
+     */
+    public EngagementResponse getEngagementById(
+            Long id) {
+
+        return EngagementResponse.from(
+                findActiveOrThrow(id)
+        );
+    }
+
+
+    /*
+     * CONSULTANT:
+     * Can only access an engagement if Staffing
+     * confirms that the current user is assigned to it.
+     */
+    public EngagementResponse getEngagementByIdForConsultant(
+            Long engagementId,
+            String token) {
+
+        boolean assigned =
+                staffingClient.isCurrentUserAssigned(
+                        engagementId,
+                        token
+                );
+
+        if (!assigned) {
+
+            throw new AccessDeniedException(
+                    "You are not assigned to this engagement"
+            );
+        }
+
+        return getEngagementById(
+                engagementId
+        );
+    }
+
+
+    /*
+     * MANAGER:
+     * Get active engagements belonging to a client.
+     */
+    public List<EngagementResponse> getEngagementsByClientId(
+            Long clientId) {
+
+        return engagementRepository
+                .findByClientIdAndActiveTrue(clientId)
+                .stream()
+                .map(EngagementResponse::from)
+                .toList();
+    }
+
+
+    /*
+     * UPDATE
+     *
+     * If the engagement status changes, tell Staffing
+     * so its assignments can be updated as well.
+     */
+    public EngagementResponse updateEngagement(
+            Long id,
+            UpdateEngagementRequest request,
+            String token) {
+
+        Engagement engagement =
+                findActiveOrThrow(id);
+
 
         if (request.getEngagementName() != null) {
-            engagement.setEngagementName(request.getEngagementName());
+
+            engagement.setEngagementName(
+                    request.getEngagementName()
+            );
         }
+
+
         if (request.getEngagementType() != null) {
-            engagement.setEngagementType(request.getEngagementType().getLabel());
+
+            engagement.setEngagementType(
+                    request
+                            .getEngagementType()
+                            .getLabel()
+            );
         }
+
+
         if (request.getSummary() != null) {
-            engagement.setSummary(request.getSummary());
-        }
-        if (request.getStatus() == EngagementStatus.CANCELLED) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Use the cancel endpoint to cancel an engagement, not a status update");
+
+            engagement.setSummary(
+                    request.getSummary()
+            );
         }
 
-        boolean statusChanged = request.getStatus() != null
-                && !request.getStatus().getLabel().equals(engagement.getStatus());
+
+        /*
+         * Cancellation must use the dedicated
+         * cancellation endpoint.
+         */
+        if (
+                request.getStatus()
+                        == EngagementStatus.CANCELLED
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Use the cancel endpoint to cancel an engagement, not a status update"
+            );
+        }
+
+
+        boolean statusChanged =
+                request.getStatus() != null
+                        &&
+                !request
+                        .getStatus()
+                        .getLabel()
+                        .equals(
+                                engagement.getStatus()
+                        );
+
+
         if (request.getStatus() != null) {
-            engagement.setStatus(request.getStatus().getLabel());
+
+            engagement.setStatus(
+                    request
+                            .getStatus()
+                            .getLabel()
+            );
         }
+
+
         if (request.getStartDate() != null) {
-            engagement.setStartDate(request.getStartDate());
+
+            engagement.setStartDate(
+                    request.getStartDate()
+            );
         }
+
+
         if (request.getTargetEndDate() != null) {
-            engagement.setTargetEndDate(request.getTargetEndDate());
+
+            engagement.setTargetEndDate(
+                    request.getTargetEndDate()
+            );
         }
 
-        validateTimeline(engagement.getStartDate(), engagement.getTargetEndDate());
 
-        Engagement saved = engagementRepository.save(engagement);
+        validateTimeline(
+                engagement.getStartDate(),
+                engagement.getTargetEndDate()
+        );
 
+
+        Engagement saved =
+                engagementRepository.save(
+                        engagement
+                );
+
+
+        /*
+         * Forward the same JWT received from the user
+         * to Staffing.
+         */
         if (statusChanged) {
-            staffingClient.cascadeAssignmentStatus(saved.getId(), saved.getStatus());
+
+            staffingClient.cascadeAssignmentStatus(
+                    saved.getId(),
+                    saved.getStatus(),
+                    token
+            );
         }
 
-        return EngagementResponse.from(saved);
+
+        return EngagementResponse.from(
+                saved
+        );
     }
 
-    /**
-     * Deleting an engagement unstaffs any remaining assignments (same cascade as cancellation)
-     * before the engagement itself is removed.
-     */
-    public void deleteEngagement(Long id) {
-        Engagement engagement = findActiveOrThrow(id);
 
-        staffingClient.cascadeEngagementCancelled(id);
+    /*
+     * DELETE
+     *
+     * First remove/cancel remaining staffing assignments,
+     * then soft-delete the engagement.
+     */
+    public void deleteEngagement(
+            Long id,
+            String token) {
+
+        Engagement engagement =
+                findActiveOrThrow(id);
+
+
+        staffingClient.cascadeEngagementCancelled(
+                id,
+                token
+        );
+
 
         engagement.setActive(false);
-        engagementRepository.save(engagement);
+
+
+        engagementRepository.save(
+                engagement
+        );
     }
 
-    /**
-     * Cancellation is the everyday "this isn't happening" action — available on any engagement
-     * that isn't already finished, keeps the record (and its history) intact, and cascades a
-     * cancel/deactivate to any remaining assignments.
-     */
-    public EngagementResponse cancelEngagement(Long id) {
-        Engagement engagement = findActiveOrThrow(id);
 
-        if (EngagementStatus.COMPLETED.getLabel().equals(engagement.getStatus())
-                || EngagementStatus.CANCELLED.getLabel().equals(engagement.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only active engagements can be cancelled");
+    /*
+     * CANCEL
+     *
+     * Keep the engagement in the database but mark
+     * it cancelled and deactivate its assignments.
+     */
+    public EngagementResponse cancelEngagement(
+            Long id,
+            String token) {
+
+        Engagement engagement =
+                findActiveOrThrow(id);
+
+
+        if (
+                EngagementStatus.COMPLETED
+                        .getLabel()
+                        .equals(
+                                engagement.getStatus()
+                        )
+                ||
+                EngagementStatus.CANCELLED
+                        .getLabel()
+                        .equals(
+                                engagement.getStatus()
+                        )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Only active engagements can be cancelled"
+            );
         }
 
-        engagement.setStatus(EngagementStatus.CANCELLED.getLabel());
-        Engagement saved = engagementRepository.save(engagement);
 
-        staffingClient.cascadeEngagementCancelled(saved.getId());
+        engagement.setStatus(
+                EngagementStatus.CANCELLED
+                        .getLabel()
+        );
 
-        return EngagementResponse.from(saved);
+
+        Engagement saved =
+                engagementRepository.save(
+                        engagement
+                );
+
+
+        staffingClient.cascadeEngagementCancelled(
+                saved.getId(),
+                token
+        );
+
+
+        return EngagementResponse.from(
+                saved
+        );
     }
 
-    private Engagement findActiveOrThrow(Long id) {
-        return engagementRepository.findById(id)
-                .filter(Engagement::isActive)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Engagement " + id + " not found"));
+
+    /*
+     * Find only active engagements.
+     */
+    private Engagement findActiveOrThrow(
+            Long id) {
+
+        return engagementRepository
+                .findById(id)
+                .filter(
+                        Engagement::isActive
+                )
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Engagement "
+                                        + id
+                                        + " not found"
+                        )
+                );
     }
 
-    private void validateTimeline(LocalDate startDate, LocalDate targetEndDate) {
-        if (startDate.isAfter(targetEndDate)) {
-            throw new IllegalArgumentException("startDate must not be after targetEndDate");
+
+    /*
+     * Ensure the engagement ends on or after
+     * its start date.
+     */
+    private void validateTimeline(
+            LocalDate startDate,
+            LocalDate targetEndDate) {
+
+        if (
+                startDate != null
+                &&
+                targetEndDate != null
+                &&
+                startDate.isAfter(
+                        targetEndDate
+                )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "startDate must not be after targetEndDate"
+            );
         }
     }
 }
