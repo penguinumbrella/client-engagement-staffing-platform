@@ -43,5 +43,5 @@ spring:
 eureka:
     client:
         service-url:
-            default-zone: http://localhost:8761/eureka/
+            defaultZone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
         registry-fetch-interval-seconds: 5

@@ -28,4 +28,4 @@ eureka:
         fetch-registry: true
         register-with-eureka: true
         service-url:
-            default-zone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
+            defaultZone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/

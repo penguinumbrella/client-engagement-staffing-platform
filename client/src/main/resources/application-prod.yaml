@@ -6,6 +6,6 @@ spring:
 eureka:
     client:
         service-url:
-            default-zone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
+            defaultZone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
     instance:
         prefer-ip-address: true

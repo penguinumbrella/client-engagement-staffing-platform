@@ -1,4 +1,6 @@
 spring:
+    config:
+        import: optional:file:.env[.properties]
     application:
         name: staffing
     output:
@@ -28,6 +30,6 @@ eureka:
         fetch-registry: true
         register-with-eureka: true
         service-url:
-            default-zone: http://localhost:8761/eureka/
+            defaultZone: http://localhost:8761/eureka/
         registry-fetch-interval-seconds: 5
 
