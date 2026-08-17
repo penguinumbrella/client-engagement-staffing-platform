@@ -24,7 +24,6 @@ public class ClientService {
     private final ClientRepository clientRepo;
     private final ClientMapper clientMapper;
     private final EngagementClient engagementClient;
-    private static final int PAGE_SIZE = 10;
 
     public ClientService(ClientRepository clientRepo, ClientMapper clientMapper, EngagementClient engagementClient) {
         this.clientRepo = clientRepo;
@@ -32,8 +31,8 @@ public class ClientService {
         this.engagementClient = engagementClient;
     }
 
-    public ResponseEntity<Page<ClientResponse>> getAllClients(int page) {
-        Pageable pages = PageRequest.of(page, PAGE_SIZE);
+    public ResponseEntity<Page<ClientResponse>> getAllClients(int page, int size) {
+        Pageable pages = PageRequest.of(page, size);
 
         return ResponseEntity.ok(this.clientRepo.findByIsActiveTrue(pages).map(clientMapper::toDto));
     }

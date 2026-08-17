@@ -17,33 +17,41 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-            List.of("http://localhost:4200")
+                List.of(
+                        "http://localhost:4200",
+                        "https://d1r0oi9vzejxs3.cloudfront.net",
+                        "https://du83k7mttey3e.cloudfront.net"
+                )
         );
 
         configuration.setAllowedMethods(
-            List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH",
-                "OPTIONS"
-            )
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE",
+                        "OPTIONS"
+                )
         );
 
         configuration.setAllowedHeaders(
-            List.of(
-                "Authorization",
-                "Content-Type"
-            )
+                List.of(
+                        "Authorization",
+                        "Content-Type"
+                )
         );
 
+        configuration.setAllowCredentials(true);
+
+        configuration.setMaxAge(3600L);
+
         UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+                new UrlBasedCorsConfigurationSource();
 
         source.registerCorsConfiguration(
-            "/**",
-            configuration
+                "/**",
+                configuration
         );
 
         return source;

@@ -30,8 +30,9 @@ public class ClientController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ClientResponse>> getAllClients(@RequestParam(defaultValue = "0") int page) {
-        return clientService.getAllClients(page);
+    public ResponseEntity<Page<ClientResponse>> getAllClients(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return clientService.getAllClients(page, size);
     }
 
     @GetMapping("/{id}")

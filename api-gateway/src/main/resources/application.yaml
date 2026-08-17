@@ -47,6 +47,12 @@ server:
                 same-site: none
                 secure: true
 
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info,gateway
+
 eureka:
     client:
         fetch-registry: true
