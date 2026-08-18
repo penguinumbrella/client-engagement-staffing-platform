@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS assignments (
 ALTER TABLE assignments ADD COLUMN IF NOT EXISTS assignment_end_date DATE;
 ALTER TABLE assignments ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE';
 ALTER TABLE assignments ADD COLUMN IF NOT EXISTS status_overridden BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE assignments ALTER COLUMN status_overridden SET DEFAULT FALSE;
 
 -- Backfill any pre-existing open-ended assignments before enforcing NOT NULL below
 UPDATE assignments SET assignment_end_date = assignment_start_date WHERE assignment_end_date IS NULL;
