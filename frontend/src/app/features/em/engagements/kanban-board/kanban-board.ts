@@ -16,7 +16,7 @@ const COLUMN_STATUSES = [
   EngagementStatus.PLANNED,
   EngagementStatus.IN_PROGRESS,
   EngagementStatus.ON_HOLD,
-  EngagementStatus.COMPLETED,
+  EngagementStatus.COMPLETED, 
   EngagementStatus.CANCELLED,
 ];
 

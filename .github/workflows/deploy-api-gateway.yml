@@ -1,15 +1,15 @@
-name: Deploy Client Service
+name: Deploy API Gateway
 
 on:
   push:
     branches: [aws-preauth, main]
     paths:
-      - 'client/**'
+      - 'api-gateway/**'
 
 env:
   AWS_REGION: us-east-1
-  EB_APPLICATION_NAME: Client-Client-env
-  EB_ENVIRONMENT_NAME: Client-Client-env
+  EB_APPLICATION_NAME: Client-egagement-staffing-APIGateway
+  EB_ENVIRONMENT_NAME: Client-egagement-staffing-APIGat-env
   S3_BUCKET: elasticbeanstalk-us-east-1-397345411365
 
 jobs:
@@ -17,22 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: client
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: client_platform_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+        working-directory: api-gateway
 
     steps:
       - name: Checkout code
@@ -46,10 +31,6 @@ jobs:
           cache: 'maven'
 
       - name: Run tests
-        env:
-          DB_URL: jdbc:postgresql://localhost:5432/client_platform_test
-          DB_USERNAME: postgres
-          DB_PASSWORD: postgres
         run: mvn -B test
 
       - name: Build JAR
