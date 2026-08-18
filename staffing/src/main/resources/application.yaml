@@ -26,8 +26,6 @@ spring:
             resourceserver:
                 jwt:
                     public-key-location: classpath:keys/public.pem
-    config:
-        import: optional:file:.env[.properties]
 
 server:
     port: 8083
