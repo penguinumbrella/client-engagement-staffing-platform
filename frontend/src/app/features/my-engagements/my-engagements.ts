@@ -1,6 +1,6 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CurrentConsultantService } from '../../services/current-consultant.service';
+//import { CurrentConsultantService } from '../../services/current-consultant.service';
 import { AssignmentService } from '../../services/assignment.service';
 import { EngagementService } from '../../services/engagement.service';
 import { ConsultantService } from '../../services/consultant.service';
@@ -21,7 +21,7 @@ import { MyEngagementRow } from './my-engagement.model';
   styleUrl: './my-engagements.css',
 })
 export class MyEngagements {
-  protected readonly currentConsultant = inject(CurrentConsultantService);
+  //protected readonly currentConsultant = inject(CurrentConsultantService);
   private readonly assignmentService = inject(AssignmentService);
   private readonly engagementService = inject(EngagementService);
   private readonly consultantService = inject(ConsultantService);
@@ -47,12 +47,13 @@ export class MyEngagements {
       error: (err) => console.error('Failed to load clients', err),
     });
 
-    effect(() => {
-      const consultantId = this.currentConsultant.currentId();
-      if (consultantId !== null) {
-        this.load(consultantId);
-      }
-    });
+    // effect(() => {
+    //   const consultantId = this.currentConsultant.currentId();
+    //   if (consultantId !== null) {
+    //     this.load(consultantId);
+    //   }
+    // });
+    this.load();
   }
 
   protected readonly rows = computed<MyEngagementRow[]>(() => {
@@ -83,24 +84,69 @@ export class MyEngagements {
       .filter((row): row is MyEngagementRow => row !== null);
   });
 
-  private load(consultantId: number): void {
+  private load(): void {
+
     this.loading.set(true);
 
-    this.assignmentService.getByConsultant(consultantId).subscribe({
-      next: (assignments) => {
-        this.myAssignments.set(assignments);
-        this.loading.set(false);
-        assignments.forEach((assignment) => {
-          this.loadEngagement(assignment.engagementId);
-          this.loadTeammates(assignment.engagementId);
-        });
-      },
-      error: (err) => {
-        console.error(`Failed to load assignments for consultant ${consultantId}`, err);
-        this.loading.set(false);
-      },
-    });
+    this.assignmentService
+      .getMine()
+      .subscribe({
+
+        next: assignments => {
+
+          this.myAssignments.set(
+            assignments
+          );
+
+          this.loading.set(false);
+
+
+          assignments.forEach(
+            assignment => {
+
+              this.loadEngagement(
+                assignment.engagementId
+              );
+
+              this.loadTeammates(
+                assignment.engagementId
+              );
+            }
+          );
+        },
+
+        error: err => {
+
+          console.error(
+            'Failed to load my assignments',
+            err
+          );
+
+          this.loading.set(false);
+        }
+
+      });
   }
+
+  //commented for debuging
+  // private load(consultantId: number): void {
+  //   this.loading.set(true);
+
+  //   this.assignmentService.getByConsultant(consultantId).subscribe({
+  //     next: (assignments) => {
+  //       this.myAssignments.set(assignments);
+  //       this.loading.set(false);
+  //       assignments.forEach((assignment) => {
+  //         this.loadEngagement(assignment.engagementId);
+  //         this.loadTeammates(assignment.engagementId);
+  //       });
+  //     },
+  //     error: (err) => {
+  //       console.error(`Failed to load assignments for consultant ${consultantId}`, err);
+  //       this.loading.set(false);
+  //     },
+  //   });
+  // }
 
   private loadEngagement(engagementId: number): void {
     if (this.engagementsById().has(engagementId)) {
@@ -118,7 +164,7 @@ export class MyEngagements {
   }
 
   private loadTeammates(engagementId: number): void {
-    this.assignmentService.getByEngagement(engagementId).subscribe({
+    this.assignmentService.getMyEngagementTeam(engagementId).subscribe({
       next: (assignments) => {
         const consultantsById = this.consultantsById();
         const badges: ConsultantBadge[] = assignments.map((a) => ({

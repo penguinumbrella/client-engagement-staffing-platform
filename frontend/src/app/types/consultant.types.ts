@@ -1,9 +1,9 @@
 export enum SkillArea {
-  AUDIT = 'AUDIT',
-  TAX = 'TAX',
-  RISK = 'RISK',
-  TECHNOLOGY = 'TECHNOLOGY',
-  STRATEGY = 'STRATEGY',
+  AUDIT = 'Audit',
+  TAX = 'Tax',
+  RISK = 'Risk',
+  TECHNOLOGY = 'Technology',
+  STRATEGY = 'Strategy',
 }
 
 export interface Consultant {
@@ -11,7 +11,6 @@ export interface Consultant {
   name: string;
   titleRole: string;
   primarySkillArea: SkillArea;
-  userId: string;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -19,6 +18,7 @@ export interface Consultant {
 
 export interface CreateConsultantRequest {
   name: string;
+  email: string;
   titleRole: string;
   primarySkillArea: SkillArea;
 }

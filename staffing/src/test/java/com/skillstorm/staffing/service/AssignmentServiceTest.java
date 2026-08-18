@@ -54,9 +54,73 @@ class AssignmentServiceTest {
     }
 
     private Consultant consultant(Long id) {
-        Consultant consultant = new Consultant("Jane Doe", "Senior Consultant", SkillArea.AUDIT.getLabel());
-        setId(consultant, Consultant.class, id);
+        Consultant consultant = createConsultant();
+
+        setField(consultant, "id", id);
+        setField(consultant, "name", "Jane Doe");
+        setField(consultant, "titleRole", "Senior Consultant");
+        setField(
+                consultant,
+                "primarySkillArea",
+                SkillArea.AUDIT.getLabel()
+        );
+
         return consultant;
+    }
+
+    private Consultant createConsultant() {
+        try {
+            var constructor =
+                    Consultant.class.getDeclaredConstructor();
+
+            constructor.setAccessible(true);
+
+            return constructor.newInstance();
+
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setField(
+            Object target,
+            String fieldName,
+            Object value) {
+
+        try {
+            var field =
+                    target.getClass()
+                            .getDeclaredField(fieldName);
+
+            field.setAccessible(true);
+            field.set(target, value);
+
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setId(
+            Object target,
+            Class<?> type,
+            Long id) {
+
+        setField(target, type, "id", id);
+    }
+
+    private void setField(
+            Object target,
+            Class<?> type,
+            String fieldName,
+            Object value) {
+
+        try {
+            var field = type.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Assignment assignment(Long id, Long consultantId, Long engagementId, String status, boolean active) {
@@ -67,16 +131,6 @@ class AssignmentServiceTest {
         assignment.setActive(active);
         setId(assignment, Assignment.class, id);
         return assignment;
-    }
-
-    private void setId(Object target, Class<?> type, Long id) {
-        try {
-            var idField = type.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(target, id);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private CreateAssignmentRequest createRequest(Long consultantId, Long engagementId, AssignmentStatus status) {
@@ -95,11 +149,11 @@ class AssignmentServiceTest {
     @Test
     void assignConsultant_createsNewAssignmentWithDefaultStatusWhenNull() {
         when(consultantService.findActiveOrThrow(1L)).thenReturn(consultant(1L));
-        when(engagementClient.engagementExists(10L)).thenReturn(true);
+        when(engagementClient.engagementExists(10L,"test")).thenReturn(true);
         when(assignmentRepository.findByConsultantIdAndEngagementId(1L, 10L)).thenReturn(Optional.empty());
         when(assignmentRepository.save(any(Assignment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, null));
+        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, null),"test");
 
         assertThat(response.getStatus()).isEqualTo(AssignmentStatus.ACTIVE.getLabel());
         assertThat(response.getConsultantName()).isEqualTo("Jane Doe");
@@ -108,11 +162,11 @@ class AssignmentServiceTest {
     @Test
     void assignConsultant_usesProvidedStatus() {
         when(consultantService.findActiveOrThrow(1L)).thenReturn(consultant(1L));
-        when(engagementClient.engagementExists(10L)).thenReturn(true);
+        when(engagementClient.engagementExists(10L,"test")).thenReturn(true);
         when(assignmentRepository.findByConsultantIdAndEngagementId(1L, 10L)).thenReturn(Optional.empty());
         when(assignmentRepository.save(any(Assignment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, AssignmentStatus.PENDING));
+        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, AssignmentStatus.PENDING),"test");
 
         assertThat(response.getStatus()).isEqualTo(AssignmentStatus.PENDING.getLabel());
     }
@@ -120,9 +174,9 @@ class AssignmentServiceTest {
     @Test
     void assignConsultant_throwsNotFoundWhenEngagementDoesNotExist() {
         when(consultantService.findActiveOrThrow(1L)).thenReturn(consultant(1L));
-        when(engagementClient.engagementExists(10L)).thenReturn(false);
+        when(engagementClient.engagementExists(10L,"test")).thenReturn(false);
 
-        assertThatThrownBy(() -> assignmentService.assignConsultant(createRequest(1L, 10L, null)))
+        assertThatThrownBy(() -> assignmentService.assignConsultant(createRequest(1L, 10L, null),"test"))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Engagement 10 not found");
 
@@ -132,12 +186,12 @@ class AssignmentServiceTest {
     @Test
     void assignConsultant_reactivatesInactiveExistingAssignment() {
         when(consultantService.findActiveOrThrow(1L)).thenReturn(consultant(1L));
-        when(engagementClient.engagementExists(10L)).thenReturn(true);
+        when(engagementClient.engagementExists(10L,"test")).thenReturn(true);
         Assignment inactive = assignment(5L, 1L, 10L, AssignmentStatus.CANCELLED.getLabel(), false);
         when(assignmentRepository.findByConsultantIdAndEngagementId(1L, 10L)).thenReturn(Optional.of(inactive));
         when(assignmentRepository.save(any(Assignment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, AssignmentStatus.ACTIVE));
+        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, AssignmentStatus.ACTIVE),"test");
 
         assertThat(response.getId()).isEqualTo(5L);
         assertThat(response.isActive()).isTrue();
@@ -147,11 +201,11 @@ class AssignmentServiceTest {
     @Test
     void assignConsultant_throwsConflictWhenAlreadyActivelyStaffed() {
         when(consultantService.findActiveOrThrow(1L)).thenReturn(consultant(1L));
-        when(engagementClient.engagementExists(10L)).thenReturn(true);
+        when(engagementClient.engagementExists(10L,"test")).thenReturn(true);
         Assignment active = assignment(5L, 1L, 10L, AssignmentStatus.ACTIVE.getLabel(), true);
         when(assignmentRepository.findByConsultantIdAndEngagementId(1L, 10L)).thenReturn(Optional.of(active));
 
-        assertThatThrownBy(() -> assignmentService.assignConsultant(createRequest(1L, 10L, null)))
+        assertThatThrownBy(() -> assignmentService.assignConsultant(createRequest(1L, 10L, null),"test"))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("already staffed");
 
