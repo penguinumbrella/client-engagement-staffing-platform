@@ -21,8 +21,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @GetMapping("/by-email")
-    public ResponseEntity<UserResponse> getUserByEmail(
-            @RequestParam String email) {
+    public ResponseEntity<UserResponse> getUserByEmail(@RequestParam String email) {
 
         return ResponseEntity.ok(
                 authService.getUserByEmail(email)

@@ -64,8 +64,7 @@ public class AuthService {
                 passwordHash,
                 UserRole.CONSULTANT);
 
-        User savedUser =
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         AuthResponse authResponse =
                 createAuthResponse(savedUser);

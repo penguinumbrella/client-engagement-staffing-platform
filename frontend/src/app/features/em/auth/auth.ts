@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -18,6 +18,8 @@ export class Auth {
 
   private readonly baseUrl =
     'http://localhost:8125/auth/api/auth';
+
+  currentUser = signal<AuthUser | null>(this.loadStoredUser());
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(
@@ -48,20 +50,13 @@ export class Auth {
   }
 
   saveUser(user: AuthUser): void {
-    localStorage.setItem(
-      'user',
-      JSON.stringify(user)
-    );
+    localStorage.setItem('user', JSON.stringify(user));
+
+    this.currentUser.set(user);
   }
 
   getUser(): AuthUser | null {
-    const user = localStorage.getItem('user');
-
-    if (!user) {
-      return null;
-    }
-
-    return JSON.parse(user) as AuthUser;
+    return this.currentUser();
   }
 
   isLoggedIn(): boolean {
@@ -71,5 +66,17 @@ export class Auth {
   logout(): void {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
+
+    this.currentUser.set(null);
+  }
+
+  private loadStoredUser(): AuthUser | null {
+    const user = localStorage.getItem('user');
+
+    if (!user) {
+      return null;
+    }
+
+    return JSON.parse(user) as AuthUser;
   }
 }

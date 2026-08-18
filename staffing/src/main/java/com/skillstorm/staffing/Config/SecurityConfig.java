@@ -1,4 +1,4 @@
-package com.skillstorm.staffing.config;
+package com.skillstorm.staffing.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

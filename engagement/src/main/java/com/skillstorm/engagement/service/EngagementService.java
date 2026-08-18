@@ -124,8 +124,7 @@ public class EngagementService {
      * MANAGER:
      * Get any active engagement by ID.
      */
-    public EngagementResponse getEngagementById(
-            Long id) {
+    public EngagementResponse getEngagementById(Long id) {
 
         return EngagementResponse.from(
                 findActiveOrThrow(id)
@@ -138,9 +137,7 @@ public class EngagementService {
      * Can only access an engagement if Staffing
      * confirms that the current user is assigned to it.
      */
-    public EngagementResponse getEngagementByIdForConsultant(
-            Long engagementId,
-            String token) {
+    public EngagementResponse getEngagementByIdForConsultant(Long engagementId, String token) {
 
         boolean assigned =
                 staffingClient.isCurrentUserAssigned(
@@ -165,8 +162,7 @@ public class EngagementService {
      * MANAGER:
      * Get active engagements belonging to a client.
      */
-    public List<EngagementResponse> getEngagementsByClientId(
-            Long clientId) {
+    public List<EngagementResponse> getEngagementsByClientId(Long clientId) {
 
         return engagementRepository
                 .findByClientIdAndActiveTrue(clientId)

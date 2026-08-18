@@ -3,6 +3,8 @@ package com.skillstorm.client.controllers;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,10 +61,8 @@ public class ClientController {
 
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteClient(
-            @PathVariable Long id) {
-
-        return clientService.deleteClient(id);
+    public ResponseEntity<Void> deleteClient(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return clientService.deleteClient(id, jwt.getTokenValue());
     }
 
 }

@@ -48,18 +48,9 @@ public class EngagementController {
      * Pass the JWT to the service because Engagement
      * needs to call Client Service to validate clientId.
      */
-    @PreAuthorize(
-            "hasRole('ENGAGEMENT_MANAGER')"
-    )
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @PostMapping
-    public ResponseEntity<EngagementResponse> create(
-            @Valid
-            @RequestBody
-            CreateEngagementRequest request,
-
-            @AuthenticationPrincipal
-            Jwt jwt) {
-
+    public ResponseEntity<EngagementResponse> create(@Valid @RequestBody CreateEngagementRequest request, @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity
                 .status(
                         HttpStatus.CREATED
@@ -82,10 +73,7 @@ public class EngagementController {
      * sees only engagements they are staffed on.
      */
     @GetMapping
-    public ResponseEntity<List<EngagementResponse>> getAll(
-            @AuthenticationPrincipal
-            Jwt jwt) {
-
+    public ResponseEntity<List<EngagementResponse>> getAll(@AuthenticationPrincipal Jwt jwt) {
         if (isEngagementManager(jwt)) {
 
             return ResponseEntity.ok(
@@ -97,9 +85,7 @@ public class EngagementController {
 
         return ResponseEntity.ok(
                 engagementService
-                        .getEngagementsForCurrentConsultant(
-                                jwt.getTokenValue()
-                        )
+                        .getEngagementsForCurrentConsultant(jwt.getTokenValue())
         );
     }
 
@@ -112,12 +98,7 @@ public class EngagementController {
      * can only view an engagement they're assigned to.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<EngagementResponse> getById(
-            @PathVariable
-            Long id,
-
-            @AuthenticationPrincipal
-            Jwt jwt) {
+    public ResponseEntity<EngagementResponse> getById(@PathVariable Long id,@AuthenticationPrincipal Jwt jwt) {
 
         if (isEngagementManager(jwt)) {
 
@@ -141,19 +122,13 @@ public class EngagementController {
     /*
      * ENGAGEMENT MANAGER
      */
-    @PreAuthorize(
-            "hasRole('ENGAGEMENT_MANAGER')"
-    )
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @GetMapping("/client/{clientId}")
-    public ResponseEntity<List<EngagementResponse>> getByClient(
-            @PathVariable
-            Long clientId) {
+    public ResponseEntity<List<EngagementResponse>> getByClient(@PathVariable Long clientId) {
 
         return ResponseEntity.ok(
                 engagementService
-                        .getEngagementsByClientId(
-                                clientId
-                        )
+                        .getEngagementsByClientId(clientId)
         );
     }
 
@@ -164,18 +139,11 @@ public class EngagementController {
      * Pass JWT because a status change may need to
      * cascade to Staffing.
      */
-    @PreAuthorize(
-            "hasRole('ENGAGEMENT_MANAGER')"
-    )
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @PutMapping("/{id}")
-    public ResponseEntity<EngagementResponse> update(
-            @PathVariable
-            Long id,
-
-            @Valid
-            @RequestBody
+    public ResponseEntity<EngagementResponse> update(@PathVariable Long id,
+            @Valid @RequestBody
             UpdateEngagementRequest request,
-
             @AuthenticationPrincipal
             Jwt jwt) {
 
@@ -196,16 +164,9 @@ public class EngagementController {
      * Pass JWT because Staffing must remove/cancel
      * assignments before the engagement is deleted.
      */
-    @PreAuthorize(
-            "hasRole('ENGAGEMENT_MANAGER')"
-    )
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(
-            @PathVariable
-            Long id,
-
-            @AuthenticationPrincipal
-            Jwt jwt) {
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
 
         engagementService.deleteEngagement(
                 id,
@@ -249,8 +210,7 @@ public class EngagementController {
      * Determines whether the authenticated user
      * has the Engagement Manager role.
      */
-    private boolean isEngagementManager(
-            Jwt jwt) {
+    private boolean isEngagementManager(Jwt jwt) {
 
         List<String> roles =
                 jwt.getClaimAsStringList(

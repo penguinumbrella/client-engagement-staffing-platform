@@ -23,9 +23,7 @@ public class StaffingClient {
         this.loadBalancerClient = loadBalancerClient;
     }
 
-    public void provisionConsultant(
-            ProvisionConsultantRequest request,
-            String token) {
+    public void provisionConsultant(ProvisionConsultantRequest request, String token) {
 
         ServiceInstance instance =
                 loadBalancerClient.choose("staffing");

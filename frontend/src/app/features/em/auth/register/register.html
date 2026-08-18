@@ -1,257 +1,424 @@
-<div class="auth-container">
+<div class="register-page">
 
-  <div class="auth-card">
+  <div class="register-card">
 
-    <h1>Create Account</h1>
+    <!-- LEFT SIDE -->
+    <section class="welcome-panel">
 
-    <p>
-      Client Engagement & Staffing Platform
-    </p>
+      <div class="shape shape-one"></div>
+      <div class="shape shape-two"></div>
+      <div class="shape shape-three"></div>
 
+      <div class="welcome-content">
 
-    <form
-      [formGroup]="registerForm"
-      (ngSubmit)="register()"
-    >
-
-      <!-- FIRST NAME -->
-      <div class="form-group">
-
-        <label for="firstName">
-          First Name
-        </label>
-
-        <input
-          id="firstName"
-          type="text"
-          formControlName="firstName"
-        >
-
-        @if (
-          registerForm.controls.firstName.touched &&
-          registerForm.controls.firstName.hasError('required')
-        ) {
-          <small class="error">
-            First name is required.
-          </small>
-        }
-
-      </div>
-
-
-      <!-- LAST NAME -->
-      <div class="form-group">
-
-        <label for="lastName">
-          Last Name
-        </label>
-
-        <input
-          id="lastName"
-          type="text"
-          formControlName="lastName"
-        >
-
-        @if (
-          registerForm.controls.lastName.touched &&
-          registerForm.controls.lastName.hasError('required')
-        ) {
-          <small class="error">
-            Last name is required.
-          </small>
-        }
-
-      </div>
-
-
-      <!-- EMAIL -->
-      <div class="form-group">
-
-        <label for="email">
-          Email
-        </label>
-
-        <input
-          id="email"
-          type="email"
-          formControlName="email"
-        >
-
-        @if (
-          registerForm.controls.email.touched &&
-          registerForm.controls.email.invalid
-        ) {
-          <small class="error">
-            Enter a valid email address.
-          </small>
-        }
-
-      </div>
-
-
-      <!-- TITLE / ROLE -->
-      <div class="form-group">
-
-        <label for="titleRole">
-          Title
-        </label>
-
-        <input
-          id="titleRole"
-          type="text"
-          formControlName="titleRole"
-          placeholder="Example: Associate"
-        >
-
-        @if (
-          registerForm.controls.titleRole.touched &&
-          registerForm.controls.titleRole.hasError('required')
-        ) {
-          <small class="error">
-            Title is required.
-          </small>
-        }
-
-      </div>
-
-
-      <!-- SKILL AREA -->
-      <div class="form-group">
-
-        <label for="primarySkillArea">
-          Primary Skill Area
-        </label>
-
-        <select
-          id="primarySkillArea"
-          formControlName="primarySkillArea"
-        >
-          <option value="">Select a skill area</option>
-          <option value="Audit">Audit</option>
-          <option value="Tax">Tax</option>
-          <option value="Risk">Risk</option>
-          <option value="Technology">Technology</option>
-          <option value="Strategy">Strategy</option>
-
-        </select>
-
-        @if (
-          registerForm.controls.primarySkillArea.touched &&
-          registerForm.controls.primarySkillArea.hasError('required')
-        ) {
-          <small class="error">
-            Primary skill area is required.
-          </small>
-        }
-
-      </div>
-
-
-      <!-- PASSWORD -->
-      <div class="form-group">
-
-        <label for="password">
-          Password
-        </label>
-
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-        >
-
-        @if (
-          registerForm.controls.password.touched &&
-          registerForm.controls.password.hasError('required')
-        ) {
-          <small class="error">
-            Password is required.
-          </small>
-        }
-
-        @if (
-          registerForm.controls.password.touched &&
-          registerForm.controls.password.hasError('minlength')
-        ) {
-          <small class="error">
-            Password must be at least 12 characters.
-          </small>
-        }
-
-        @if (
-          registerForm.controls.password.touched &&
-          registerForm.controls.password.hasError('maxlength')
-        ) {
-          <small class="error">
-            Password cannot exceed 72 characters.
-          </small>
-        }
-
-      </div>
-
-
-      <!-- CONFIRM PASSWORD -->
-      <div class="form-group">
-
-        <label for="confirmPassword">
-          Confirm Password
-        </label>
-
-        <input
-          id="confirmPassword"
-          type="password"
-          formControlName="confirmPassword"
-        >
-
-        @if (
-          registerForm.controls.confirmPassword.touched &&
-          registerForm.controls.confirmPassword.hasError('required')
-        ) {
-          <small class="error">
-            Confirm your password.
-          </small>
-        }
-
-        @if (
-          registerForm.controls.confirmPassword.touched &&
-          registerForm.hasError('passwordMismatch')
-        ) {
-          <small class="error">
-            Passwords do not match.
-          </small>
-        }
-
-      </div>
-
-
-      @if (errorMessage) {
-        <div class="error-message">
-          {{ errorMessage }}
+        <div class="brand-mark">
+          <i class="pi pi-briefcase"></i>
         </div>
-      }
+
+        <h1>
+          Client Engagement
+          <span>& Staffing Platform</span>
+        </h1>
+
+        <p>
+          Create your account to access your engagements,
+          assignments, and consulting team information.
+        </p>
+
+        <div class="welcome-features">
+
+          <div class="feature">
+            <i class="pi pi-building"></i>
+            <span>Client Management</span>
+          </div>
+
+          <div class="feature">
+            <i class="pi pi-users"></i>
+            <span>Consultant Staffing</span>
+          </div>
+
+          <div class="feature">
+            <i class="pi pi-briefcase"></i>
+            <span>Engagement Tracking</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
 
 
-      <button
-        type="submit"
-        [disabled]="loading"
-      >
-        {{
-          loading
-            ? 'Creating Account...'
-            : 'Create Account'
-        }}
-      </button>
+    <!-- RIGHT SIDE -->
+    <section class="form-panel">
 
-    </form>
+      <div class="form-container">
+
+        <div class="form-heading">
+
+          <p class="eyebrow">
+            GET STARTED
+          </p>
+
+          <h2>
+            Create your account
+          </h2>
+
+          <p class="subtitle">
+            Enter your information to join the platform.
+          </p>
+
+        </div>
 
 
-    <p>
-      Already have an account?
+        <form
+          [formGroup]="registerForm"
+          (ngSubmit)="register()"
+        >
 
-      <a routerLink="/login">
-        Sign in
-      </a>
-    </p>
+          <div class="form-row">
+
+            <!-- FIRST NAME -->
+            <div class="form-group">
+
+              <label for="firstName">
+                First Name
+              </label>
+
+              <div
+                class="input-wrapper"
+                [class.input-invalid]="
+                  registerForm.controls.firstName.touched &&
+                  registerForm.controls.firstName.invalid
+                "
+              >
+                <i class="pi pi-user"></i>
+
+                <input
+                  id="firstName"
+                  type="text"
+                  formControlName="firstName"
+                  placeholder="John"
+                  autocomplete="given-name"
+                >
+              </div>
+
+              @if (
+                registerForm.controls.firstName.touched &&
+                registerForm.controls.firstName.hasError('required')
+              ) {
+                <small class="field-error">
+                  First name is required.
+                </small>
+              }
+
+            </div>
+
+
+            <!-- LAST NAME -->
+            <div class="form-group">
+
+              <label for="lastName">
+                Last Name
+              </label>
+
+              <div
+                class="input-wrapper"
+                [class.input-invalid]="
+                  registerForm.controls.lastName.touched &&
+                  registerForm.controls.lastName.invalid
+                "
+              >
+                <i class="pi pi-user"></i>
+
+                <input
+                  id="lastName"
+                  type="text"
+                  formControlName="lastName"
+                  placeholder="Doe"
+                  autocomplete="family-name"
+                >
+              </div>
+
+              @if (
+                registerForm.controls.lastName.touched &&
+                registerForm.controls.lastName.hasError('required')
+              ) {
+                <small class="field-error">
+                  Last name is required.
+                </small>
+              }
+
+            </div>
+
+          </div>
+
+
+          <!-- EMAIL -->
+          <div class="form-group">
+
+            <label for="email">
+              Email address
+            </label>
+
+            <div
+              class="input-wrapper"
+              [class.input-invalid]="
+                registerForm.controls.email.touched &&
+                registerForm.controls.email.invalid
+              "
+            >
+              <i class="pi pi-envelope"></i>
+
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="you@company.com"
+                autocomplete="email"
+              >
+            </div>
+
+            @if (
+              registerForm.controls.email.touched &&
+              registerForm.controls.email.invalid
+            ) {
+              <small class="field-error">
+                Enter a valid email address.
+              </small>
+            }
+
+          </div>
+
+
+          <div class="form-row">
+
+            <!-- TITLE / ROLE -->
+            <div class="form-group">
+
+              <label for="titleRole">
+                Title
+              </label>
+
+              <div
+                class="input-wrapper"
+                [class.input-invalid]="
+                  registerForm.controls.titleRole.touched &&
+                  registerForm.controls.titleRole.invalid
+                "
+              >
+                <i class="pi pi-id-card"></i>
+
+                <input
+                  id="titleRole"
+                  type="text"
+                  formControlName="titleRole"
+                  placeholder="Associate"
+                >
+              </div>
+
+              @if (
+                registerForm.controls.titleRole.touched &&
+                registerForm.controls.titleRole.hasError('required')
+              ) {
+                <small class="field-error">
+                  Title is required.
+                </small>
+              }
+
+            </div>
+
+
+            <!-- SKILL AREA -->
+            <div class="form-group">
+
+              <label for="primarySkillArea">
+                Primary Skill Area
+              </label>
+
+              <div
+                class="input-wrapper select-wrapper"
+                [class.input-invalid]="
+                  registerForm.controls.primarySkillArea.touched &&
+                  registerForm.controls.primarySkillArea.invalid
+                "
+              >
+                <i class="pi pi-chart-bar"></i>
+
+                <select
+                  id="primarySkillArea"
+                  formControlName="primarySkillArea"
+                >
+                  <option value="">Select skill area</option>
+                  <option value="Audit">Audit</option>
+                  <option value="Tax">Tax</option>
+                  <option value="Risk">Risk</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Strategy">Strategy</option>
+                </select>
+              </div>
+
+              @if (
+                registerForm.controls.primarySkillArea.touched &&
+                registerForm.controls.primarySkillArea.hasError('required')
+              ) {
+                <small class="field-error">
+                  Primary skill area is required.
+                </small>
+              }
+
+            </div>
+
+          </div>
+
+
+          <!-- PASSWORD -->
+          <div class="form-group">
+
+            <label for="password">
+              Password
+            </label>
+
+            <div
+              class="input-wrapper"
+              [class.input-invalid]="
+                registerForm.controls.password.touched &&
+                registerForm.controls.password.invalid
+              "
+            >
+              <i class="pi pi-lock"></i>
+
+              <input
+                id="password"
+                type="password"
+                formControlName="password"
+                placeholder="Create a password"
+                autocomplete="new-password"
+              >
+            </div>
+
+            @if (
+              registerForm.controls.password.touched &&
+              registerForm.controls.password.hasError('required')
+            ) {
+              <small class="field-error">
+                Password is required.
+              </small>
+            }
+
+            @if (
+              registerForm.controls.password.touched &&
+              registerForm.controls.password.hasError('minlength')
+            ) {
+              <small class="field-error">
+                Password must be at least 12 characters.
+              </small>
+            }
+
+            @if (
+              registerForm.controls.password.touched &&
+              registerForm.controls.password.hasError('maxlength')
+            ) {
+              <small class="field-error">
+                Password cannot exceed 72 characters.
+              </small>
+            }
+
+          </div>
+
+
+          <!-- CONFIRM PASSWORD -->
+          <div class="form-group">
+
+            <label for="confirmPassword">
+              Confirm Password
+            </label>
+
+            <div
+              class="input-wrapper"
+              [class.input-invalid]="
+                registerForm.controls.confirmPassword.touched &&
+                (
+                  registerForm.controls.confirmPassword.invalid ||
+                  registerForm.hasError('passwordMismatch')
+                )
+              "
+            >
+              <i class="pi pi-lock"></i>
+
+              <input
+                id="confirmPassword"
+                type="password"
+                formControlName="confirmPassword"
+                placeholder="Confirm your password"
+                autocomplete="new-password"
+              >
+            </div>
+
+            @if (
+              registerForm.controls.confirmPassword.touched &&
+              registerForm.controls.confirmPassword.hasError('required')
+            ) {
+              <small class="field-error">
+                Confirm your password.
+              </small>
+            }
+
+            @if (
+              registerForm.controls.confirmPassword.touched &&
+              registerForm.hasError('passwordMismatch')
+            ) {
+              <small class="field-error">
+                Passwords do not match.
+              </small>
+            }
+
+          </div>
+
+
+          @if (errorMessage) {
+            <div
+              class="register-error"
+              aria-live="polite"
+            >
+              <i class="pi pi-exclamation-circle"></i>
+              <span>{{ errorMessage }}</span>
+            </div>
+          }
+
+
+          <button
+            class="create-account-button"
+            type="submit"
+            [disabled]="loading"
+          >
+            @if (loading) {
+              <i class="pi pi-spin pi-spinner"></i>
+              Creating Account...
+            } @else {
+              Create Account
+              <i class="pi pi-arrow-right"></i>
+            }
+          </button>
+
+        </form>
+
+
+        <div class="login-section">
+
+          <span>
+            Already have an account?
+          </span>
+
+          <a routerLink="/login">
+            Sign in
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
 
   </div>
 

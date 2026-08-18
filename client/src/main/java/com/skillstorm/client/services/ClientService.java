@@ -79,15 +79,15 @@ public class ClientService {
         return ResponseEntity.notFound().build();
     }
 
-    public ResponseEntity<Void> deleteClient(Long id) {
+    public ResponseEntity<Void> deleteClient(Long id, String token) {
         Optional<Client> current = this.clientRepo.findById(id);
 
         if(current.isPresent() && current.get().isActive()) {
 
             try {
-                if (engagementClient.hasActiveEngagements(id)) {
-                    return ResponseEntity.status(409).build();
-                }
+                if (engagementClient.hasActiveEngagements(id, token)) {
+                return ResponseEntity.status(409).build();
+            }
             } catch (ResponseStatusException ex) {
                 return ResponseEntity.status(ex.getStatusCode()).build();
             }

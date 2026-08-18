@@ -1,48 +1,72 @@
-<div class="flex h-screen flex-col bg-gray-50">
-  <header class="flex h-14 shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4">
-    <button
-      type="button"
-      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-lg text-gray-500 hover:bg-gray-100"
-      title="Toggle navigation"
-      (click)="toggleSidebar()"
-    >
-      ☰
-    </button>
-    <span class="text-sm font-semibold text-gray-800">SkillStorm</span>
-  </header>
+@if (authPage()) {
+  <router-outlet />
+} @else {
+  <div class="flex h-screen flex-col bg-gray-50">
+    <header class="flex h-14 shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4">
+      <button
+        type="button"
+        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-lg text-gray-500 hover:bg-gray-100"
+        title="Toggle navigation"
+        (click)="toggleSidebar()"
+      >
+        ☰
+      </button>
 
-  <div class="flex flex-1 overflow-hidden">
-    <aside
-      class="flex flex-col overflow-hidden border-r border-gray-200 bg-white transition-[width] duration-150"
-      [class.w-56]="sidebarOpen()"
-      [class.w-0]="!sidebarOpen()"
-    >
-      <nav class="flex flex-1 flex-col gap-1 p-3">
-        @for (item of navItems; track item.path) {
-          <a
-            [routerLink]="item.path"
-            routerLinkActive="bg-indigo-50 text-indigo-700"
-            class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
-          >
-            {{ item.label }}
-          </a>
+      <span class="text-sm font-semibold text-gray-800">SkillStorm</span>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+      <aside
+        class="flex flex-col overflow-hidden border-r border-gray-200 bg-white transition-[width] duration-150"
+        [class.w-56]="sidebarOpen()"
+        [class.w-0]="!sidebarOpen()"
+      >
+        <nav class="flex flex-1 flex-col gap-1 p-3">
+          @for (item of navItems(); track item.path) {
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="bg-indigo-50 text-indigo-700"
+              class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+            >
+              {{ item.label }}
+            </a>
+          }
+        </nav>
+
+        <!-- TODO: replace with the signed-in user once AuthService is wired up on the frontend. -->
+        @if (currentUser(); as user) {
+          <div class="flex items-center gap-2 whitespace-nowrap border-t border-gray-200 p-3">
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white"
+            >
+              {{ getUserInitials() }}
+            </span>
+
+            <div class="flex min-w-0 flex-1 flex-col">
+              <span class="truncate text-sm font-medium text-gray-800">
+                {{ user.firstName }} {{ user.lastName }}
+              </span>
+
+              <span class="truncate text-xs text-gray-400">
+                {{ getRoleDisplayName() }}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-red-50 hover:text-red-600"
+              title="Logout"
+              (click)="logout()"
+            >
+              <i class="pi pi-sign-out"></i>
+            </button>
+          </div>
         }
-      </nav>
+      </aside>
 
-      <!-- TODO: replace with the signed-in user once AuthService is wired up on the frontend. -->
-      <div class="flex items-center gap-2 whitespace-nowrap border-t border-gray-200 p-3">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
-          JD
-        </span>
-        <div class="flex min-w-0 flex-col">
-          <span class="truncate text-sm font-medium text-gray-800">Jane Doe</span>
-          <span class="truncate text-xs text-gray-400">Engagement Manager</span>
-        </div>
-      </div>
-    </aside>
-
-    <main class="flex-1 overflow-y-auto">
-      <router-outlet />
-    </main>
+      <main class="flex-1 overflow-y-auto">
+        <router-outlet />
+      </main>
+    </div>
   </div>
-</div>
+}
