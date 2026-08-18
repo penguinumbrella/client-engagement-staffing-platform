@@ -33,7 +33,7 @@ public class EngagementClient {
                     .uri(instance.getUri() + "/api/engagements/client/{clientId}", clientId)
                     .retrieve()
                     .body(new ParameterizedTypeReference<List<Object>>() {});
-            return engagements != null && !engagements.isEmpty(); 
+            return engagements != null && !engagements.isEmpty();
         } catch (RestClientException ex) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                     "Unable to reach engagement service: " + ex.getMessage());
