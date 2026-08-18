@@ -7,9 +7,9 @@ spring:
       enabled: always
 
   datasource:
-    url: ${AUTH_DB_URL:jdbc:postgresql://localhost:5432/auth_db}
-    username: ${AUTH_DB_USERNAME:p3_user}
-    password: ${AUTH_DB_PASSWORD:local_auth_password}
+    url: ${AUTH_DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     open-in-view: false
