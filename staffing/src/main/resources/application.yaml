@@ -7,7 +7,7 @@ spring:
         ansi:
             enabled: always
     datasource:
-        url: ${DB_URL}
+        url: ${STAFFING_DB_URL}
         username: ${DB_USERNAME}
         password: ${DB_PASSWORD}
         driver-class-name: org.postgresql.Driver
@@ -20,7 +20,12 @@ spring:
                 format_sql: true
     sql:
         init:
-            mode: always
+            mode: never
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    public-key-location: classpath:keys/public.pem
 
 server:
     port: 8083

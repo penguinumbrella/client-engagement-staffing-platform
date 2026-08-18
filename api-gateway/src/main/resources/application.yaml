@@ -7,6 +7,11 @@ spring:
     output:
         ansi:
             enabled: always
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    public-key-location: classpath:keys/public.pem
     cloud:
         gateway:
             server:
@@ -30,6 +35,12 @@ spring:
                               - Path=/staffing/**
                           filters:
                               - StripPrefix=1
+                        - id: auth
+                          uri: lb://auth-service
+                          predicates:
+                            - Path=/auth/**
+                          filters:
+                              - StripPrefix=1
 
 server:
     port: 8125
@@ -51,3 +62,8 @@ eureka:
         register-with-eureka: true
         service-url:
             defaultZone: http://localhost:8761/eureka/
+            #http://client-platform-Eureka-env.us-east-1.elasticbeanstalk.com:8761/eureka #http://10.0.0.10:8761/eureka/
+    # instance:
+    #     hostname: 10.0.0.10
+    #     prefer-ip-address: true
+    #     instance-id: ${spring.application.name}:${random.uuid}

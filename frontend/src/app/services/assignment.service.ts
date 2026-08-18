@@ -28,6 +28,14 @@ export class AssignmentService {
     return this.http.get<Assignment[]>(`${this.baseUrl}/consultant/${consultantId}`);
   }
 
+  getMine(): Observable<Assignment[]> {
+    return this.http.get<Assignment[]>(`${this.baseUrl}/me`);
+  }
+
+  getMyEngagementTeam(engagementId: number): Observable<Assignment[]> {
+    return this.http.get<Assignment[]>(`${this.baseUrl}/me/engagements/${engagementId}/team`);
+  }
+
   create(request: CreateAssignmentRequest): Observable<Assignment> {
     return this.http.post<Assignment>(this.baseUrl, request);
   }

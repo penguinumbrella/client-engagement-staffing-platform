@@ -2,6 +2,7 @@ package com.skillstorm.staffing.client;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -20,23 +21,48 @@ public class EngagementClient {
         this.loadBalancerClient = loadBalancerClient;
     }
 
-    public boolean engagementExists(Long engagementId) {
-        ServiceInstance instance = loadBalancerClient.choose("engagement");
+    public boolean engagementExists(
+        Long engagementId,
+        String token) {
+
+        ServiceInstance instance =
+                loadBalancerClient.choose("engagement");
+
         if (instance == null) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Engagement service is not available");
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Engagement service is not available"
+            );
         }
 
         try {
+
             restClient.get()
-                    .uri(instance.getUri() + "/api/engagements/{id}", engagementId)
+                    .uri(
+                            instance.getUri()
+                                    + "/api/engagements/{id}",
+                            engagementId
+                    )
+                    .header(
+                            HttpHeaders.AUTHORIZATION,
+                            "Bearer " + token
+                    )
                     .retrieve()
                     .toBodilessEntity();
+
             return true;
+
         } catch (HttpClientErrorException.NotFound ex) {
+
             return false;
+
         } catch (RestClientException ex) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Unable to reach engagement service: " + ex.getMessage());
+
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Unable to reach engagement service: "
+                            + ex.getMessage()
+            );
         }
     }
 }

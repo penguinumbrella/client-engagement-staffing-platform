@@ -61,7 +61,7 @@ public class JwtService {
                 .issuedAt(issuedAt)
                 .expiresAt(expiresAt)
                 .id(UUID.randomUUID().toString())
-                .subject(user.getEmail())
+                .subject(user.getId().toString())
                 .claim("user_id", user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("first_name", user.getFirstName())

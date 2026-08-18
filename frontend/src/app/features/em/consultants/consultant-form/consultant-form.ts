@@ -25,8 +25,18 @@ export class ConsultantForm {
 
   form: FormGroup = this.formBuilder.nonNullable.group({
     name: ['', Validators.required],
+    email: [
+      '',
+      [
+        Validators.required,
+        Validators.email
+      ]
+    ],
     titleRole: ['', Validators.required],
-    primarySkillArea: [SkillArea.AUDIT, Validators.required],
+    primarySkillArea: [
+      SkillArea.AUDIT,
+      Validators.required
+    ],
   });
 
   onSubmit(): void {
@@ -42,7 +52,7 @@ export class ConsultantForm {
       next: (consultant) => {
         this.submitting.set(false);
         this.visible.set(false);
-        this.form.reset({ name: '', titleRole: '', primarySkillArea: SkillArea.AUDIT });
+        this.form.reset({name: '', email: '', titleRole: '', primarySkillArea: SkillArea.AUDIT});
         this.saved.emit(consultant);
       },
       error: () => {
@@ -54,7 +64,7 @@ export class ConsultantForm {
 
   onCancel(): void {
     this.visible.set(false);
-    this.form.reset({ name: '', titleRole: '', primarySkillArea: SkillArea.AUDIT });
+    this.form.reset({name: '', email: '', titleRole: '', primarySkillArea: SkillArea.AUDIT});
     this.cancel.emit();
   }
 }

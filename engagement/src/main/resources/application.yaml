@@ -3,14 +3,17 @@ spring:
         import: optional:file:.env[.properties]
     application:
         name: engagement
+
     output:
         ansi:
             enabled: always
+
     datasource:
-        url: ${DB_URL}
+        url: ${CLIENT_DB_URL}
         username: ${DB_USERNAME}
         password: ${DB_PASSWORD}
         driver-class-name: org.postgresql.Driver
+
     jpa:
         hibernate:
             ddl-auto: none
@@ -18,9 +21,16 @@ spring:
         properties:
             hibernate:
                 format_sql: true
+
     sql:
         init:
             mode: always
+
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    public-key-location: classpath:keys/public.pem
 
 server:
     port: 8082
@@ -30,5 +40,10 @@ eureka:
         fetch-registry: true
         register-with-eureka: true
         service-url:
-            defaultZone: http://localhost:8761/eureka/
+            defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
         registry-fetch-interval-seconds: 5
+
+    instance:
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${server.port}
+        leaseRenewalIntervalInSeconds: 10
