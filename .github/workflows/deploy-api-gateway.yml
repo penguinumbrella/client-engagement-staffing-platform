@@ -2,7 +2,7 @@ name: Deploy API Gateway
 
 on:
   push:
-    branches: [aws-preauth]
+    branches: [aws-preauth, main]
     paths:
       - 'api-gateway/**'
 

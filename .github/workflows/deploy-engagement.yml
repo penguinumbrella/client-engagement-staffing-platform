@@ -2,7 +2,7 @@ name: Deploy Engagement Service
 
 on:
   push:
-    branches: [aws-preauth]
+    branches: [aws-preauth, main]
     paths:
       - 'engagement/**'
 
