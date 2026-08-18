@@ -30,5 +30,5 @@ eureka:
         fetch-registry: true
         register-with-eureka: true
         service-url:
-            defaultZone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
+            defaultZone: http://localhost:8761/eureka/
         registry-fetch-interval-seconds: 5

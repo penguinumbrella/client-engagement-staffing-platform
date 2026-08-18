@@ -50,9 +50,4 @@ eureka:
         fetch-registry: true
         register-with-eureka: true
         service-url:
-            defaultZone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
-            #http://client-platform-Eureka-env.us-east-1.elasticbeanstalk.com:8761/eureka #http://10.0.0.10:8761/eureka/
-    # instance:
-    #     hostname: 10.0.0.10
-    #     prefer-ip-address: true
-    #     instance-id: ${spring.application.name}:${random.uuid}
+            defaultZone: http://localhost:8761/eureka/
