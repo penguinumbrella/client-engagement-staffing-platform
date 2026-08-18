@@ -1,4 +1,6 @@
 spring:
+    config:
+        import: optional:file:.env[.properties]
     application:
         name: engagement
 
@@ -7,9 +9,9 @@ spring:
             enabled: always
 
     datasource:
-        url: ${ENGAGEMENT_DB_URL}
-        username: ${DB_USERNAME:postgres}
-        password: ${DB_PASSWORD:postgres}
+        url: ${DB_URL}
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
         driver-class-name: org.postgresql.Driver
 
     jpa:
@@ -22,7 +24,7 @@ spring:
 
     sql:
         init:
-            mode: ${SQL_INIT_MODE:always}
+            mode: always
 
     security:
         oauth2:
@@ -34,13 +36,14 @@ spring:
         import: optional:file:.env[.properties]
 
 server:
-    port: ${SERVER_PORT:${PORT:8082}}
+    port: 8082
 
 eureka:
     client:
         fetch-registry: true
         register-with-eureka: true
         service-url:
+<<<<<<< HEAD
             default-zone: ${EUREKA_URL:http://localhost:8761/eureka/}
         registry-fetch-interval-seconds: 5
 
@@ -48,3 +51,7 @@ eureka:
         prefer-ip-address: true
         instance-id: ${spring.application.name}:${server.port}
         leaseRenewalIntervalInSeconds: 10
+=======
+            defaultZone: http://localhost:8761/eureka/
+        registry-fetch-interval-seconds: 5
+>>>>>>> aws-preauth

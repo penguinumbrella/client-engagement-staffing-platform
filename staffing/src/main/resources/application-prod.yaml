@@ -1,6 +1,4 @@
 spring:
-    config:
-        import: optional:file:.env[.properties]
     application:
         name: staffing
     output:
@@ -10,24 +8,17 @@ spring:
         url: ${DB_URL}
         username: ${DB_USERNAME}
         password: ${DB_PASSWORD}
-        driver-class-name: org.postgresql.Driver
     jpa:
         hibernate:
-            ddl-auto: none
+            ddl-auto: update
         show-sql: true
         properties:
             hibernate:
                 format_sql: true
+        defer-datasource-initialization: true
     sql:
         init:
-            mode: never
-    security:
-        oauth2:
-            resourceserver:
-                jwt:
-                    public-key-location: classpath:keys/public.pem
-    config:
-        import: optional:file:.env[.properties]
+            mode: always
 
 server:
     port: 8083
@@ -37,6 +28,4 @@ eureka:
         fetch-registry: true
         register-with-eureka: true
         service-url:
-            defaultZone: http://localhost:8761/eureka/
-        registry-fetch-interval-seconds: 5
-
+            defaultZone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
