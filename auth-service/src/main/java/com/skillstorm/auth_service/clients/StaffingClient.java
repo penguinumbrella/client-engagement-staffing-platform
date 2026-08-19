@@ -1,6 +1,9 @@
 package com.skillstorm.auth_service.clients;
 
 import com.skillstorm.auth_service.Dtos.ProvisionConsultantRequest;
+
+import java.util.UUID;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +47,37 @@ public class StaffingClient {
                 .header(
                         HttpHeaders.AUTHORIZATION,
                         "Bearer " + token
+                )
+                .body(request)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public void provisionConsultantByManager(
+        UUID userId,
+        ProvisionConsultantRequest request,
+        String managerToken) {
+
+        ServiceInstance instance =
+                loadBalancerClient.choose("staffing");
+
+        if (instance == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.SERVICE_UNAVAILABLE,
+                        "Staffing service is not available"
+                );
+        }
+
+        restClient
+                .post()
+                .uri(
+                        instance.getUri()
+                                + "/api/consultants/provision/{userId}",
+                        userId
+                )
+                .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + managerToken
                 )
                 .body(request)
                 .retrieve()

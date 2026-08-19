@@ -115,4 +115,20 @@ public class ConsultantController {
                         )
                 );
     }
+
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
+    @PostMapping("/provision/{userId}")
+    public ResponseEntity<ConsultantResponse> provisionByManager(
+        @PathVariable UUID userId,
+        @Valid @RequestBody ProvisionConsultantRequest request) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        consultantService.provisionConsultant(
+                                userId,
+                                request
+                        )
+                );
+    }
 }

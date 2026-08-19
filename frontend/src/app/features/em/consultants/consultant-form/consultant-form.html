@@ -5,24 +5,62 @@
       (ngSubmit)="onSubmit()"
       class="flex w-full max-w-sm flex-col gap-3 rounded-md bg-[var(--p-surface-800)] p-4 shadow-lg"
     >
-      <h2 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Add Consultant</h2>
+      <h2 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">
+        Add User
+      </h2>
 
       <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
-        Name
+        Account Type
+        <select
+          formControlName="role"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+        >
+          @for (role of userRoles; track role.value) {
+            <option [value]="role.value">{{ role.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
+        First Name
         <input
           type="text"
-          formControlName="name"
-          placeholder="Jane Doe"
+          formControlName="firstName"
+          placeholder="Jane"
           class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
         />
-        @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <small class="p-error">Name is required</small>
+
+        @if (
+          form.get('firstName')?.invalid &&
+          form.get('firstName')?.touched
+        ) {
+          <small class="p-error">
+            First name is required
+          </small>
+        }
+      </label>
+
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
+        Last Name
+        <input
+          type="text"
+          formControlName="lastName"
+          placeholder="Doe"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+        />
+
+        @if (
+          form.get('lastName')?.invalid &&
+          form.get('lastName')?.touched
+        ) {
+          <small class="p-error">
+            Last name is required
+          </small>
         }
       </label>
 
       <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Email
-
         <input
           type="email"
           formControlName="email"
@@ -41,32 +79,61 @@
       </label>
 
       <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
-        Title / Role
+        Password
         <input
-          type="text"
-          formControlName="titleRole"
-          placeholder="Senior Consultant"
+          type="password"
+          formControlName="password"
+          placeholder="Minimum 8 characters"
           class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
         />
-        @if (form.get('titleRole')?.invalid && form.get('titleRole')?.touched) {
-          <small class="p-error">Title / role is required</small>
+
+        @if (
+          form.get('password')?.invalid &&
+          form.get('password')?.touched
+        ) {
+          <small class="p-error">
+            Password must be at least 8 characters
+          </small>
         }
       </label>
 
-      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
-        Primary Skill Area
-        <select
-          formControlName="primarySkillArea"
-          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
-        >
-          @for (area of skillAreas; track area) {
-            <option [value]="area">{{ area }}</option>
+      @if (isConsultant()) {
+        <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
+          Title / Role
+          <input
+            type="text"
+            formControlName="titleRole"
+            placeholder="Senior Consultant"
+            class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+          />
+
+          @if (
+            form.get('titleRole')?.invalid &&
+            form.get('titleRole')?.touched
+          ) {
+            <small class="p-error">
+              Title / role is required
+            </small>
           }
-        </select>
-      </label>
+        </label>
+
+        <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
+          Primary Skill Area
+          <select
+            formControlName="primarySkillArea"
+            class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+          >
+            @for (area of skillAreas; track area) {
+              <option [value]="area">{{ area }}</option>
+            }
+          </select>
+        </label>
+      }
 
       @if (errorMessage()) {
-        <p class="m-0 text-xs text-red-600">{{ errorMessage() }}</p>
+        <p class="m-0 text-xs text-red-600">
+          {{ errorMessage() }}
+        </p>
       }
 
       <div class="mt-2 flex justify-end gap-2">
@@ -83,7 +150,7 @@
           [disabled]="submitting()"
           class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {{ submitting() ? 'Saving…' : 'Create Consultant' }}
+          {{ submitting() ? 'Saving…' : 'Create User' }}
         </button>
       </div>
     </form>

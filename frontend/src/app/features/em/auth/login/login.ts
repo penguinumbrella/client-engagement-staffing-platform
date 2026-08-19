@@ -97,6 +97,7 @@ export class Login {
           this.errorMessage =
             'Unable to log in. Please try again.';
         }
+        this.loginForm.reset();
       }
     });
   }
