@@ -8,6 +8,26 @@ import {
   RegisterRequest,
   AuthUser
 } from '../../../types';
+import { environment } from '../../../../environments/environment';
+
+export interface CreateUserRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: 'CONSULTANT' | 'ENGAGEMENT_MANAGER';
+  titleRole?: string;
+  primarySkillArea?: string;
+}
+
+export interface CreateUserResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: 'CONSULTANT' | 'ENGAGEMENT_MANAGER';
+  enabled: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +37,10 @@ export class Auth {
   private readonly http = inject(HttpClient);
 
   private readonly baseUrl =
-    'http://localhost:8125/auth/api/auth';
+    `${environment.apiGatewayUrl}/auth/api/auth`;
+
+  private readonly usersUrl =
+  'http://localhost:8125/auth/api/users';
 
   currentUser = signal<AuthUser | null>(this.loadStoredUser());
 
@@ -60,7 +83,38 @@ export class Auth {
   }
 
   isLoggedIn(): boolean {
-    return this.getToken() !== null;
+    const token = this.getToken();
+
+    if (!token) {
+      return false;
+    }
+
+    try {
+
+      const payloadPart = token.split('.')[1];
+
+      if (!payloadPart) {
+        return false;
+      }
+
+      const normalized = payloadPart
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+
+      const padded =
+        normalized + '='.repeat((4 - normalized.length % 4) % 4);
+
+      const payload = JSON.parse(atob(padded));
+
+      if (!payload.exp) {
+        return false;
+      }
+
+      return payload.exp * 1000 > Date.now();
+
+    } catch {
+      return false;
+    }
   }
 
   logout(): void {
@@ -78,5 +132,12 @@ export class Auth {
     }
 
     return JSON.parse(user) as AuthUser;
+  }
+
+  createUser(request: CreateUserRequest): Observable<CreateUserResponse> {
+    return this.http.post<CreateUserResponse>(
+      this.usersUrl,
+      request
+    );
   }
 }

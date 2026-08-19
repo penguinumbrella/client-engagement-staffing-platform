@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.skillstorm.auth_service.Dtos.AuthResponse;
+import com.skillstorm.auth_service.Dtos.CreateUserRequest;
+import com.skillstorm.auth_service.Dtos.CreateUserResponse;
 import com.skillstorm.auth_service.Dtos.LoginRequest;
 import com.skillstorm.auth_service.Dtos.ProvisionConsultantRequest;
 import com.skillstorm.auth_service.Dtos.RegisterRequest;
@@ -49,22 +51,13 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        String normalizedEmail = normalizeEmail(request.email());
-
-        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
-            throw new DuplicateEmailException(normalizedEmail);
-        }
-
-        String passwordHash = passwordEncoder.encode(request.password());
-
-        User user = new User(
-                request.firstName().trim(),
-                request.lastName().trim(),
-                normalizedEmail,
-                passwordHash,
-                UserRole.CONSULTANT);
-
-        User savedUser = userRepository.save(user);
+        User savedUser = createUserAccount(
+            request.firstName(),
+            request.lastName(),
+            request.email(),
+            request.password(),
+            UserRole.CONSULTANT
+        );
 
         AuthResponse authResponse =
                 createAuthResponse(savedUser);
@@ -162,5 +155,92 @@ public class AuthService {
                 );
 
         return toUserResponse(user);
+    }
+
+    private User createUserAccount(
+        String firstName,
+        String lastName,
+        String email,
+        String password,
+        UserRole role) {
+
+        String normalizedEmail =
+                normalizeEmail(email);
+
+        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+                throw new DuplicateEmailException(normalizedEmail);
+        }
+
+        String passwordHash =
+                passwordEncoder.encode(password);
+
+        User user = new User(
+                firstName.trim(),
+                lastName.trim(),
+                normalizedEmail,
+                passwordHash,
+                role
+        );
+
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public CreateUserResponse createUser(
+        CreateUserRequest request,
+        String managerToken) {
+
+        if (request.role() == UserRole.CONSULTANT) {
+
+                if (request.titleRole() == null ||
+                        request.titleRole().isBlank()) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "titleRole is required for consultants"
+                );
+                }
+
+                if (request.primarySkillArea() == null ||
+                        request.primarySkillArea().isBlank()) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "primarySkillArea is required for consultants"
+                );
+                }
+        }
+
+        // Create the user in auth_db
+        User savedUser = createUserAccount(
+                request.firstName(),
+                request.lastName(),
+                request.email(),
+                request.password(),
+                request.role()
+        );
+
+        if (savedUser.getRole() == UserRole.CONSULTANT) {
+
+                staffingClient.provisionConsultantByManager(
+                        savedUser.getId(),
+                        new ProvisionConsultantRequest(
+                                savedUser.getFirstName(),
+                                savedUser.getLastName(),
+                                request.titleRole(),
+                                request.primarySkillArea()
+                        ),
+                        managerToken
+                );
+        }
+
+        return new CreateUserResponse(
+                savedUser.getId(),
+                savedUser.getFirstName(),
+                savedUser.getLastName(),
+                savedUser.getEmail(),
+                savedUser.getRole(),
+                savedUser.isEnabled()
+        );
     }
 }

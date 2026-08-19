@@ -105,6 +105,7 @@ export class Login {
         }
 
         console.error(error);
+        this.loginForm.reset();
       }
     });
   }

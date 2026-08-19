@@ -2,6 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 
 import { Auth } from './auth';
+import { environment } from '../../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
@@ -9,7 +10,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = auth.getToken();
 
   const isApiRequest =
-    req.url.startsWith('http://localhost:8125');
+    req.url.startsWith(environment.apiGatewayUrl);
 
   if (!token || !isApiRequest) {
     return next(req);
