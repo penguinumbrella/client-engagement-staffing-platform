@@ -1,5 +1,6 @@
 import { Component, computed, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 import { EngagementCard } from './engagement.model';
 import { EditDatesModal } from '../editors/edit-dates-modal/edit-dates-modal';
 import { EditableBadge } from '../editors/editable-badge/editable-badge';
@@ -47,6 +48,7 @@ export class EngagementDetail implements OnInit {
   private readonly assignmentService = inject(AssignmentService);
   private readonly consultantService = inject(ConsultantService);
   private readonly engagementService = inject(EngagementService);
+  private readonly messageService = inject(MessageService);
 
   @Input() engagement: EngagementCard | null = null;
   @Input() initialStatus: EngagementStatus = EngagementStatus.PLANNED;
@@ -118,7 +120,6 @@ export class EngagementDetail implements OnInit {
   protected readonly deleteHistory = signal<Assignment[] | null>(null);
   protected readonly historyLoading = signal(false);
   protected readonly deleting = signal(false);
-  protected readonly deleteError = signal<string | null>(null);
   protected deleteConfirmName = '';
 
   protected get deleteNameConfirmed(): boolean {
@@ -130,7 +131,6 @@ export class EngagementDetail implements OnInit {
       return;
     }
 
-    this.deleteError.set(null);
     this.deleteConfirmName = '';
     this.deleteHistory.set(null);
     this.deleteModalOpen.set(true);
@@ -143,7 +143,11 @@ export class EngagementDetail implements OnInit {
       },
       error: (err) => {
         this.historyLoading.set(false);
-        this.deleteError.set('Failed to check assignment history. Please try again.');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to check assignment history. Please try again.',
+        });
         console.error('Failed to load assignment history', err);
       },
     });
@@ -159,7 +163,6 @@ export class EngagementDetail implements OnInit {
     }
 
     this.deleting.set(true);
-    this.deleteError.set(null);
 
     this.engagementService.delete(this.engagement.id).subscribe({
       next: () => {
@@ -169,7 +172,12 @@ export class EngagementDetail implements OnInit {
       },
       error: (err) => {
         this.deleting.set(false);
-        this.deleteError.set(err?.error?.message ?? 'Failed to delete engagement. Please try again.');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Delete Failed',
+          detail: err?.error?.message ?? 'Failed to delete engagement. Please try again.',
+        });
+        console.error(err);
       },
     });
   }
@@ -177,7 +185,6 @@ export class EngagementDetail implements OnInit {
   // --- Cancel: the everyday "this isn't happening" action. Keeps the record and its history. ---
   protected readonly cancelModalOpen = signal(false);
   protected readonly cancelling = signal(false);
-  protected readonly cancelError = signal<string | null>(null);
 
   protected get canCancel(): boolean {
     return this.engagement !== null && !NON_CANCELLABLE_STATUSES.has(this.engagement.status);
@@ -188,7 +195,6 @@ export class EngagementDetail implements OnInit {
   }
 
   protected openCancelModal(): void {
-    this.cancelError.set(null);
     this.cancelModalOpen.set(true);
   }
 
@@ -202,7 +208,6 @@ export class EngagementDetail implements OnInit {
     }
 
     this.cancelling.set(true);
-    this.cancelError.set(null);
 
     this.engagementService.cancel(this.engagement.id).subscribe({
       next: (updated) => {
@@ -212,7 +217,12 @@ export class EngagementDetail implements OnInit {
       },
       error: (err) => {
         this.cancelling.set(false);
-        this.cancelError.set(err?.error?.message ?? 'Failed to cancel engagement. Please try again.');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Cancel Failed',
+          detail: err?.error?.message ?? 'Failed to cancel engagement. Please try again.',
+        });
+        console.error(err);
       },
     });
   }
@@ -283,7 +293,14 @@ export class EngagementDetail implements OnInit {
           this.loadConsultantsPanel();
           this.assigned.emit();
         },
-        error: (err) => console.error('Failed to assign consultant', err),
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Assign Failed',
+            detail: err?.error?.message ?? 'Failed to assign consultant. Please try again.',
+          });
+          console.error('Failed to assign consultant', err);
+        },
       });
   }
 
@@ -297,10 +314,8 @@ export class EngagementDetail implements OnInit {
 
   protected readonly unstaffTarget = signal<Assignment | null>(null);
   protected readonly unstaffing = signal(false);
-  protected readonly unstaffError = signal<string | null>(null);
 
   protected confirmUnstaff(assignment: Assignment): void {
-    this.unstaffError.set(null);
     this.unstaffTarget.set(assignment);
   }
 
@@ -315,7 +330,6 @@ export class EngagementDetail implements OnInit {
     }
 
     this.unstaffing.set(true);
-    this.unstaffError.set(null);
 
     this.assignmentService.remove(target.id).subscribe({
       next: () => {
@@ -325,7 +339,12 @@ export class EngagementDetail implements OnInit {
       },
       error: (err) => {
         this.unstaffing.set(false);
-        this.unstaffError.set(err?.error?.message ?? 'Failed to unstaff consultant. Please try again.');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Unstaff Failed',
+          detail: err?.error?.message ?? 'Failed to unstaff consultant. Please try again.',
+        });
+        console.error(err);
       },
     });
   }
@@ -350,12 +369,26 @@ export class EngagementDetail implements OnInit {
         this.assignments.set(assignments);
         this.expandedRoles.set(new Set(assignments.map((a) => a.engagementRole)));
       },
-      error: (err) => console.error(`Failed to load assignments for engagement ${engagementId}`, err),
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load staffing for this engagement.',
+        });
+        console.error(`Failed to load assignments for engagement ${engagementId}`, err);
+      },
     });
 
     this.consultantService.getAll().subscribe({
       next: (consultants) => this.allConsultants.set(consultants),
-      error: (err) => console.error('Failed to load consultants', err),
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load consultants.',
+        });
+        console.error('Failed to load consultants', err);
+      },
     });
   }
 

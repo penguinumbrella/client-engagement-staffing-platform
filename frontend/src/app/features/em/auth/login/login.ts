@@ -5,6 +5,7 @@ import {
   Validators
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { MessageService } from 'primeng/api';
 
 import { Auth } from '../auth';
 import { UserRole } from '../../../../types';
@@ -23,9 +24,9 @@ export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  private readonly messageService = inject(MessageService);
 
   loading = false;
-  errorMessage = '';
 
   loginForm = this.fb.nonNullable.group({
     email: [
@@ -52,7 +53,6 @@ export class Login {
     }
 
     this.loading = true;
-    this.errorMessage = '';
 
     this.auth.login(
       this.loginForm.getRawValue()
@@ -92,12 +92,20 @@ export class Login {
         this.loading = false;
 
         if (error.status === 401) {
-          this.errorMessage =
-            'Invalid email or password.';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Login Failed',
+            detail: 'Invalid email or password.'
+          });
         } else {
-          this.errorMessage =
-            'Unable to log in. Please try again.';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Login Failed',
+            detail: 'Unable to log in. Please try again.'
+          });
         }
+
+        console.error(error);
       }
     });
   }

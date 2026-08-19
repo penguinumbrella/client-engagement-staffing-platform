@@ -1,4 +1,5 @@
 import { Component, effect, inject, input, model, output, signal } from '@angular/core';
+import { MessageService } from 'primeng/api';
 import { EditableCompanyName } from '../editors/editable-company-name/editable-company-name';
 import { EditableIndustry } from '../editors/editable-industry/editable-industry';
 import { EditablePrimaryContactEmail } from '../editors/editable-primary-contact-email/editable-primary-contact-email';
@@ -24,6 +25,7 @@ import { EngagementService } from '../../../../services/engagement.service';
 })
 export class ClientDetail {
   private readonly engagementService = inject(EngagementService);
+  private readonly messageService = inject(MessageService);
 
   readonly client = input<Client | null>(null);
   readonly visible = model<boolean>(false);
@@ -60,6 +62,11 @@ export class ClientDetail {
         this.loadingEngagements.set(false);
       },
       error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load engagements for this client.',
+        });
         console.error(`Failed to load engagements for client ${clientId}`, err);
         this.loadingEngagements.set(false);
       },

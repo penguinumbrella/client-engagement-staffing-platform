@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { MessageService } from 'primeng/api';
 import { ConsultantService } from './consultant.service';
 import { Consultant } from '../types/consultant.types';
 
@@ -10,6 +11,7 @@ import { Consultant } from '../types/consultant.types';
 @Injectable({ providedIn: 'root' })
 export class CurrentConsultantService {
   private readonly consultantService = inject(ConsultantService);
+  private readonly messageService = inject(MessageService);
 
   private readonly consultants = signal<Consultant[]>([]);
   private readonly selectedId = signal<number | null>(null);
@@ -22,7 +24,14 @@ export class CurrentConsultantService {
           this.selectedId.set(consultants[0].id);
         }
       },
-      error: (err) => console.error('Failed to load consultants', err),
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load consultants.',
+        });
+        console.error('Failed to load consultants', err);
+      },
     });
   }
 

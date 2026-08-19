@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { MessageService } from 'primeng/api';
 import { Engagement, EngagementStatus } from '../../../../types/engagement.types';
 import { EngagementService } from '../../../../services/engagement.service';
 import { AssignmentService } from '../../../../services/assignment.service';
@@ -46,6 +47,7 @@ export class EngagementTimeline {
   private readonly engagementService = inject(EngagementService);
   private readonly assignmentService = inject(AssignmentService);
   private readonly clientService = inject(ClientService);
+  private readonly messageService = inject(MessageService);
 
   private readonly engagements = signal<Engagement[]>([]);
   private readonly clientsById = signal<Map<number, Client>>(new Map());
@@ -58,7 +60,7 @@ export class EngagementTimeline {
   constructor() {
     this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
-      error: (err) => console.error('Failed to load clients', err),
+      error: (err) => this.notifyError('Failed to load clients.', err),
     });
 
     this.engagementService.getAll().subscribe({
@@ -66,7 +68,7 @@ export class EngagementTimeline {
         this.engagements.set(engagements);
         engagements.forEach((e) => this.loadConsultants(e.id));
       },
-      error: (err) => console.error('Failed to load engagements', err),
+      error: (err) => this.notifyError('Failed to load engagements.', err),
     });
   }
 
@@ -197,7 +199,7 @@ export class EngagementTimeline {
         this.stopLoading(engagementId);
       },
       error: (err) => {
-        console.error(`Failed to load assignments for engagement ${engagementId}`, err);
+        this.notifyError('Failed to load consultants for an engagement.', err);
         this.stopLoading(engagementId);
       },
     });
@@ -207,5 +209,14 @@ export class EngagementTimeline {
     const next = new Set(this.loadingConsultants());
     next.delete(engagementId);
     this.loadingConsultants.set(next);
+  }
+
+  private notifyError(detail: string, err: unknown): void {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail,
+    });
+    console.error(detail, err);
   }
 }

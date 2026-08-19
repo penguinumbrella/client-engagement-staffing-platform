@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { MessageService } from 'primeng/api';
 
 import { ClientService } from '../../../services/ClientService';
 import { Client, RelationshipStatus } from '../../../types/client.types';
@@ -14,6 +15,7 @@ import { ClientTable } from './client-table/client-table';
 })
 export class Clients implements OnInit {
   private readonly clientService = inject(ClientService);
+  private readonly messageService = inject(MessageService);
 
   readonly clients = signal<Client[]>([]);
   readonly loading = signal(true);
@@ -86,7 +88,14 @@ export class Clients implements OnInit {
           this.detailClient.set(updated);
         }
       },
-      error: (err) => console.error(`Failed to update client ${id}`, err),
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Update Failed',
+          detail: err?.error?.message ?? 'Failed to update client. Please try again.',
+        });
+        console.error(`Failed to update client ${id}`, err);
+      },
     });
   }
 

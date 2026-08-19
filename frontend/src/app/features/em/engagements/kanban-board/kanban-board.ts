@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { MessageService } from 'primeng/api';
 import { KanbanColumn } from '../kanban-column/kanban-column';
 import { EngagementDetail } from '../engagement-detail/engagement-detail';
 import { EngagementCard, EngagementColumn, ConsultantBadge, ClientBadge } from '../engagement-detail/engagement.model';
@@ -31,6 +32,7 @@ export class KanbanBoard {
   private readonly consultantService = inject(ConsultantService);
   private readonly assignmentService = inject(AssignmentService);
   private readonly clientService = inject(ClientService);
+  private readonly messageService = inject(MessageService);
 
   private readonly engagements = signal<Engagement[]>([]);
   private readonly consultantsById = signal<Map<number, Consultant>>(new Map());
@@ -45,12 +47,12 @@ export class KanbanBoard {
   constructor() {
     this.consultantService.getAll().subscribe({
       next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
-      error: (err) => console.error('Failed to load consultants', err),
+      error: (err) => this.notifyError('Failed to load consultants.', err),
     });
 
     this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
-      error: (err) => console.error('Failed to load clients', err),
+      error: (err) => this.notifyError('Failed to load clients.', err),
     });
 
     this.engagementService.getAll().subscribe({
@@ -58,7 +60,7 @@ export class KanbanBoard {
         this.engagements.set(engagements);
         engagements.forEach((e) => this.refreshConsultants(e.id));
       },
-      error: (err) => console.error('Failed to load engagements', err),
+      error: (err) => this.notifyError('Failed to load engagements.', err),
     });
   }
 
@@ -111,7 +113,7 @@ export class KanbanBoard {
         next.set(engagementId, badges);
         this.consultantsByEngagement.set(next);
       },
-      error: (err) => console.error(`Failed to load consultants for engagement ${engagementId}`, err),
+      error: (err) => this.notifyError('Failed to load consultants for an engagement.', err),
     });
   }
 
@@ -134,7 +136,14 @@ export class KanbanBoard {
           this.engagements().map((e) => (e.id === engagement.id ? { ...e, status: updated.status } : e)),
         );
       },
-      error: (err) => console.error(`Failed to update engagement ${engagement.id} status`, err),
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Move Failed',
+          detail: err?.error?.message ?? 'Failed to update the engagement status. Please try again.',
+        });
+        console.error(err);
+      },
     });
   }
 
@@ -174,7 +183,14 @@ export class KanbanBoard {
         this.engagements.set([...this.engagements(), engagement]);
         this.creatingStatus.set(null);
       },
-      error: (err) => console.error('Failed to create engagement', err),
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Create Failed',
+          detail: err?.error?.message ?? 'Failed to create engagement. Please try again.',
+        });
+        console.error(err);
+      },
     });
   }
 
@@ -188,7 +204,7 @@ export class KanbanBoard {
           this.selected.set({ ...current, summary: updated.summary });
         }
       },
-      error: (err) => console.error(`Failed to update engagement ${id} summary`, err),
+      error: (err) => this.notifyUpdateError('summary', id, err),
     });
   }
 
@@ -202,7 +218,7 @@ export class KanbanBoard {
           this.selected.set({ ...current, engagementName: updated.engagementName });
         }
       },
-      error: (err) => console.error(`Failed to update engagement ${id} name`, err),
+      error: (err) => this.notifyUpdateError('name', id, err),
     });
   }
 
@@ -216,7 +232,7 @@ export class KanbanBoard {
           this.selected.set({ ...current, startDate: updated.startDate, targetEndDate: updated.targetEndDate });
         }
       },
-      error: (err) => console.error(`Failed to update engagement ${id} dates`, err),
+      error: (err) => this.notifyUpdateError('dates', id, err),
     });
   }
 
@@ -230,7 +246,7 @@ export class KanbanBoard {
           this.selected.set({ ...current, engagementType: updated.engagementType });
         }
       },
-      error: (err) => console.error(`Failed to update engagement ${id} type`, err),
+      error: (err) => this.notifyUpdateError('type', id, err),
     });
   }
 
@@ -244,7 +260,25 @@ export class KanbanBoard {
           this.selected.set({ ...current, status: updated.status });
         }
       },
-      error: (err) => console.error(`Failed to update engagement ${id} status`, err),
+      error: (err) => this.notifyUpdateError('status', id, err),
     });
+  }
+
+  private notifyError(detail: string, err: unknown): void {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail,
+    });
+    console.error(detail, err);
+  }
+
+  private notifyUpdateError(field: string, engagementId: number, err: unknown): void {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Update Failed',
+      detail: (err as { error?: { message?: string } })?.error?.message ?? `Failed to update the engagement ${field}. Please try again.`,
+    });
+    console.error(`Failed to update engagement ${engagementId} ${field}`, err);
   }
 }

@@ -11,6 +11,7 @@ import {
   Router,
   RouterLink
 } from '@angular/router';
+import { MessageService } from 'primeng/api';
 
 import { Auth } from '../auth';
 
@@ -34,10 +35,10 @@ export class Register {
 
   private readonly router = inject(Router);
 
+  private readonly messageService = inject(MessageService);
+
 
   loading = false;
-
-  errorMessage = '';
 
 
   registerForm = this.fb.nonNullable.group(
@@ -150,8 +151,6 @@ export class Register {
 
     this.loading = true;
 
-    this.errorMessage = '';
-
 
     this.auth.register({
 
@@ -195,25 +194,39 @@ export class Register {
 
         if (error.status === 409) {
 
-          this.errorMessage =
-            'An account with this email already exists.';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Registration Failed',
+            detail: 'An account with this email already exists.'
+          });
 
         } else if (error.status === 400) {
 
-          this.errorMessage =
-            'Please check the information you entered.';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Registration Failed',
+            detail: 'Please check the information you entered.'
+          });
 
         } else if (error.status === 503) {
 
-          this.errorMessage =
-            'The staffing service is currently unavailable. Please try again.';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Registration Failed',
+            detail: 'The staffing service is currently unavailable. Please try again.'
+          });
 
         } else {
 
-          this.errorMessage =
-            'Unable to create your account. Please try again.';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Registration Failed',
+            detail: 'Unable to create your account. Please try again.'
+          });
 
         }
+
+        console.error(error);
       }
 
     });

@@ -7,6 +7,7 @@ import {
   RouterOutlet
 } from '@angular/router';
 import { filter } from 'rxjs';
+import { Toast } from 'primeng/toast';
 import { Auth } from './features/em/auth/auth';
 
 interface NavItem {
@@ -16,7 +17,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Toast],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

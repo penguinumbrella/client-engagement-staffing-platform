@@ -1,5 +1,6 @@
 import { Component, inject, model, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 
 import { ConsultantService } from '../../../../services/consultant.service';
 import { Consultant, SkillArea } from '../../../../types/consultant.types';
@@ -18,10 +19,10 @@ export class ConsultantForm {
 
   private readonly consultantService = inject(ConsultantService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly messageService = inject(MessageService);
 
   readonly skillAreas = Object.values(SkillArea);
   readonly submitting = signal(false);
-  readonly errorMessage = signal<string | null>(null);
 
   form: FormGroup = this.formBuilder.nonNullable.group({
     name: ['', Validators.required],
@@ -40,8 +41,6 @@ export class ConsultantForm {
   });
 
   onSubmit(): void {
-    this.errorMessage.set(null);
-
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -55,9 +54,24 @@ export class ConsultantForm {
         this.form.reset({name: '', email: '', titleRole: '', primarySkillArea: SkillArea.AUDIT});
         this.saved.emit(consultant);
       },
-      error: () => {
+      error: (err) => {
         this.submitting.set(false);
-        this.errorMessage.set('Failed to create consultant. Please try again.');
+
+        if (err.status === 409) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Cannot Create',
+            detail: err?.error?.message ?? 'A consultant profile already exists for this user.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Create Failed',
+            detail: err?.error?.message ?? 'Failed to create consultant. Please try again.',
+          });
+        }
+
+        console.error(err);
       },
     });
   }

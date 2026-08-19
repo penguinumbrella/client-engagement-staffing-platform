@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 //import { CurrentConsultantService } from '../../services/current-consultant.service';
 import { AssignmentService } from '../../services/assignment.service';
 import { EngagementService } from '../../services/engagement.service';
@@ -26,6 +27,7 @@ export class MyEngagements {
   private readonly engagementService = inject(EngagementService);
   private readonly consultantService = inject(ConsultantService);
   private readonly clientService = inject(ClientService);
+  private readonly messageService = inject(MessageService);
 
   private readonly consultantsById = signal<Map<number, Consultant>>(new Map());
   private readonly clientsById = signal<Map<number, Client>>(new Map());
@@ -39,12 +41,12 @@ export class MyEngagements {
   constructor() {
     this.consultantService.getAll().subscribe({
       next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
-      error: (err) => console.error('Failed to load consultants', err),
+      error: (err) => this.notifyError('Failed to load consultants.', err),
     });
 
     this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
-      error: (err) => console.error('Failed to load clients', err),
+      error: (err) => this.notifyError('Failed to load clients.', err),
     });
 
     // effect(() => {
@@ -117,10 +119,7 @@ export class MyEngagements {
 
         error: err => {
 
-          console.error(
-            'Failed to load my assignments',
-            err
-          );
+          this.notifyError('Failed to load your engagements.', err);
 
           this.loading.set(false);
         }
@@ -159,7 +158,7 @@ export class MyEngagements {
         next.set(engagementId, engagement);
         this.engagementsById.set(next);
       },
-      error: (err) => console.error(`Failed to load engagement ${engagementId}`, err),
+      error: (err) => this.notifyError('Failed to load an engagement.', err),
     });
   }
 
@@ -179,8 +178,17 @@ export class MyEngagements {
         next.set(engagementId, badges);
         this.teammatesByEngagement.set(next);
       },
-      error: (err) => console.error(`Failed to load teammates for engagement ${engagementId}`, err),
+      error: (err) => this.notifyError('Failed to load teammates.', err),
     });
+  }
+
+  private notifyError(detail: string, err: unknown): void {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail,
+    });
+    console.error(detail, err);
   }
 
   protected toggleExpanded(engagementId: number): void {

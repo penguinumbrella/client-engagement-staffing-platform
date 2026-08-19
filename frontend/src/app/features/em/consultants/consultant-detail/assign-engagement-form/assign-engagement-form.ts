@@ -1,5 +1,6 @@
 import { Component, OnInit, effect, inject, input, model, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 
 import { AssignmentService } from '../../../../../services/assignment.service';
 import { EngagementService } from '../../../../../services/engagement.service';
@@ -21,6 +22,7 @@ export class AssignEngagementForm implements OnInit {
   private readonly engagementService = inject(EngagementService);
   private readonly assignmentService = inject(AssignmentService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly messageService = inject(MessageService);
 
   consultant = input<Consultant | null>(null);
   existingAssignments = input<AssignedEngagementRef[]>([]);
@@ -31,7 +33,6 @@ export class AssignEngagementForm implements OnInit {
   readonly engagementRoles = Object.values(EngagementRole);
   readonly engagements = signal<Engagement[]>([]);
   readonly submitting = signal(false);
-  readonly errorMessage = signal<string | null>(null);
 
   readonly availableEngagements = signal<Engagement[]>([]);
 
@@ -53,7 +54,6 @@ export class AssignEngagementForm implements OnInit {
 
     effect(() => {
       if (this.visible()) {
-        this.errorMessage.set(null);
         this.form.reset({
           engagementId: null,
           engagementRole: EngagementRole.ASSOCIATE,
@@ -76,7 +76,14 @@ export class AssignEngagementForm implements OnInit {
         this.engagements.set(
           engagements.filter((e) => !AssignEngagementForm.UNASSIGNABLE_STATUSES.has(e.status)),
         ),
-      error: () => this.errorMessage.set('Failed to load engagements.'),
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load engagements.',
+        });
+        console.error(err);
+      },
     });
   }
 
@@ -87,7 +94,6 @@ export class AssignEngagementForm implements OnInit {
       return;
     }
 
-    this.errorMessage.set(null);
     this.submitting.set(true);
 
     const value = this.form.getRawValue();
@@ -106,9 +112,24 @@ export class AssignEngagementForm implements OnInit {
           this.visible.set(false);
           this.assigned.emit(assignment);
         },
-        error: () => {
+        error: (err) => {
           this.submitting.set(false);
-          this.errorMessage.set('Failed to assign engagement.');
+
+          if (err.status === 409) {
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Cannot Assign',
+              detail: err?.error?.message ?? 'This consultant is already staffed on that engagement.',
+            });
+          } else {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Assign Failed',
+              detail: err?.error?.message ?? 'Failed to assign engagement. Please try again.',
+            });
+          }
+
+          console.error(err);
         },
       });
   }

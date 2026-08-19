@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, model, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 
 import { ClientService } from '../../../../services/ClientService';
@@ -27,10 +27,10 @@ export class ClientForm {
   private clientService = inject(ClientService);
   private formBuilder = inject(FormBuilder);
   private confirmationService = inject(ConfirmationService);
+  private messageService = inject(MessageService);
 
   readonly relationshipStatuses = Object.values(RelationshipStatus);
   readonly submitting = signal(false);
-  readonly errorMessage = signal<string | null>(null);
 
   readonly isDelete = computed(() => this.mode() === 'delete');
   readonly title = computed(() => {
@@ -76,8 +76,6 @@ export class ClientForm {
       return;
     }
 
-    this.errorMessage.set(null);
-
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -109,7 +107,6 @@ export class ClientForm {
     const id = this.client()?.id;
     if (id == null) return;
 
-    this.errorMessage.set(null);
     this.submitting.set(true);
     this.clientService.deleteClient(id).subscribe({
       next: () => {
@@ -117,9 +114,24 @@ export class ClientForm {
         this.visible.set(false);
         this.deleted.emit(id);
       },
-      error: () => {
+      error: (err) => {
         this.submitting.set(false);
-        this.errorMessage.set('Failed to delete client. Please try again.');
+
+        if (err.status === 409) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Cannot Delete',
+            detail: 'This client has active engagements. Complete or cancel them first, then delete the client.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Delete Failed',
+            detail: 'Failed to delete client. Please try again.',
+          });
+        }
+
+        console.error(err);
       },
     });
   }
@@ -140,9 +152,24 @@ export class ClientForm {
         this.visible.set(false);
         this.saved.emit(client);
       },
-      error: () => {
+      error: (err) => {
         this.submitting.set(false);
-        this.errorMessage.set(`Failed to ${this.mode() === 'create' ? 'create' : 'update'} client.`);
+
+        if (err.status === 409) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Duplicate Client',
+            detail: err?.error?.message ?? 'A client with this name already exists.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: this.mode() === 'create' ? 'Create Failed' : 'Update Failed',
+            detail: `Failed to ${this.mode() === 'create' ? 'create' : 'update'} client. Please try again.`,
+          });
+        }
+
+        console.error(err);
       },
     });
   }

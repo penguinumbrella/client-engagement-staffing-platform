@@ -308,10 +308,6 @@
         This removes {{ target.consultantName }}'s assignment from this engagement. This can't be undone.
       </p>
 
-      @if (unstaffError()) {
-        <p class="mb-3 text-xs text-red-600">{{ unstaffError() }}</p>
-      }
-
       <div class="flex justify-end gap-2">
         <button
           type="button"
@@ -381,10 +377,6 @@
           />
         </label>
 
-        @if (deleteError()) {
-          <p class="mb-3 text-xs text-red-600">{{ deleteError() }}</p>
-        }
-
         <div class="flex justify-end gap-2">
           <button
             type="button"
@@ -431,10 +423,6 @@
             </li>
           }
         </ul>
-      }
-
-      @if (cancelError()) {
-        <p class="mb-3 text-xs text-red-600">{{ cancelError() }}</p>
       }
 
       <div class="flex justify-end gap-2">
