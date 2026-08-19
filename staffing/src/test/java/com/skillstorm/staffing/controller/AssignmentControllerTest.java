@@ -15,15 +15,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,7 +58,23 @@ class AssignmentControllerTest {
         AssignmentController controller = new AssignmentController(assignmentService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new JwtArgumentResolver())
                 .build();
+    }
+
+    private static class JwtArgumentResolver implements HandlerMethodArgumentResolver {
+
+        @Override
+        public boolean supportsParameter(MethodParameter parameter) {
+            return Jwt.class.isAssignableFrom(parameter.getParameterType());
+        }
+
+        @Override
+        public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+            return new Jwt("token", Instant.now(), Instant.now().plusSeconds(3600),
+                    Map.of("alg", "none"), Map.of("sub", "test-user"));
+        }
     }
 
     private AssignmentResponse sampleResponse(Long id) {
@@ -68,7 +92,7 @@ class AssignmentControllerTest {
         request.setAssignmentStartDate(LocalDate.of(2026, 1, 1));
         request.setAssignmentEndDate(LocalDate.of(2026, 6, 1));
 
-        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class),"token")).thenReturn(sampleResponse(1L));
+        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class), eq("token"))).thenReturn(sampleResponse(1L));
 
         mockMvc.perform(post("/api/assignments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -94,7 +118,7 @@ class AssignmentControllerTest {
         request.setAssignmentStartDate(LocalDate.of(2026, 1, 1));
         request.setAssignmentEndDate(LocalDate.of(2026, 6, 1));
 
-        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class),"token"))
+        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class), eq("token")))
                 .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Consultant 1 is already staffed on engagement 10"));
 
         mockMvc.perform(post("/api/assignments")

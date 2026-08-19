@@ -12,11 +12,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Instant;
+import java.util.Map;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -46,7 +55,23 @@ class ConsultantControllerTest {
         ConsultantController controller = new ConsultantController(consultantService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new JwtArgumentResolver())
                 .build();
+    }
+
+    private static class JwtArgumentResolver implements HandlerMethodArgumentResolver {
+
+        @Override
+        public boolean supportsParameter(MethodParameter parameter) {
+            return Jwt.class.isAssignableFrom(parameter.getParameterType());
+        }
+
+        @Override
+        public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+            return new Jwt("token", Instant.now(), Instant.now().plusSeconds(3600),
+                    Map.of("alg", "none"), Map.of("sub", "test-user"));
+        }
     }
 
     private ConsultantResponse sampleResponse(Long id) {
@@ -58,10 +83,11 @@ class ConsultantControllerTest {
     void create_returns201WithCreatedConsultant() throws Exception {
         CreateConsultantRequest request = new CreateConsultantRequest();
         request.setName("Jane Doe");
+        request.setEmail("jane.doe@example.com");
         request.setTitleRole("Senior Consultant");
         request.setPrimarySkillArea(SkillArea.AUDIT);
 
-        when(consultantService.createConsultant(any(CreateConsultantRequest.class),"token")).thenReturn(sampleResponse(1L));
+        when(consultantService.createConsultant(any(CreateConsultantRequest.class), eq("token"))).thenReturn(sampleResponse(1L));
 
         mockMvc.perform(post("/api/consultants")
                         .contentType(MediaType.APPLICATION_JSON)
