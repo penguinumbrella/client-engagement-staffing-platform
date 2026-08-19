@@ -1,7 +1,7 @@
 @if (editing) {
   <textarea
     #draftTextarea
-    class="m-0 min-h-[100px] w-full rounded-md border border-indigo-300 p-1 text-xs leading-relaxed text-gray-800 outline-none"
+    class="m-0 min-h-[100px] w-full rounded-md border border-indigo-300 p-1 text-xs leading-relaxed text-[var(--p-surface-100)] outline-none"
     name="draft"
     [(ngModel)]="draft"
     (blur)="save()"
@@ -9,7 +9,7 @@
   ></textarea>
 } @else {
   <p
-    class="m-0 cursor-pointer rounded-md p-1 text-xs leading-relaxed text-gray-600 hover:bg-gray-50"
+    class="m-0 cursor-pointer rounded-md p-1 text-xs leading-relaxed text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
     title="Click to edit"
     (click)="startEdit()"
   >

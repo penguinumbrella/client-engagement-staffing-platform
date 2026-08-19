@@ -1,19 +1,19 @@
 <div class="mx-auto max-w-4xl p-6">
   <div class="mb-6 flex items-center justify-between gap-4">
-    <h2 class="m-0 text-lg font-semibold text-gray-800">My Engagements</h2>
+    <h2 class="m-0 text-lg font-semibold text-[var(--p-surface-100)]">My Engagements</h2>
   </div>
 
   @if (loading()) {
-    <p class="text-sm text-gray-500">Loading engagements…</p>
+    <p class="text-sm text-[var(--p-surface-300)]">Loading engagements…</p>
   } @else if (rows().length === 0) {
-    <p class="text-sm text-gray-500">No engagements assigned to you.</p>
+    <p class="text-sm text-[var(--p-surface-300)]">No engagements assigned to you.</p>
   } @else {
     <ul class="flex flex-col gap-2">
       @for (row of rows(); track row.id) {
-        <li class="rounded-lg border border-gray-200 bg-white">
+        <li class="rounded-lg border border-[var(--p-surface-600)] bg-[var(--p-surface-800)]">
           <button
             type="button"
-            class="flex w-full flex-col gap-3 p-4 text-left hover:bg-gray-50"
+            class="flex w-full flex-col gap-3 p-4 text-left hover:bg-[var(--p-surface-800)]"
             (click)="toggleExpanded(row.id)"
           >
             <div class="flex w-full items-center gap-3">
@@ -26,15 +26,15 @@
               </span>
 
               <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span class="truncate text-sm font-semibold text-gray-800">{{ row.engagementName }}</span>
-                <span class="truncate text-xs text-gray-500">{{ row.client.companyName }}</span>
-                <span class="inline-flex items-center gap-1.5 text-[11px] text-gray-400">
+                <span class="truncate text-sm font-semibold text-[var(--p-surface-100)]">{{ row.engagementName }}</span>
+                <span class="truncate text-xs text-[var(--p-surface-300)]">{{ row.client.companyName }}</span>
+                <span class="inline-flex items-center gap-1.5 text-[11px] text-[var(--p-surface-400)]">
                   <i class="pi pi-calendar text-[11px]"></i>
                   {{ formatDate(row.startDate) }} &ndash; {{ formatDate(row.targetEndDate) }}
                 </span>
               </div>
 
-              <span class="text-xs text-gray-500">{{ row.engagementType }} &middot; {{ row.myRole }}</span>
+              <span class="text-xs text-[var(--p-surface-300)]">{{ row.engagementType }} &middot; {{ row.myRole }}</span>
 
               <span
                 class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
@@ -44,30 +44,30 @@
                 {{ row.status }}
               </span>
 
-              <span class="text-xs text-gray-400 transition-transform" [class.rotate-90]="isExpanded(row.id)">
+              <span class="text-xs text-[var(--p-surface-400)] transition-transform" [class.rotate-90]="isExpanded(row.id)">
                 ›
               </span>
             </div>
 
             <div class="flex w-full items-center gap-2">
-              <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+              <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--p-surface-700)]">
                 <div class="h-full rounded-full" [class]="progressFillClasses(row.status)" [style.width.%]="progressPercent(row)"></div>
               </div>
-              <span class="shrink-0 text-[10px] text-gray-400">{{ progressPercent(row) }}%</span>
+              <span class="shrink-0 text-[10px] text-[var(--p-surface-400)]">{{ progressPercent(row) }}%</span>
             </div>
           </button>
 
           @if (isExpanded(row.id)) {
-            <div class="flex flex-col gap-3 border-t border-gray-100 p-4">
+            <div class="flex flex-col gap-3 border-t border-[var(--p-surface-700)] p-4">
               <div>
-                <h4 class="m-0 mb-1 text-xs font-semibold text-gray-600">Description</h4>
-                <p class="m-0 text-sm text-gray-700">{{ row.summary || 'No description provided.' }}</p>
+                <h4 class="m-0 mb-1 text-xs font-semibold text-[var(--p-surface-300)]">Description</h4>
+                <p class="m-0 text-sm text-[var(--p-surface-200)]">{{ row.summary || 'No description provided.' }}</p>
               </div>
 
               <div>
-                <h4 class="m-0 mb-2 text-xs font-semibold text-gray-600">Team</h4>
+                <h4 class="m-0 mb-2 text-xs font-semibold text-[var(--p-surface-300)]">Team</h4>
                 @if (row.teammates.length === 0) {
-                  <p class="m-0 text-xs text-gray-400">No other consultants assigned.</p>
+                  <p class="m-0 text-xs text-[var(--p-surface-400)]">No other consultants assigned.</p>
                 } @else {
                   <ul class="flex flex-col gap-2">
                     @for (teammate of row.teammates; track teammate.name) {
@@ -79,8 +79,8 @@
                           {{ teammate.initials }}
                         </span>
                         <div class="flex flex-col">
-                          <span class="text-xs font-medium text-gray-700">{{ teammate.name }}</span>
-                          <span class="text-[10px] text-gray-400">{{ teammate.projectRole }}</span>
+                          <span class="text-xs font-medium text-[var(--p-surface-200)]">{{ teammate.name }}</span>
+                          <span class="text-[10px] text-[var(--p-surface-400)]">{{ teammate.projectRole }}</span>
                         </div>
                       </li>
                     }

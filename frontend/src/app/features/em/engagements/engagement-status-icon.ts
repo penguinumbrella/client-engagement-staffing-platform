@@ -19,11 +19,11 @@ const STATUS_ICON_COLORS: Record<EngagementStatus, string> = {
   [EngagementStatus.IN_PROGRESS]: 'text-indigo-500',
   [EngagementStatus.ON_HOLD]: 'text-amber-500',
   [EngagementStatus.COMPLETED]: 'text-emerald-500',
-  [EngagementStatus.CANCELLED]: 'text-gray-400',
+  [EngagementStatus.CANCELLED]: 'text-[var(--p-surface-400)]',
 };
 
 export function engagementStatusIconColor(status: string): string {
-  return STATUS_ICON_COLORS[status as EngagementStatus] ?? 'text-gray-500';
+  return STATUS_ICON_COLORS[status as EngagementStatus] ?? 'text-[var(--p-surface-300)]';
 }
 
 /** Hex equivalents of STATUS_ICON_COLORS, for contexts (e.g. inline SVG/CSS) that need an actual color value rather than a Tailwind class. */

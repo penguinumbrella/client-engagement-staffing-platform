@@ -23,8 +23,7 @@ import { Auth } from '../auth';
     RouterLink
   ],
 
-  templateUrl: './register.html',
-  styleUrl: './register.css'
+  templateUrl: './register.html'
 })
 export class Register {
 

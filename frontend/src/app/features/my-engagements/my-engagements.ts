@@ -206,12 +206,12 @@ export class MyEngagements {
     [EngagementStatus.PLANNED]: 'bg-amber-100 text-amber-700',
     [EngagementStatus.IN_PROGRESS]: 'bg-green-100 text-green-700',
     [EngagementStatus.ON_HOLD]: 'bg-orange-100 text-orange-700',
-    [EngagementStatus.COMPLETED]: 'bg-gray-100 text-gray-600',
+    [EngagementStatus.COMPLETED]: 'bg-[var(--p-surface-700)] text-[var(--p-surface-300)]',
     [EngagementStatus.CANCELLED]: 'bg-red-100 text-red-700',
   };
 
   protected statusClasses(status: EngagementStatus): string {
-    return MyEngagements.STATUS_CLASSES[status] ?? 'bg-gray-100 text-gray-600';
+    return MyEngagements.STATUS_CLASSES[status] ?? 'bg-[var(--p-surface-700)] text-[var(--p-surface-300)]';
   }
 
   protected readonly statusIcon = engagementStatusIcon;
@@ -219,15 +219,15 @@ export class MyEngagements {
 
   /** Matches the progress-fill palette used on the EM consultant-detail page. */
   private static readonly PROGRESS_FILL_CLASSES: Record<EngagementStatus, string> = {
-    [EngagementStatus.PLANNED]: 'bg-gray-300',
+    [EngagementStatus.PLANNED]: 'bg-[var(--p-surface-500)]',
     [EngagementStatus.IN_PROGRESS]: 'bg-blue-500',
     [EngagementStatus.ON_HOLD]: 'bg-orange-400',
     [EngagementStatus.COMPLETED]: 'bg-emerald-500',
-    [EngagementStatus.CANCELLED]: 'bg-gray-400',
+    [EngagementStatus.CANCELLED]: 'bg-[var(--p-surface-400)]',
   };
 
   protected progressFillClasses(status: EngagementStatus): string {
-    return MyEngagements.PROGRESS_FILL_CLASSES[status] ?? 'bg-gray-300';
+    return MyEngagements.PROGRESS_FILL_CLASSES[status] ?? 'bg-[var(--p-surface-500)]';
   }
 
   /** % of the way from startDate to targetEndDate, clamped 0-100. Completed/cancelled engagements read as fully done. */

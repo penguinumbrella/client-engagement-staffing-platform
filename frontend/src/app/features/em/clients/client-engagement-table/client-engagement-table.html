@@ -1,4 +1,4 @@
-<div class="w-full rounded-lg bg-gray-100 p-3">
+<div class="w-full rounded-lg bg-[var(--p-surface-700)] p-3">
   <div class="mb-3 flex items-center gap-1">
     @for (tab of tabs; track tab.value) {
       <button
@@ -7,8 +7,8 @@
         class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
         [class]="
           activeFilter() === tab.value
-            ? 'bg-white text-gray-900 shadow-sm'
-            : 'text-gray-500 hover:text-gray-700'
+            ? 'bg-[var(--p-surface-800)] text-[var(--p-surface-50)] shadow-sm'
+            : 'text-[var(--p-surface-300)] hover:text-[var(--p-surface-200)]'
         "
       >
         {{ tab.label }}
@@ -20,7 +20,7 @@
     @for (engagement of filteredEngagements(); track engagement.id) {
       <app-client-engagement-card [engagement]="engagement" />
     } @empty {
-      <p class="col-span-2 m-0 px-1 py-4 text-center text-xs text-gray-400">No engagements found.</p>
+      <p class="col-span-2 m-0 px-1 py-4 text-center text-xs text-[var(--p-surface-400)]">No engagements found.</p>
     }
   </div>
 </div>

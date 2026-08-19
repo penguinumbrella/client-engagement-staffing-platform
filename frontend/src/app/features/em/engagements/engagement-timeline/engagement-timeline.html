@@ -1,14 +1,14 @@
-<div class="flex h-[70vh] flex-col overflow-hidden rounded-md bg-white shadow-sm">
-  <div class="flex items-center justify-end gap-1 border-b border-gray-200 px-3 py-2">
+<div class="flex h-[70vh] flex-col overflow-hidden rounded-md bg-[var(--p-surface-800)] shadow-sm">
+  <div class="flex items-center justify-end gap-1 border-b border-[var(--p-surface-600)] px-3 py-2">
     <button
-      class="flex h-6 w-6 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
+      class="flex h-6 w-6 items-center justify-center rounded text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
       title="Zoom out"
       (click)="zoomOut()"
     >
       <i class="pi pi-minus text-[10px]"></i>
     </button>
     <button
-      class="flex h-6 w-6 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
+      class="flex h-6 w-6 items-center justify-center rounded text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
       title="Zoom in"
       (click)="zoomIn()"
     >
@@ -26,10 +26,10 @@
         ></div>
       }
 
-      <div class="sticky top-0 z-20 h-8 border-b border-gray-200 bg-white text-xs font-medium text-gray-500">
+      <div class="sticky top-0 z-20 h-8 border-b border-[var(--p-surface-600)] bg-[var(--p-surface-800)] text-xs font-medium text-[var(--p-surface-300)]">
         <div class="relative h-full">
           @for (marker of monthMarkers(); track marker.label) {
-            <span class="absolute top-2 border-l border-gray-100 pl-1.5" [style.left.px]="marker.leftPx">{{
+            <span class="absolute top-2 border-l border-[var(--p-surface-700)] pl-1.5" [style.left.px]="marker.leftPx">{{
               marker.label
             }}</span>
           }
@@ -37,7 +37,7 @@
       </div>
 
       @for (row of rows(); track row.engagement.id) {
-        <div class="relative h-14 border-b border-gray-100">
+        <div class="relative h-14 border-b border-[var(--p-surface-700)]">
           <button
             class="absolute inset-y-2 flex items-center gap-1.5 overflow-hidden rounded px-2 text-left text-white shadow-sm hover:brightness-95"
             [style.left.px]="row.leftPx"
@@ -72,12 +72,12 @@
 
         @if (isExpanded(row.engagement.id)) {
           @if (loadingConsultants().has(row.engagement.id)) {
-            <p class="m-0 px-3 py-2 text-[11px] text-gray-400">Loading consultants…</p>
+            <p class="m-0 px-3 py-2 text-[11px] text-[var(--p-surface-400)]">Loading consultants…</p>
           } @else if (!consultantRows(row.engagement.id).length) {
-            <p class="m-0 px-3 py-2 text-[11px] text-gray-400">No consultants assigned.</p>
+            <p class="m-0 px-3 py-2 text-[11px] text-[var(--p-surface-400)]">No consultants assigned.</p>
           } @else {
             @for (consultant of consultantRows(row.engagement.id); track consultant.consultantName) {
-              <div class="relative h-10 border-b border-gray-100 bg-gray-50/60">
+              <div class="relative h-10 border-b border-[var(--p-surface-700)] bg-[var(--p-surface-800)]/60">
                 <div
                   class="absolute inset-y-1.5 flex items-center gap-1.5 overflow-hidden rounded px-2 text-left text-white shadow-sm"
                   [style.left.px]="consultant.leftPx"
@@ -86,7 +86,7 @@
                   [title]="consultant.startDate + ' – ' + (consultant.endDate ?? 'ongoing')"
                 >
                   <span
-                    class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/25 text-[8px] font-bold"
+                    class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--p-surface-800)]/25 text-[8px] font-bold"
                   >
                     {{ consultant.initials }}
                   </span>
@@ -101,7 +101,7 @@
       }
 
       @if (!rows().length) {
-        <p class="m-0 px-3 py-6 text-center text-sm text-gray-400">No engagements to display.</p>
+        <p class="m-0 px-3 py-6 text-center text-sm text-[var(--p-surface-400)]">No engagements to display.</p>
       }
     </div>
   </div>

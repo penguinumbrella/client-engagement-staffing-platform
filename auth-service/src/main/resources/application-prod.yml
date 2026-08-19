@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: auth-service
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    url: ${AUTH_DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/

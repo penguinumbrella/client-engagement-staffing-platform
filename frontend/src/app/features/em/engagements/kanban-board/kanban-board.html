@@ -4,7 +4,7 @@
       [column]="column"
       [connectedTo]="connectedLists"
       [class.border-l]="column.status === cancelledStatus"
-      [class.border-gray-200]="column.status === cancelledStatus"
+      [class.border-[var(--p-surface-600)]]="column.status === cancelledStatus"
       [class.pl-4]="column.status === cancelledStatus"
       (dropped)="drop($event)"
       (select)="selectEngagement($event)"

@@ -27,9 +27,9 @@ export class EditableRelationshipStatus {
       case RelationshipStatus.PROSPECTIVE:
         return 'bg-blue-100 text-blue-700 hover:bg-blue-200';
       case RelationshipStatus.FORMER:
-        return 'bg-gray-100 text-gray-500 hover:bg-gray-200';
+        return 'bg-[var(--p-surface-700)] text-[var(--p-surface-300)] hover:bg-[var(--p-surface-600)]';
       default:
-        return 'bg-gray-100 text-gray-600 hover:bg-gray-200';
+        return 'bg-[var(--p-surface-700)] text-[var(--p-surface-300)] hover:bg-[var(--p-surface-600)]';
     }
   }
 

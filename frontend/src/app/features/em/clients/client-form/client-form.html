@@ -5,9 +5,9 @@
     <form
       [formGroup]="form"
       (ngSubmit)="onSubmit()"
-      class="flex w-full max-w-sm flex-col gap-3 rounded-md bg-white p-4 shadow-lg"
+      class="flex w-full max-w-sm flex-col gap-3 rounded-md bg-[var(--p-surface-800)] p-4 shadow-lg"
     >
-      <h2 class="m-0 text-sm font-semibold text-gray-900">{{ title() }}</h2>
+      <h2 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">{{ title() }}</h2>
 
       @if (isDelete()) {
         <p class="m-0 text-xs text-red-600">
@@ -15,57 +15,57 @@
         </p>
       }
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Company Name
         <input
           type="text"
           formControlName="companyName"
           placeholder="Acme Corporation"
-          class="rounded border border-gray-300 px-2 py-1 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         />
         @if (form.get('companyName')?.invalid && form.get('companyName')?.touched) {
           <small class="p-error">Company name is required</small>
         }
       </label>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Industry
         <input
           type="text"
           formControlName="industry"
           placeholder="Technology"
-          class="rounded border border-gray-300 px-2 py-1 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         />
       </label>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Primary Contact Name
         <input
           type="text"
           formControlName="primaryContactName"
           placeholder="Jane Doe"
-          class="rounded border border-gray-300 px-2 py-1 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         />
       </label>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Primary Contact Email
         <input
           type="email"
           formControlName="primaryContactEmail"
           placeholder="jane@acme.com"
-          class="rounded border border-gray-300 px-2 py-1 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         />
         @if (form.get('primaryContactEmail')?.invalid && form.get('primaryContactEmail')?.touched) {
           <small class="p-error">Must be a valid email</small>
         }
       </label>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Relationship Status
         <select
           formControlName="relationshipStatus"
-          class="rounded border border-gray-300 px-2 py-1 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         >
           @for (status of relationshipStatuses; track status) {
             <option [value]="status">{{ status }}</option>
@@ -84,7 +84,7 @@
         <button
           type="button"
           (click)="onCancel()"
-          class="rounded px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100"
+          class="rounded px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
         >
           Cancel
         </button>

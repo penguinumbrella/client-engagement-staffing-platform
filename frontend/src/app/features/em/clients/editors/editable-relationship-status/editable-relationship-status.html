@@ -1,7 +1,7 @@
 @if (editing) {
   <select
     #draftSelect
-    class="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 outline-none"
+    class="rounded-full border border-[var(--p-surface-600)] bg-[var(--p-surface-800)] px-2 py-0.5 text-[10px] font-medium text-[var(--p-surface-300)] outline-none"
     name="draft"
     [(ngModel)]="draft"
     (change)="save()"
