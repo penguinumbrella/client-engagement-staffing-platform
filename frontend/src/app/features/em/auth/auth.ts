@@ -40,7 +40,7 @@ export class Auth {
     `${environment.apiGatewayUrl}/auth/api/auth`;
 
   private readonly usersUrl =
-  'http://localhost:8125/auth/api/users';
+    `${environment.apiGatewayUrl}/auth/api/users`;
 
   currentUser = signal<AuthUser | null>(this.loadStoredUser());
 
