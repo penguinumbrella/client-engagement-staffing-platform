@@ -16,8 +16,7 @@ import { UserRole } from '../../../../types';
     ReactiveFormsModule,
     RouterLink
   ],
-  templateUrl: './login.html',
-  styleUrl: './login.css'
+  templateUrl: './login.html'
 })
 export class Login {
 

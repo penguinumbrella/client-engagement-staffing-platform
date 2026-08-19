@@ -3,8 +3,22 @@
 @import 'tailwindcss';
 @import 'primeicons/primeicons.css';
 
+:root {
+  --color-accent-blue: #4a7ba6;
+  --color-accent-blue-hover: #5f92bf;
+}
+
 body {
-  background-color: #ffffff;
+  background-color: var(--p-surface-950, #12100c);
+  color: var(--p-surface-50, #efe9df);
+}
+
+a {
+  color: var(--color-accent-blue);
+}
+
+a:hover {
+  color: var(--color-accent-blue-hover);
 }
 
 .cdk-drag-preview {

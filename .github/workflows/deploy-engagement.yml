@@ -1,15 +1,15 @@
-name: Deploy Client Service
+name: Deploy Engagement Service
 
 on:
   push:
     branches: [aws-preauth, main]
     paths:
-      - 'client/**'
+      - 'engagement/**'
 
 env:
   AWS_REGION: us-east-1
-  EB_APPLICATION_NAME: Client-Client-env
-  EB_ENVIRONMENT_NAME: Client-Client-env
+  EB_APPLICATION_NAME: Client-engagement-staffing-Engagements
+  EB_ENVIRONMENT_NAME: Client-Engagements-env
   S3_BUCKET: elasticbeanstalk-us-east-1-397345411365
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: client
+        working-directory: engagement
 
     services:
       postgres:
@@ -25,7 +25,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: client_platform_test
+          POSTGRES_DB: engagement_test
         ports:
           - 5432:5432
         options: >-
@@ -47,7 +47,7 @@ jobs:
 
       - name: Run tests
         env:
-          DB_URL: jdbc:postgresql://localhost:5432/client_platform_test
+          DB_URL: jdbc:postgresql://localhost:5432/engagement_test
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
         run: mvn -B test

@@ -1,5 +1,5 @@
 <div
-  class="cursor-pointer rounded-md bg-white p-3 shadow-sm"
+  class="cursor-pointer rounded-md bg-[var(--p-surface-800)] p-3 shadow-sm"
   cdkDrag
   [cdkDragData]="engagement"
   (click)="select.emit(engagement)"
@@ -11,13 +11,13 @@
     >
       {{ engagement.client.initials }}
     </span>
-    <span class="flex-1 text-[11px] text-gray-500">{{ engagement.client.companyName }}</span>
+    <span class="flex-1 text-[11px] text-[var(--p-surface-300)]">{{ engagement.client.companyName }}</span>
   </div>
 
   <p class="m-0 mb-2 text-sm font-semibold">{{ engagement.engagementName }}</p>
 
   <span
-    class="mb-2 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600"
+    class="mb-2 inline-block rounded-full bg-[var(--p-surface-700)] px-2 py-0.5 text-[10px] font-medium text-[var(--p-surface-300)]"
   >
     {{ engagement.engagementType }}
   </span>

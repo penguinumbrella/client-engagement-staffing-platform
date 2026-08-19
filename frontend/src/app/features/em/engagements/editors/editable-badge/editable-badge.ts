@@ -16,8 +16,8 @@ import { FormsModule } from '@angular/forms';
 export class EditableBadge {
   @Input({ required: true }) value!: string;
   @Input({ required: true }) options: string[] = [];
-  @Input() badgeClass = 'bg-gray-100 text-gray-600 hover:bg-gray-200';
-  @Input() selectClass = 'border-gray-200 text-gray-600';
+  @Input() badgeClass = 'bg-[var(--p-surface-700)] text-[var(--p-surface-300)] hover:bg-[var(--p-surface-600)]';
+  @Input() selectClass = 'border-[var(--p-surface-600)] text-[var(--p-surface-300)]';
   /** Optional per-value PrimeIcons class (e.g. `'pi-check-circle'`), shown before the label. */
   @Input() icon: ((value: string) => string) | null = null;
   @Output() valueChange = new EventEmitter<string>();

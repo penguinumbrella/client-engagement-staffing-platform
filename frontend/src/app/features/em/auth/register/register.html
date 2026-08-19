@@ -1,44 +1,50 @@
-<div class="register-page">
+<div class="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-[var(--p-surface-950)] font-sans">
 
-  <div class="register-card">
+  <div class="w-full max-w-[1200px] min-h-[720px] grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] overflow-hidden rounded-3xl bg-[var(--p-surface-800)] shadow-2xl shadow-black/40">
 
     <!-- LEFT SIDE -->
-    <section class="welcome-panel">
+    <section class="relative hidden lg:flex items-center overflow-hidden p-16 text-[var(--p-surface-50)] bg-gradient-to-br from-[#3a2708] via-[#573b0d] to-[#7a5212]">
 
-      <div class="shape shape-one"></div>
-      <div class="shape shape-two"></div>
-      <div class="shape shape-three"></div>
+      <div class="absolute w-[430px] h-[430px] -top-44 -right-36 rounded-full bg-white/10"></div>
+      <div class="absolute w-[540px] h-[270px] -bottom-44 -left-24 rounded-full bg-white/10 -rotate-10"></div>
+      <div class="absolute w-24 h-24 top-32 left-20 rounded-full border-8 border-white/25"></div>
 
-      <div class="welcome-content">
+      <div class="relative z-10 max-w-[470px]">
 
-        <div class="brand-mark">
+        <div class="w-14 h-14 flex items-center justify-center mb-9 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm text-2xl">
           <i class="pi pi-briefcase"></i>
         </div>
 
-        <h1>
+        <h1 class="m-0 text-4xl lg:text-5xl leading-tight tracking-tight font-bold">
           Client Engagement
-          <span>& Staffing Platform</span>
+          <span class="block text-[#f9d24f]">& Staffing Platform</span>
         </h1>
 
-        <p>
+        <p class="max-w-[420px] my-6 text-white/80 leading-relaxed">
           Create your account to access your engagements,
           assignments, and consulting team information.
         </p>
 
-        <div class="welcome-features">
+        <div class="flex flex-col gap-4">
 
-          <div class="feature">
-            <i class="pi pi-building"></i>
+          <div class="flex items-center gap-3 text-white/90 text-sm">
+            <span class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10">
+              <i class="pi pi-building"></i>
+            </span>
             <span>Client Management</span>
           </div>
 
-          <div class="feature">
-            <i class="pi pi-users"></i>
+          <div class="flex items-center gap-3 text-white/90 text-sm">
+            <span class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10">
+              <i class="pi pi-users"></i>
+            </span>
             <span>Consultant Staffing</span>
           </div>
 
-          <div class="feature">
-            <i class="pi pi-briefcase"></i>
+          <div class="flex items-center gap-3 text-white/90 text-sm">
+            <span class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10">
+              <i class="pi pi-briefcase"></i>
+            </span>
             <span>Engagement Tracking</span>
           </div>
 
@@ -50,21 +56,21 @@
 
 
     <!-- RIGHT SIDE -->
-    <section class="form-panel">
+    <section class="flex items-center justify-center p-8 sm:p-12 lg:p-16 bg-[var(--p-surface-800)]">
 
-      <div class="form-container">
+      <div class="w-full max-w-[520px]">
 
-        <div class="form-heading">
+        <div class="mb-8">
 
-          <p class="eyebrow">
+          <p class="m-0 mb-2 text-xs font-bold tracking-[1.8px] text-[var(--color-accent-blue)]">
             GET STARTED
           </p>
 
-          <h2>
+          <h2 class="m-0 text-3xl leading-tight tracking-tight font-bold text-[var(--p-surface-50)]">
             Create your account
           </h2>
 
-          <p class="subtitle">
+          <p class="mt-2.5 text-[var(--p-surface-300)]">
             Enter your information to join the platform.
           </p>
 
@@ -72,27 +78,28 @@
 
 
         <form
+          class="flex flex-col gap-4.5"
           [formGroup]="registerForm"
           (ngSubmit)="register()"
         >
 
-          <div class="form-row">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             <!-- FIRST NAME -->
-            <div class="form-group">
+            <div class="flex flex-col gap-1.5">
 
-              <label for="firstName">
+              <label for="firstName" class="text-sm font-semibold text-[var(--p-surface-200)]">
                 First Name
               </label>
 
               <div
-                class="input-wrapper"
-                [class.input-invalid]="
+                class="h-[50px] flex items-center rounded-xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                [class.border-red-500]="
                   registerForm.controls.firstName.touched &&
                   registerForm.controls.firstName.invalid
                 "
               >
-                <i class="pi pi-user"></i>
+                <i class="pi pi-user ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
 
                 <input
                   id="firstName"
@@ -100,6 +107,7 @@
                   formControlName="firstName"
                   placeholder="John"
                   autocomplete="given-name"
+                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
                 >
               </div>
 
@@ -107,7 +115,7 @@
                 registerForm.controls.firstName.touched &&
                 registerForm.controls.firstName.hasError('required')
               ) {
-                <small class="field-error">
+                <small class="text-red-400 text-xs">
                   First name is required.
                 </small>
               }
@@ -116,20 +124,20 @@
 
 
             <!-- LAST NAME -->
-            <div class="form-group">
+            <div class="flex flex-col gap-1.5">
 
-              <label for="lastName">
+              <label for="lastName" class="text-sm font-semibold text-[var(--p-surface-200)]">
                 Last Name
               </label>
 
               <div
-                class="input-wrapper"
-                [class.input-invalid]="
+                class="h-[50px] flex items-center rounded-xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                [class.border-red-500]="
                   registerForm.controls.lastName.touched &&
                   registerForm.controls.lastName.invalid
                 "
               >
-                <i class="pi pi-user"></i>
+                <i class="pi pi-user ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
 
                 <input
                   id="lastName"
@@ -137,6 +145,7 @@
                   formControlName="lastName"
                   placeholder="Doe"
                   autocomplete="family-name"
+                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
                 >
               </div>
 
@@ -144,7 +153,7 @@
                 registerForm.controls.lastName.touched &&
                 registerForm.controls.lastName.hasError('required')
               ) {
-                <small class="field-error">
+                <small class="text-red-400 text-xs">
                   Last name is required.
                 </small>
               }
@@ -155,20 +164,20 @@
 
 
           <!-- EMAIL -->
-          <div class="form-group">
+          <div class="flex flex-col gap-1.5">
 
-            <label for="email">
+            <label for="email" class="text-sm font-semibold text-[var(--p-surface-200)]">
               Email address
             </label>
 
             <div
-              class="input-wrapper"
-              [class.input-invalid]="
+              class="h-[50px] flex items-center rounded-xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              [class.border-red-500]="
                 registerForm.controls.email.touched &&
                 registerForm.controls.email.invalid
               "
             >
-              <i class="pi pi-envelope"></i>
+              <i class="pi pi-envelope ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
 
               <input
                 id="email"
@@ -176,6 +185,7 @@
                 formControlName="email"
                 placeholder="you@company.com"
                 autocomplete="email"
+                class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
               >
             </div>
 
@@ -183,7 +193,7 @@
               registerForm.controls.email.touched &&
               registerForm.controls.email.invalid
             ) {
-              <small class="field-error">
+              <small class="text-red-400 text-xs">
                 Enter a valid email address.
               </small>
             }
@@ -191,29 +201,30 @@
           </div>
 
 
-          <div class="form-row">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             <!-- TITLE / ROLE -->
-            <div class="form-group">
+            <div class="flex flex-col gap-1.5">
 
-              <label for="titleRole">
+              <label for="titleRole" class="text-sm font-semibold text-[var(--p-surface-200)]">
                 Title
               </label>
 
               <div
-                class="input-wrapper"
-                [class.input-invalid]="
+                class="h-[50px] flex items-center rounded-xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                [class.border-red-500]="
                   registerForm.controls.titleRole.touched &&
                   registerForm.controls.titleRole.invalid
                 "
               >
-                <i class="pi pi-id-card"></i>
+                <i class="pi pi-id-card ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
 
                 <input
                   id="titleRole"
                   type="text"
                   formControlName="titleRole"
                   placeholder="Associate"
+                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
                 >
               </div>
 
@@ -221,7 +232,7 @@
                 registerForm.controls.titleRole.touched &&
                 registerForm.controls.titleRole.hasError('required')
               ) {
-                <small class="field-error">
+                <small class="text-red-400 text-xs">
                   Title is required.
                 </small>
               }
@@ -230,31 +241,32 @@
 
 
             <!-- SKILL AREA -->
-            <div class="form-group">
+            <div class="flex flex-col gap-1.5">
 
-              <label for="primarySkillArea">
+              <label for="primarySkillArea" class="text-sm font-semibold text-[var(--p-surface-200)]">
                 Primary Skill Area
               </label>
 
               <div
-                class="input-wrapper select-wrapper"
-                [class.input-invalid]="
+                class="h-[50px] flex items-center rounded-xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                [class.border-red-500]="
                   registerForm.controls.primarySkillArea.touched &&
                   registerForm.controls.primarySkillArea.invalid
                 "
               >
-                <i class="pi pi-chart-bar"></i>
+                <i class="pi pi-chart-bar ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
 
                 <select
                   id="primarySkillArea"
                   formControlName="primarySkillArea"
+                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] cursor-pointer"
                 >
-                  <option value="">Select skill area</option>
-                  <option value="Audit">Audit</option>
-                  <option value="Tax">Tax</option>
-                  <option value="Risk">Risk</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Strategy">Strategy</option>
+                  <option value="" class="bg-[var(--p-surface-800)]">Select skill area</option>
+                  <option value="Audit" class="bg-[var(--p-surface-800)]">Audit</option>
+                  <option value="Tax" class="bg-[var(--p-surface-800)]">Tax</option>
+                  <option value="Risk" class="bg-[var(--p-surface-800)]">Risk</option>
+                  <option value="Technology" class="bg-[var(--p-surface-800)]">Technology</option>
+                  <option value="Strategy" class="bg-[var(--p-surface-800)]">Strategy</option>
                 </select>
               </div>
 
@@ -262,7 +274,7 @@
                 registerForm.controls.primarySkillArea.touched &&
                 registerForm.controls.primarySkillArea.hasError('required')
               ) {
-                <small class="field-error">
+                <small class="text-red-400 text-xs">
                   Primary skill area is required.
                 </small>
               }
@@ -273,20 +285,20 @@
 
 
           <!-- PASSWORD -->
-          <div class="form-group">
+          <div class="flex flex-col gap-1.5">
 
-            <label for="password">
+            <label for="password" class="text-sm font-semibold text-[var(--p-surface-200)]">
               Password
             </label>
 
             <div
-              class="input-wrapper"
-              [class.input-invalid]="
+              class="h-[50px] flex items-center rounded-xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              [class.border-red-500]="
                 registerForm.controls.password.touched &&
                 registerForm.controls.password.invalid
               "
             >
-              <i class="pi pi-lock"></i>
+              <i class="pi pi-lock ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
 
               <input
                 id="password"
@@ -294,6 +306,7 @@
                 formControlName="password"
                 placeholder="Create a password"
                 autocomplete="new-password"
+                class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
               >
             </div>
 
@@ -301,7 +314,7 @@
               registerForm.controls.password.touched &&
               registerForm.controls.password.hasError('required')
             ) {
-              <small class="field-error">
+              <small class="text-red-400 text-xs">
                 Password is required.
               </small>
             }
@@ -310,7 +323,7 @@
               registerForm.controls.password.touched &&
               registerForm.controls.password.hasError('minlength')
             ) {
-              <small class="field-error">
+              <small class="text-red-400 text-xs">
                 Password must be at least 12 characters.
               </small>
             }
@@ -319,7 +332,7 @@
               registerForm.controls.password.touched &&
               registerForm.controls.password.hasError('maxlength')
             ) {
-              <small class="field-error">
+              <small class="text-red-400 text-xs">
                 Password cannot exceed 72 characters.
               </small>
             }
@@ -328,15 +341,15 @@
 
 
           <!-- CONFIRM PASSWORD -->
-          <div class="form-group">
+          <div class="flex flex-col gap-1.5">
 
-            <label for="confirmPassword">
+            <label for="confirmPassword" class="text-sm font-semibold text-[var(--p-surface-200)]">
               Confirm Password
             </label>
 
             <div
-              class="input-wrapper"
-              [class.input-invalid]="
+              class="h-[50px] flex items-center rounded-xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              [class.border-red-500]="
                 registerForm.controls.confirmPassword.touched &&
                 (
                   registerForm.controls.confirmPassword.invalid ||
@@ -344,7 +357,7 @@
                 )
               "
             >
-              <i class="pi pi-lock"></i>
+              <i class="pi pi-lock ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
 
               <input
                 id="confirmPassword"
@@ -352,6 +365,7 @@
                 formControlName="confirmPassword"
                 placeholder="Confirm your password"
                 autocomplete="new-password"
+                class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
               >
             </div>
 
@@ -359,7 +373,7 @@
               registerForm.controls.confirmPassword.touched &&
               registerForm.controls.confirmPassword.hasError('required')
             ) {
-              <small class="field-error">
+              <small class="text-red-400 text-xs">
                 Confirm your password.
               </small>
             }
@@ -368,7 +382,7 @@
               registerForm.controls.confirmPassword.touched &&
               registerForm.hasError('passwordMismatch')
             ) {
-              <small class="field-error">
+              <small class="text-red-400 text-xs">
                 Passwords do not match.
               </small>
             }
@@ -377,7 +391,7 @@
 
 
           <button
-            class="create-account-button"
+            class="w-full h-[52px] flex items-center justify-center gap-2.5 mt-0.5 rounded-xl bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-400)] text-[#1a1611] font-bold text-[0.95rem] shadow-lg shadow-[var(--p-primary-400)]/25 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             type="submit"
             [disabled]="loading"
           >
@@ -393,13 +407,13 @@
         </form>
 
 
-        <div class="login-section">
+        <div class="flex items-center justify-center gap-1.5 mt-6.5 text-[var(--p-surface-300)] text-sm">
 
           <span>
             Already have an account?
           </span>
 
-          <a routerLink="/login">
+          <a routerLink="/login" class="font-semibold text-[var(--color-accent-blue)] no-underline hover:underline">
             Sign in
           </a>
 

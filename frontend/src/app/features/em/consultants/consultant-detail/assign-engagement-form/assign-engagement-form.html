@@ -3,15 +3,15 @@
     <form
       [formGroup]="form"
       (ngSubmit)="onSubmit()"
-      class="flex w-full max-w-sm flex-col gap-3 rounded-md bg-white p-4 shadow-lg"
+      class="flex w-full max-w-sm flex-col gap-3 rounded-md bg-[var(--p-surface-800)] p-4 shadow-lg"
     >
-      <h2 class="m-0 text-sm font-semibold text-gray-900">Assign Engagement</h2>
+      <h2 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Assign Engagement</h2>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Engagement
         <select
           formControlName="engagementId"
-          class="rounded border border-gray-300 px-2 py-1 text-sm"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
         >
           <option [ngValue]="null" disabled>Select an engagement</option>
           @for (engagement of availableEngagements(); track engagement.id) {
@@ -22,15 +22,15 @@
           <small class="p-error">Engagement is required</small>
         }
         @if (availableEngagements().length === 0) {
-          <small class="text-gray-400">No unassigned active engagements available.</small>
+          <small class="text-[var(--p-surface-400)]">No unassigned active engagements available.</small>
         }
       </label>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Role
         <select
           formControlName="engagementRole"
-          class="rounded border border-gray-300 px-2 py-1 text-sm"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
         >
           @for (role of engagementRoles; track role) {
             <option [value]="role">{{ role }}</option>
@@ -39,24 +39,24 @@
       </label>
 
       <div class="flex gap-3">
-        <label class="flex flex-1 flex-col gap-1 text-xs text-gray-700">
+        <label class="flex flex-1 flex-col gap-1 text-xs text-[var(--p-surface-200)]">
           Start Date
           <input
             type="date"
             formControlName="assignmentStartDate"
-            class="rounded border border-gray-300 px-2 py-1 text-sm"
+            class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
           />
           @if (form.get('assignmentStartDate')?.invalid && form.get('assignmentStartDate')?.touched) {
             <small class="p-error">Start date is required</small>
           }
         </label>
 
-        <label class="flex flex-1 flex-col gap-1 text-xs text-gray-700">
+        <label class="flex flex-1 flex-col gap-1 text-xs text-[var(--p-surface-200)]">
           End Date
           <input
             type="date"
             formControlName="assignmentEndDate"
-            class="rounded border border-gray-300 px-2 py-1 text-sm"
+            class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
           />
           @if (form.get('assignmentEndDate')?.invalid && form.get('assignmentEndDate')?.touched) {
             <small class="p-error">End date is required</small>
@@ -68,7 +68,7 @@
         <button
           type="button"
           (click)="onCancel()"
-          class="rounded px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100"
+          class="rounded px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
         >
           Cancel
         </button>

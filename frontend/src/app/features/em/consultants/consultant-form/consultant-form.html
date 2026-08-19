@@ -3,31 +3,31 @@
     <form
       [formGroup]="form"
       (ngSubmit)="onSubmit()"
-      class="flex w-full max-w-sm flex-col gap-3 rounded-md bg-white p-4 shadow-lg"
+      class="flex w-full max-w-sm flex-col gap-3 rounded-md bg-[var(--p-surface-800)] p-4 shadow-lg"
     >
-      <h2 class="m-0 text-sm font-semibold text-gray-900">Add Consultant</h2>
+      <h2 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Add Consultant</h2>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Name
         <input
           type="text"
           formControlName="name"
           placeholder="Jane Doe"
-          class="rounded border border-gray-300 px-2 py-1 text-sm"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
         />
         @if (form.get('name')?.invalid && form.get('name')?.touched) {
           <small class="p-error">Name is required</small>
         }
       </label>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Email
 
         <input
           type="email"
           formControlName="email"
           placeholder="jane.doe@example.com"
-          class="rounded border border-gray-300 px-2 py-1 text-sm"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
         />
 
         @if (
@@ -40,24 +40,24 @@
         }
       </label>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Title / Role
         <input
           type="text"
           formControlName="titleRole"
           placeholder="Senior Consultant"
-          class="rounded border border-gray-300 px-2 py-1 text-sm"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
         />
         @if (form.get('titleRole')?.invalid && form.get('titleRole')?.touched) {
           <small class="p-error">Title / role is required</small>
         }
       </label>
 
-      <label class="flex flex-col gap-1 text-xs text-gray-700">
+      <label class="flex flex-col gap-1 text-xs text-[var(--p-surface-200)]">
         Primary Skill Area
         <select
           formControlName="primarySkillArea"
-          class="rounded border border-gray-300 px-2 py-1 text-sm"
+          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
         >
           @for (area of skillAreas; track area) {
             <option [value]="area">{{ area }}</option>
@@ -69,7 +69,7 @@
         <button
           type="button"
           (click)="onCancel()"
-          class="rounded px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100"
+          class="rounded px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
         >
           Cancel
         </button>

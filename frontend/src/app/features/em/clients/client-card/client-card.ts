@@ -20,9 +20,9 @@ export class ClientCard {
       case RelationshipStatus.PROSPECTIVE:
         return 'bg-blue-100 text-blue-700';
       case RelationshipStatus.FORMER:
-        return 'bg-gray-100 text-gray-500';
+        return 'bg-[var(--p-surface-700)] text-[var(--p-surface-300)]';
       default:
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-[var(--p-surface-700)] text-[var(--p-surface-300)]';
     }
   });
 }
