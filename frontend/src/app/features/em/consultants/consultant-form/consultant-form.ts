@@ -147,7 +147,5 @@ export class ConsultantForm {
       titleRole: '',
       primarySkillArea: SkillArea.AUDIT
     });
-
-    this.errorMessage.set(null);
   }
 }
