@@ -8,7 +8,7 @@ import {
   RegisterRequest,
   AuthUser
 } from '../../../types';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
