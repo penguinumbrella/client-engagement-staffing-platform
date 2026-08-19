@@ -8,6 +8,7 @@ import {
   RegisterRequest,
   AuthUser
 } from '../../../types';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class Auth {
   private readonly http = inject(HttpClient);
 
   private readonly baseUrl =
-    'http://localhost:8125/auth/api/auth';
+    `${environment.apiGatewayUrl}/auth/api/auth`;
 
   currentUser = signal<AuthUser | null>(this.loadStoredUser());
 
