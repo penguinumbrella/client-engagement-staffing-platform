@@ -2,7 +2,7 @@ name: Deploy Eureka Server
 
 on:
   push:
-    branches: [aws-preauth, main]
+    branches: [aws-preauth, main, aws-postauth]
     paths:
       - 'eureka-server/**'
 

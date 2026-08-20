@@ -2,7 +2,7 @@ name: Deploy Client Service
 
 on:
   push:
-    branches: [aws-preauth, main]
+    branches: [aws-preauth, main, aws-postauth]
     paths:
       - 'client/**'
 
