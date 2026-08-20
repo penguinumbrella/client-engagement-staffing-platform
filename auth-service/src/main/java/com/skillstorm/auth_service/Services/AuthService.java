@@ -1,7 +1,7 @@
 package com.skillstorm.auth_service.Services;
 
 import java.util.Locale;
-import java.util.UUID;
+import java.util.UUID; 
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
