@@ -1,5 +1,6 @@
 package com.skillstorm.engagement.service;
 
+import com.skillstorm.engagement.client.ClientClient;
 import com.skillstorm.engagement.client.StaffingClient;
 import com.skillstorm.engagement.dto.CreateEngagementRequest;
 import com.skillstorm.engagement.dto.EngagementResponse;
@@ -38,11 +39,16 @@ class EngagementServiceTest {
     @Mock
     private StaffingClient staffingClient;
 
+    @Mock
+    private ClientClient clientClient;
+
     private EngagementService engagementService;
+
+    private static final String TOKEN = "test-token";
 
     @BeforeEach
     void setUp() {
-        engagementService = new EngagementService(engagementRepository, staffingClient);
+        engagementService = new EngagementService(engagementRepository, staffingClient, clientClient);
     }
 
     private Engagement activeEngagement(Long id, String status) {
@@ -78,7 +84,7 @@ class EngagementServiceTest {
         CreateEngagementRequest request = createRequest(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 6, 1), null);
         when(engagementRepository.save(any(Engagement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        EngagementResponse response = engagementService.createEngagement(request);
+        EngagementResponse response = engagementService.createEngagement(request, TOKEN);
 
         assertThat(response.getStatus()).isEqualTo(EngagementStatus.PLANNED.getLabel());
         assertThat(response.getEngagementName()).isEqualTo("Audit Rollout");
@@ -92,7 +98,7 @@ class EngagementServiceTest {
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 6, 1), EngagementStatus.IN_PROGRESS);
         when(engagementRepository.save(any(Engagement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        EngagementResponse response = engagementService.createEngagement(request);
+        EngagementResponse response = engagementService.createEngagement(request, TOKEN);
 
         assertThat(response.getStatus()).isEqualTo(EngagementStatus.IN_PROGRESS.getLabel());
     }
@@ -102,8 +108,8 @@ class EngagementServiceTest {
         CreateEngagementRequest request = createRequest(
                 LocalDate.of(2026, 6, 1), LocalDate.of(2026, 1, 1), null);
 
-        assertThatThrownBy(() -> engagementService.createEngagement(request))
-                .isInstanceOf(IllegalArgumentException.class)
+        assertThatThrownBy(() -> engagementService.createEngagement(request, TOKEN))
+                .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("startDate must not be after targetEndDate");
 
         verifyNoInteractions(engagementRepository);
@@ -185,10 +191,10 @@ class EngagementServiceTest {
         UpdateEngagementRequest request = new UpdateEngagementRequest();
         request.setEngagementName("Renamed Engagement");
 
-        EngagementResponse response = engagementService.updateEngagement(1L, request);
+        EngagementResponse response = engagementService.updateEngagement(1L, request, TOKEN);
 
         assertThat(response.getEngagementName()).isEqualTo("Renamed Engagement");
-        verify(staffingClient, never()).cascadeAssignmentStatus(anyLong(), any());
+        verify(staffingClient, never()).cascadeAssignmentStatus(anyLong(), any(), any());
     }
 
     @Test
@@ -200,10 +206,10 @@ class EngagementServiceTest {
         UpdateEngagementRequest request = new UpdateEngagementRequest();
         request.setStatus(EngagementStatus.IN_PROGRESS);
 
-        EngagementResponse response = engagementService.updateEngagement(1L, request);
+        EngagementResponse response = engagementService.updateEngagement(1L, request, TOKEN);
 
         assertThat(response.getStatus()).isEqualTo(EngagementStatus.IN_PROGRESS.getLabel());
-        verify(staffingClient).cascadeAssignmentStatus(1L, EngagementStatus.IN_PROGRESS.getLabel());
+        verify(staffingClient).cascadeAssignmentStatus(1L, EngagementStatus.IN_PROGRESS.getLabel(), TOKEN);
     }
 
     @Test
@@ -215,9 +221,9 @@ class EngagementServiceTest {
         UpdateEngagementRequest request = new UpdateEngagementRequest();
         request.setStatus(EngagementStatus.PLANNED);
 
-        engagementService.updateEngagement(1L, request);
+        engagementService.updateEngagement(1L, request, TOKEN);
 
-        verify(staffingClient, never()).cascadeAssignmentStatus(anyLong(), any());
+        verify(staffingClient, never()).cascadeAssignmentStatus(anyLong(), any(), any());
     }
 
     @Test
@@ -228,7 +234,7 @@ class EngagementServiceTest {
         UpdateEngagementRequest request = new UpdateEngagementRequest();
         request.setStatus(EngagementStatus.CANCELLED);
 
-        assertThatThrownBy(() -> engagementService.updateEngagement(1L, request))
+        assertThatThrownBy(() -> engagementService.updateEngagement(1L, request, TOKEN))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Use the cancel endpoint");
 
@@ -243,8 +249,8 @@ class EngagementServiceTest {
         UpdateEngagementRequest request = new UpdateEngagementRequest();
         request.setStartDate(LocalDate.of(2027, 1, 1));
 
-        assertThatThrownBy(() -> engagementService.updateEngagement(1L, request))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> engagementService.updateEngagement(1L, request, TOKEN))
+                .isInstanceOf(ResponseStatusException.class);
 
         verify(engagementRepository, never()).save(any());
     }
@@ -253,7 +259,7 @@ class EngagementServiceTest {
     void updateEngagement_throwsNotFoundWhenEngagementMissing() {
         when(engagementRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> engagementService.updateEngagement(1L, new UpdateEngagementRequest()))
+        assertThatThrownBy(() -> engagementService.updateEngagement(1L, new UpdateEngagementRequest(), TOKEN))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
@@ -264,19 +270,19 @@ class EngagementServiceTest {
         Engagement existing = activeEngagement(1L, EngagementStatus.IN_PROGRESS.getLabel());
         when(engagementRepository.findById(1L)).thenReturn(Optional.of(existing));
 
-        engagementService.deleteEngagement(1L);
+        engagementService.deleteEngagement(1L, TOKEN);
 
         ArgumentCaptor<Engagement> captor = ArgumentCaptor.forClass(Engagement.class);
         verify(engagementRepository).save(captor.capture());
         assertThat(captor.getValue().isActive()).isFalse();
-        verify(staffingClient).cascadeEngagementCancelled(1L);
+        verify(staffingClient).cascadeEngagementCancelled(1L, TOKEN);
     }
 
     @Test
     void deleteEngagement_throwsNotFoundWhenEngagementMissing() {
         when(engagementRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> engagementService.deleteEngagement(1L))
+        assertThatThrownBy(() -> engagementService.deleteEngagement(1L, TOKEN))
                 .isInstanceOf(ResponseStatusException.class);
 
         verifyNoInteractions(staffingClient);
@@ -291,10 +297,10 @@ class EngagementServiceTest {
         when(engagementRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(engagementRepository.save(any(Engagement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        EngagementResponse response = engagementService.cancelEngagement(1L);
+        EngagementResponse response = engagementService.cancelEngagement(1L, TOKEN);
 
         assertThat(response.getStatus()).isEqualTo(EngagementStatus.CANCELLED.getLabel());
-        verify(staffingClient).cascadeEngagementCancelled(1L);
+        verify(staffingClient).cascadeEngagementCancelled(1L, TOKEN);
     }
 
     @Test
@@ -302,7 +308,7 @@ class EngagementServiceTest {
         Engagement existing = activeEngagement(1L, EngagementStatus.COMPLETED.getLabel());
         when(engagementRepository.findById(1L)).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> engagementService.cancelEngagement(1L))
+        assertThatThrownBy(() -> engagementService.cancelEngagement(1L, TOKEN))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Only active engagements can be cancelled");
 
@@ -315,7 +321,7 @@ class EngagementServiceTest {
         Engagement existing = activeEngagement(1L, EngagementStatus.CANCELLED.getLabel());
         when(engagementRepository.findById(1L)).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> engagementService.cancelEngagement(1L))
+        assertThatThrownBy(() -> engagementService.cancelEngagement(1L, TOKEN))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
@@ -323,7 +329,7 @@ class EngagementServiceTest {
     void cancelEngagement_throwsNotFoundWhenEngagementMissing() {
         when(engagementRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> engagementService.cancelEngagement(1L))
+        assertThatThrownBy(() -> engagementService.cancelEngagement(1L, TOKEN))
                 .isInstanceOf(ResponseStatusException.class);
     }
 }

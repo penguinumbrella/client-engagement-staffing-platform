@@ -14,10 +14,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -26,6 +32,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -47,9 +55,25 @@ class EngagementControllerTest {
 
     @BeforeEach
     void setUp() {
+        Jwt jwt = mock(Jwt.class);
+        lenient().when(jwt.getTokenValue()).thenReturn("test-token");
+        lenient().when(jwt.getClaimAsStringList("roles")).thenReturn(List.of("ENGAGEMENT_MANAGER"));
+
         EngagementController controller = new EngagementController(engagementService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(Jwt.class);
+                    }
+
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                            NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                        return jwt;
+                    }
+                })
                 .build();
     }
 
@@ -68,7 +92,7 @@ class EngagementControllerTest {
         request.setStartDate(LocalDate.of(2026, 1, 1));
         request.setTargetEndDate(LocalDate.of(2026, 6, 1));
 
-        when(engagementService.createEngagement(any(CreateEngagementRequest.class))).thenReturn(sampleResponse(1L));
+        when(engagementService.createEngagement(any(CreateEngagementRequest.class), any(String.class))).thenReturn(sampleResponse(1L));
 
         mockMvc.perform(post("/api/engagements")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,7 +154,7 @@ class EngagementControllerTest {
         UpdateEngagementRequest request = new UpdateEngagementRequest();
         request.setEngagementName("Renamed");
 
-        when(engagementService.updateEngagement(eq(1L), any(UpdateEngagementRequest.class)))
+        when(engagementService.updateEngagement(eq(1L), any(UpdateEngagementRequest.class), any(String.class)))
                 .thenReturn(sampleResponse(1L));
 
         mockMvc.perform(put("/api/engagements/1")
@@ -145,7 +169,7 @@ class EngagementControllerTest {
         UpdateEngagementRequest request = new UpdateEngagementRequest();
         request.setStatus(EngagementStatus.CANCELLED);
 
-        when(engagementService.updateEngagement(eq(1L), any(UpdateEngagementRequest.class)))
+        when(engagementService.updateEngagement(eq(1L), any(UpdateEngagementRequest.class), any(String.class)))
                 .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Use the cancel endpoint"));
 
         mockMvc.perform(put("/api/engagements/1")
@@ -160,13 +184,13 @@ class EngagementControllerTest {
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(""));
 
-        verify(engagementService).deleteEngagement(1L);
+        verify(engagementService).deleteEngagement(eq(1L), any(String.class));
     }
 
     @Test
     void cancel_returnsCancelledEngagement() throws Exception {
         EngagementResponse cancelled = sampleResponse(1L);
-        when(engagementService.cancelEngagement(1L)).thenReturn(cancelled);
+        when(engagementService.cancelEngagement(eq(1L), any(String.class))).thenReturn(cancelled);
 
         mockMvc.perform(post("/api/engagements/1/cancel"))
                 .andExpect(status().isOk());
@@ -174,7 +198,7 @@ class EngagementControllerTest {
 
     @Test
     void cancel_returns409WhenAlreadyTerminal() throws Exception {
-        when(engagementService.cancelEngagement(1L))
+        when(engagementService.cancelEngagement(eq(1L), any(String.class)))
                 .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Only active engagements can be cancelled"));
 
         mockMvc.perform(post("/api/engagements/1/cancel"))

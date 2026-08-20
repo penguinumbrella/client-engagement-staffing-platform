@@ -33,7 +33,7 @@ class StaffingClientTest {
     void cascadeAssignmentStatus_skipsSilentlyWhenStaffingInstanceUnavailable() {
         when(loadBalancerClient.choose(eq("staffing"))).thenReturn(null);
 
-        assertThatCode(() -> staffingClient.cascadeAssignmentStatus(1L, "In Progress")).doesNotThrowAnyException();
+        assertThatCode(() -> staffingClient.cascadeAssignmentStatus(1L, "In Progress", "test-token")).doesNotThrowAnyException();
 
         verify(loadBalancerClient).choose("staffing");
         verifyNoMoreInteractions(loadBalancerClient);
@@ -44,14 +44,14 @@ class StaffingClientTest {
         ServiceInstance instance = new DefaultServiceInstance("staffing-1", "staffing", "localhost", 1, false);
         when(loadBalancerClient.choose(eq("staffing"))).thenReturn(instance);
 
-        assertThatCode(() -> staffingClient.cascadeAssignmentStatus(1L, "In Progress")).doesNotThrowAnyException();
+        assertThatCode(() -> staffingClient.cascadeAssignmentStatus(1L, "In Progress", "test-token")).doesNotThrowAnyException();
     }
 
     @Test
     void cascadeEngagementCancelled_skipsSilentlyWhenStaffingInstanceUnavailable() {
         when(loadBalancerClient.choose(eq("staffing"))).thenReturn(null);
 
-        assertThatCode(() -> staffingClient.cascadeEngagementCancelled(1L)).doesNotThrowAnyException();
+        assertThatCode(() -> staffingClient.cascadeEngagementCancelled(1L, "test-token")).doesNotThrowAnyException();
 
         verify(loadBalancerClient).choose("staffing");
         verifyNoMoreInteractions(loadBalancerClient);
@@ -62,6 +62,6 @@ class StaffingClientTest {
         ServiceInstance instance = new DefaultServiceInstance("staffing-1", "staffing", "localhost", 1, false);
         when(loadBalancerClient.choose(eq("staffing"))).thenReturn(instance);
 
-        assertThatCode(() -> staffingClient.cascadeEngagementCancelled(1L)).doesNotThrowAnyException();
+        assertThatCode(() -> staffingClient.cascadeEngagementCancelled(1L, "test-token")).doesNotThrowAnyException();
     }
 }
