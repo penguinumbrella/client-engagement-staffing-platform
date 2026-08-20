@@ -4,6 +4,11 @@ spring:
     output:
         ansi:
             enabled: always
+    web:
+        error:
+            include-message: always
+            include-stacktrace: always
+            include-binding-errors: always
     datasource:
         url: ${DB_URL}
         username: ${DB_USERNAME}
