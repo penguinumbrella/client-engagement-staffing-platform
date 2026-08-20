@@ -14,9 +14,9 @@ public interface ConsultantRepository
 
     List<Consultant> findByActiveTrue();
 
-    @Query(value = "SELECT * FROM consultants WHERE user_id = CAST(:userId AS uuid)", nativeQuery = true)
+    @Query(value = "SELECT * FROM consultants WHERE CAST(user_id AS text) = CAST(:userId AS text)", nativeQuery = true)
     Optional<Consultant> findByUserId(@Param("userId") UUID userId);
 
-    @Query(value = "SELECT * FROM consultants WHERE user_id = CAST(:userId AS uuid) AND is_active = true", nativeQuery = true)
+    @Query(value = "SELECT * FROM consultants WHERE CAST(user_id AS text) = CAST(:userId AS text) AND is_active = true", nativeQuery = true)
     Optional<Consultant> findByUserIdAndActiveTrue(@Param("userId") UUID userId);
 }
