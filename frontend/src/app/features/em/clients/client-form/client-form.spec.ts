@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { MessageService } from 'primeng/api';
 
 import { ClientForm } from './client-form';
 
@@ -11,7 +12,7 @@ describe('ClientForm', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ClientForm],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), MessageService],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ClientForm);

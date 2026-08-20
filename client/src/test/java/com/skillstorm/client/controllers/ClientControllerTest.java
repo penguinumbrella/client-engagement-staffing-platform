@@ -3,6 +3,7 @@ package com.skillstorm.client.controllers;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -20,11 +21,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skillstorm.client.Config.SecurityConfig;
 import com.skillstorm.client.dtos.ClientRequest;
 import com.skillstorm.client.dtos.ClientResponse;
 import com.skillstorm.client.models.enums.RelationshipStatus;
@@ -35,7 +39,7 @@ import com.skillstorm.client.validation.UniqueCompanyNameValidator;
 import java.util.List;
 
 @WebMvcTest(ClientController.class)
-@Import(UniqueCompanyNameValidator.class)
+@Import({UniqueCompanyNameValidator.class, SecurityConfig.class})
 class ClientControllerTest {
 
     @Autowired
@@ -55,6 +59,12 @@ class ClientControllerTest {
     private ClientResponse clientResponse;
     private ClientRequest validRequest;
 
+    // Any authenticated consultant/EM can read; only EMs can write/delete.
+    private static final JwtRequestPostProcessor AS_CONSULTANT =
+            jwt().authorities(new SimpleGrantedAuthority("ROLE_CONSULTANT"));
+    private static final JwtRequestPostProcessor AS_ENGAGEMENT_MANAGER =
+            jwt().authorities(new SimpleGrantedAuthority("ROLE_ENGAGEMENT_MANAGER"));
+
     @BeforeEach
     void setUp() {
         clientResponse = new ClientResponse(1L, "Acme Corp", "Manufacturing", "Jane Doe", "jane@acme.com", RelationshipStatus.ACTIVE);
@@ -68,7 +78,7 @@ class ClientControllerTest {
         Page<ClientResponse> page = new PageImpl<>(List.of(clientResponse));
         when(clientService.getAllClients(0, 10)).thenReturn(ResponseEntity.ok(page));
 
-        mockMvc.perform(get("/clients"))
+        mockMvc.perform(get("/clients").with(AS_CONSULTANT))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].companyName").value("Acme Corp"));
     }
@@ -79,7 +89,7 @@ class ClientControllerTest {
     void getClientById_found_returnsOk() throws Exception {
         when(clientService.getClientById(1L)).thenReturn(ResponseEntity.ok(clientResponse));
 
-        mockMvc.perform(get("/clients/1"))
+        mockMvc.perform(get("/clients/1").with(AS_CONSULTANT))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.companyName").value("Acme Corp"));
     }
@@ -88,7 +98,7 @@ class ClientControllerTest {
     void getClientById_notFound_returnsNotFound() throws Exception {
         when(clientService.getClientById(99L)).thenReturn(ResponseEntity.notFound().build());
 
-        mockMvc.perform(get("/clients/99"))
+        mockMvc.perform(get("/clients/99").with(AS_CONSULTANT))
                 .andExpect(status().isNotFound());
     }
 
@@ -99,6 +109,7 @@ class ClientControllerTest {
         when(clientService.createClient(any(ClientRequest.class))).thenReturn(ResponseEntity.status(HttpStatus.CREATED).body(clientResponse));
 
         mockMvc.perform(post("/clients")
+                        .with(AS_ENGAGEMENT_MANAGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isCreated())
@@ -110,6 +121,7 @@ class ClientControllerTest {
         ClientRequest invalidRequest = new ClientRequest("", null, null, null, null);
 
         mockMvc.perform(post("/clients")
+                        .with(AS_ENGAGEMENT_MANAGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -120,6 +132,7 @@ class ClientControllerTest {
         when(clientRepository.existsByCompanyNameIgnoreCase(eq("Acme Corp"))).thenReturn(true);
 
         mockMvc.perform(post("/clients")
+                        .with(AS_ENGAGEMENT_MANAGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isBadRequest());
@@ -131,6 +144,7 @@ class ClientControllerTest {
                 .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "A client named 'Acme Corp' already exists."));
 
         mockMvc.perform(post("/clients")
+                        .with(AS_ENGAGEMENT_MANAGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isConflict());
@@ -143,6 +157,7 @@ class ClientControllerTest {
         when(clientService.updateClient(eq(1L), any(ClientRequest.class))).thenReturn(ResponseEntity.ok(clientResponse));
 
         mockMvc.perform(put("/clients/1")
+                        .with(AS_ENGAGEMENT_MANAGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isOk())
@@ -154,6 +169,7 @@ class ClientControllerTest {
         when(clientService.updateClient(eq(99L), any(ClientRequest.class))).thenReturn(ResponseEntity.notFound().build());
 
         mockMvc.perform(put("/clients/99")
+                        .with(AS_ENGAGEMENT_MANAGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isNotFound());
@@ -165,6 +181,7 @@ class ClientControllerTest {
                 .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "A client named 'Acme Corp' already exists."));
 
         mockMvc.perform(put("/clients/1")
+                        .with(AS_ENGAGEMENT_MANAGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isConflict());
@@ -174,33 +191,33 @@ class ClientControllerTest {
 
     @Test
     void deleteClient_success_returnsNoContent() throws Exception {
-        when(clientService.deleteClient(1L)).thenReturn(ResponseEntity.noContent().build());
+        when(clientService.deleteClient(eq(1L), any(String.class))).thenReturn(ResponseEntity.noContent().build());
 
-        mockMvc.perform(delete("/clients/1"))
+        mockMvc.perform(delete("/clients/1").with(AS_ENGAGEMENT_MANAGER))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     void deleteClient_notFound_returnsNotFound() throws Exception {
-        when(clientService.deleteClient(99L)).thenReturn(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        when(clientService.deleteClient(eq(99L), any(String.class))).thenReturn(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
-        mockMvc.perform(delete("/clients/99"))
+        mockMvc.perform(delete("/clients/99").with(AS_ENGAGEMENT_MANAGER))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void deleteClient_hasActiveEngagements_returnsConflict() throws Exception {
-        when(clientService.deleteClient(1L)).thenReturn(ResponseEntity.status(HttpStatus.CONFLICT).build());
+        when(clientService.deleteClient(eq(1L), any(String.class))).thenReturn(ResponseEntity.status(HttpStatus.CONFLICT).build());
 
-        mockMvc.perform(delete("/clients/1"))
+        mockMvc.perform(delete("/clients/1").with(AS_ENGAGEMENT_MANAGER))
                 .andExpect(status().isConflict());
     }
 
     @Test
     void deleteClient_engagementServiceUnavailable_returnsServiceUnavailable() throws Exception {
-        when(clientService.deleteClient(1L)).thenReturn(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+        when(clientService.deleteClient(eq(1L), any(String.class))).thenReturn(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
 
-        mockMvc.perform(delete("/clients/1"))
+        mockMvc.perform(delete("/clients/1").with(AS_ENGAGEMENT_MANAGER))
                 .andExpect(status().isServiceUnavailable());
     }
 }

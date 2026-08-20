@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -189,9 +190,9 @@ class ClientServiceTest {
     @Test
     void deleteClient_activeClientNoEngagements_returnsNoContent() {
         when(clientRepo.findById(1L)).thenReturn(Optional.of(activeClient));
-        when(engagementClient.hasActiveEngagements(1L)).thenReturn(false);
+        when(engagementClient.hasActiveEngagements(1L, "test-token")).thenReturn(false);
 
-        ResponseEntity<Void> result = clientService.deleteClient(1L);
+        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token");
 
         assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
         verify(clientRepo, times(1)).save(activeClient);
@@ -200,9 +201,9 @@ class ClientServiceTest {
     @Test
     void deleteClient_hasActiveEngagements_returnsConflict() {
         when(clientRepo.findById(1L)).thenReturn(Optional.of(activeClient));
-        when(engagementClient.hasActiveEngagements(1L)).thenReturn(true);
+        when(engagementClient.hasActiveEngagements(1L, "test-token")).thenReturn(true);
 
-        ResponseEntity<Void> result = clientService.deleteClient(1L);
+        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token");
 
         assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
         verify(clientRepo, never()).save(any(Client.class));
@@ -211,10 +212,10 @@ class ClientServiceTest {
     @Test
     void deleteClient_engagementServiceUnavailable_returnsSameStatus() {
         when(clientRepo.findById(1L)).thenReturn(Optional.of(activeClient));
-        when(engagementClient.hasActiveEngagements(1L))
+        when(engagementClient.hasActiveEngagements(1L, "test-token"))
                 .thenThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Engagement service is not available"));
 
-        ResponseEntity<Void> result = clientService.deleteClient(1L);
+        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token");
 
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, result.getStatusCode());
         verify(clientRepo, never()).save(any(Client.class));
@@ -225,17 +226,17 @@ class ClientServiceTest {
         activeClient.setActive(false);
         when(clientRepo.findById(1L)).thenReturn(Optional.of(activeClient));
 
-        ResponseEntity<Void> result = clientService.deleteClient(1L);
+        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token");
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
-        verify(engagementClient, never()).hasActiveEngagements(anyLong());
+        verify(engagementClient, never()).hasActiveEngagements(anyLong(), anyString());
     }
 
     @Test
     void deleteClient_notFound_returnsNotFound() {
         when(clientRepo.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseEntity<Void> result = clientService.deleteClient(99L);
+        ResponseEntity<Void> result = clientService.deleteClient(99L, "test-token");
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
