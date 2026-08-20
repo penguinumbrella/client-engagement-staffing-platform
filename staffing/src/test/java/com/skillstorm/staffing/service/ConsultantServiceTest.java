@@ -1,5 +1,7 @@
 package com.skillstorm.staffing.service;
 
+import com.skillstorm.staffing.client.AuthClient;
+import com.skillstorm.staffing.dto.AuthUserResponse;
 import com.skillstorm.staffing.dto.ConsultantResponse;
 import com.skillstorm.staffing.dto.CreateConsultantRequest;
 import com.skillstorm.staffing.dto.UpdateConsultantRequest;
@@ -17,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,6 +33,9 @@ class ConsultantServiceTest {
 
     @Mock
     private ConsultantRepository consultantRepository;
+
+    @Mock
+    private AuthClient authClient;
 
     /*
      * Let Mockito create ConsultantService using its current constructor.
@@ -106,6 +112,25 @@ class ConsultantServiceTest {
         request.setPrimarySkillArea(
                 SkillArea.AUDIT
         );
+        request.setEmail("jane.doe@example.com");
+
+        when(
+                authClient.getUserByEmail(
+                        "jane.doe@example.com",
+                        "test-token"
+                )
+        ).thenReturn(
+                new AuthUserResponse(
+                        UUID.randomUUID(),
+                        "jane.doe@example.com",
+                        "CONSULTANT",
+                        true
+                )
+        );
+
+        when(
+                consultantRepository.findByUserId(any())
+        ).thenReturn(Optional.empty());
 
         when(
                 consultantRepository.save(

@@ -45,6 +45,9 @@ public class SecurityConfig {
                     "/actuator/health/**"
                 ).permitAll()
 
+                // Allow Spring's internal error dispatch to surface the real error
+                .requestMatchers("/error").permitAll()
+
                 // Everything else requires JWT
                 .anyRequest().authenticated()
             )
