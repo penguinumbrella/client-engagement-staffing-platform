@@ -36,7 +36,6 @@ eureka:
         register-with-eureka: true
         registry-fetch-interval-seconds: 5
     instance:
-        instance-id: ${spring.application.name}:${server.port}
         leaseRenewalIntervalInSeconds: 10
 
 ---
