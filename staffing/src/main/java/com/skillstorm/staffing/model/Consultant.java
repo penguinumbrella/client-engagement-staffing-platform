@@ -9,6 +9,9 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -30,6 +33,7 @@ public class Consultant {
     private String primarySkillArea;
 
     @Column(name = "user_id", unique = true, nullable = false)
+    @JdbcTypeCode(SqlTypes.UUID)
     private UUID userId;
 
     @Column(name = "is_active", nullable = false)

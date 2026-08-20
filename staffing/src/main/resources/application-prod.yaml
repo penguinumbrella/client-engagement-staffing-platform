@@ -20,8 +20,6 @@ spring:
         properties:
             hibernate:
                 format_sql: true
-                type:
-                    preferred_uuid_jdbc_type: UUID
         defer-datasource-initialization: true
     sql:
         init:
