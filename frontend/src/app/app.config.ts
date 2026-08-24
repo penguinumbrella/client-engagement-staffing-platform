@@ -30,6 +30,36 @@ const HoneyHive = definePreset(Aura, {
       950: '#3a2708',
     },
     colorScheme: {
+      light: {
+        /* Mirrors the dark scheme's slot semantics (950 = page background, 800 = panels, 50 = primary text)
+           rather than Tailwind's usual light->dark ordering, so existing --p-surface-* usages stay correct in both themes. */
+        surface: {
+          0: '#ffffff',
+          50: '#2e2820',
+          100: '#453c2c',
+          200: '#665a44',
+          300: '#8a7c62',
+          400: '#ab9c80',
+          500: '#c7b99e',
+          600: '#ded4c0',
+          700: '#eee8dc',
+          800: '#f7f4ee',
+          900: '#fbf9f5',
+          950: '#fefdfb',
+        },
+        primary: {
+          color: '#c8871a',
+          contrastColor: '#ffffff',
+          hoverColor: '#a06b16',
+          activeColor: '#7a5212',
+        },
+        highlight: {
+          background: 'rgba(200, 135, 26, 0.1)',
+          focusBackground: 'rgba(200, 135, 26, 0.18)',
+          color: '#7a5212',
+          focusColor: '#7a5212',
+        },
+      },
       dark: {
         surface: {
           0: '#ffffff',

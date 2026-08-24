@@ -3,7 +3,7 @@
   @if (editing) {
     <input
       #draftInput
-      class="m-0 w-full rounded-md border border-indigo-300 p-1 text-xs text-[var(--p-surface-100)] outline-none"
+      class="m-0 w-full rounded-lg border border-indigo-300 p-1 text-xs text-[var(--p-surface-100)] outline-none"
       type="email"
       name="draft"
       [(ngModel)]="draft"
@@ -13,7 +13,7 @@
     />
   } @else {
     <p
-      class="m-0 cursor-pointer rounded-md p-1 text-xs text-[var(--p-surface-200)] hover:bg-[var(--p-surface-800)]"
+      class="m-0 cursor-pointer rounded-lg p-1 text-xs text-[var(--p-surface-200)] hover:bg-[var(--p-surface-800)]"
       title="Click to edit"
       (click)="startEdit()"
     >
