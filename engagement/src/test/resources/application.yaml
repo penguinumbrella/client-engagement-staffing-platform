@@ -16,6 +16,10 @@ spring:
                 jwt:
                     public-key-location: classpath:keys/public.pem
 
+notification:
+    kafka:
+        topic: notification.events
+
 eureka:
     client:
         enabled: false
