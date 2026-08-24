@@ -33,15 +33,15 @@ spring:
             properties:
                 spring.json.add.type.headers: false
 
-notification:
-    kafka:
-        topic: notification.events
-
     security:
         oauth2:
             resourceserver:
                 jwt:
                     public-key-location: classpath:keys/public.pem
+
+notification:
+    kafka:
+        topic: notification.events
 
 server:
     port: 8082
