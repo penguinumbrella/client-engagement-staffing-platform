@@ -1,0 +1,36 @@
+spring:
+    application:
+        name: staffing
+    output:
+        ansi:
+            enabled: always
+    web:
+        error:
+            include-message: always
+            include-stacktrace: always
+            include-binding-errors: always
+    datasource:
+        url: ${DB_URL}
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
+        defer-datasource-initialization: true
+    sql:
+        init:
+            mode: always
+
+server:
+    port: 8083
+
+eureka:
+    client:
+        service-url:
+            defaultZone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
+    instance:
+        prefer-ip-address: true

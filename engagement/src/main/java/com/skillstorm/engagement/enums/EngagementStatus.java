@@ -8,7 +8,8 @@ public enum EngagementStatus {
     PLANNED("Planned"),
     IN_PROGRESS("In Progress"),
     ON_HOLD("On Hold"),
-    COMPLETED("Completed");
+    COMPLETED("Completed"),
+    CANCELLED("Cancelled");
 
     private final String label;
 

@@ -1,6 +1,17 @@
+cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,https://du83k7mttey3e.cloudfront.net,https://d1r0oi9vzejxs3.cloudfront.net}
+
 spring:
     application:
         name: api-gateway
+    output:
+        ansi:
+            enabled: always
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    public-key-location: classpath:keys/public.pem
     cloud:
         gateway:
             server:
@@ -10,6 +21,8 @@ spring:
                           uri: lb://client
                           predicates:
                               - Path=/client/**
+                          filters:
+                              - StripPrefix=1
                         - id: engagement
                           uri: lb://engagement
                           predicates:
@@ -26,6 +39,10 @@ spring:
                           uri: lb://notification
                           predicates:
                               - Path=/notification/**
+                        - id: auth
+                          uri: lb://auth-service
+                          predicates:
+                            - Path=/auth/**
                           filters:
                               - StripPrefix=1
 
@@ -37,16 +54,20 @@ server:
                 same-site: none
                 secure: true
 
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info,gateway
+
 eureka:
     client:
         fetch-registry: true
         register-with-eureka: true
         service-url:
-            default-zone: http://localhost:8761/eureka/
-        registry-fetch-interval-seconds: 5
-    instance:
-        hostname: localhost
-        ip-address: 127.0.0.1
-        prefer-ip-address: true
-        instance-id: ${spring.application.name}:${server.port}
-        leaseRenewalIntervalInSeconds: 10
+            defaultZone: http://localhost:8761/eureka/
+            #http://client-platform-Eureka-env.us-east-1.elasticbeanstalk.com:8761/eureka #http://10.0.0.10:8761/eureka/
+    # instance:
+    #     hostname: 10.0.0.10
+    #     prefer-ip-address: true
+    #     instance-id: ${spring.application.name}:${random.uuid}

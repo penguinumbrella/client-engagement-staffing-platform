@@ -29,6 +29,9 @@ public class Engagement {
     @Column(name = "engagement_type", nullable = false)
     private String engagementType;
 
+    @Column(name = "summary")
+    private String summary;
+
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
@@ -94,6 +97,14 @@ public class Engagement {
 
     public void setEngagementType(String engagementType) {
         this.engagementType = engagementType;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
 
     public LocalDate getStartDate() {

@@ -1,0 +1,11 @@
+spring:
+    config:
+        activate:
+            on-profile: prod
+
+eureka:
+    client:
+        service-url:
+            defaultZone: http://client-platform-eureka-env.us-east-1.elasticbeanstalk.com/eureka/
+    instance:
+        prefer-ip-address: true

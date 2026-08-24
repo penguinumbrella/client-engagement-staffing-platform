@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class StaffingApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(StaffingApplication.class, args);
+		SpringApplication.run(StaffingApplication.class, args);    
 	}
 
 }

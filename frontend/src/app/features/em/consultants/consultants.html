@@ -1,0 +1,62 @@
+<div class="p-4">
+  <div class="mb-4 flex items-center justify-between">
+    <h1 class="m-0 text-lg font-semibold text-[var(--p-surface-50)]">Consultants</h1>
+    <button
+      type="button"
+      (click)="openCreate()"
+      class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+    >
+      + Add User
+    </button>
+  </div>
+
+  @if (loading()) {
+    <p class="text-sm text-[var(--p-surface-300)]">Loading consultants…</p>
+  } @else if (error()) {
+    <p class="text-sm text-red-600">{{ error() }}</p>
+  } @else {
+    <div class="w-full overflow-hidden rounded-lg border border-[var(--p-surface-600)]">
+      <table class="w-full border-collapse text-left text-sm">
+        <thead class="bg-[var(--p-surface-700)]">
+          <tr>
+            <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Name</th>
+            <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Title</th>
+            <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Skill Area</th>
+            <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Engagements</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (consultant of consultants(); track consultant.id) {
+            <tr class="border-t border-[var(--p-surface-600)] hover:bg-[var(--p-surface-800)]">
+              <td class="px-3 py-2">
+                <button
+                  type="button"
+                  (click)="openDetail(consultant)"
+                  class="flex items-center gap-2 text-left"
+                >
+                  <span
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+                    [style.background-color]="colorOf(consultant.name)"
+                  >
+                    {{ initialsOf(consultant.name) }}
+                  </span>
+                  <span class="font-medium text-blue-600 hover:underline">{{ consultant.name }}</span>
+                </button>
+              </td>
+              <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.titleRole }}</td>
+              <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.primarySkillArea }}</td>
+              <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.engagementCount }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="px-3 py-4 text-center text-xs text-[var(--p-surface-400)]">No consultants found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-consultant-detail [consultant]="selectedConsultant()" [(visible)]="detailVisible" />
+  <app-consultant-form [(visible)]="createFormVisible" (saved)="onConsultantCreated()" />
+</div>

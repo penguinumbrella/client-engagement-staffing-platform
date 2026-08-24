@@ -1,6 +1,31 @@
 spring:
     application:
         name: client
+    output:
+        ansi:
+            enabled: always
+    datasource:
+        url: ${CLIENT_DB_URL}
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
+        defer-datasource-initialization: true
+    sql:
+        init:
+            mode: always
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    public-key-location: classpath:keys/public.pem
+    config:
+        import: optional:file:.env[.properties]
 
 server:
     port: 8081
@@ -9,12 +34,18 @@ eureka:
     client:
         fetch-registry: true
         register-with-eureka: true
-        service-url:
-            default-zone: http://localhost:8761/eureka/
         registry-fetch-interval-seconds: 5
     instance:
-        hostname: localhost
-        ip-address: 127.0.0.1
-        prefer-ip-address: true
-        instance-id: ${spring.application.name}:${server.port}
         leaseRenewalIntervalInSeconds: 10
+
+---
+spring:
+    config:
+        activate:
+            on-profile: default
+
+eureka:
+    client:
+        service-url:
+            defaultZone: http://localhost:8761/eureka/
+        registry-fetch-interval-seconds: 5

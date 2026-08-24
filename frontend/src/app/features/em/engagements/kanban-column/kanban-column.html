@@ -1,0 +1,34 @@
+<div class="w-full min-w-0 rounded-lg bg-[var(--p-surface-700)] p-3">
+  <div class="mb-3 flex items-center justify-between">
+    <h2 class="m-0 flex items-center gap-1.5 text-sm font-semibold text-[var(--p-surface-100)]">
+      <i class="pi {{ statusIcon(column.status) }} {{ statusIconColor(column.status) }} text-xs"></i>
+      {{ column.title }}
+    </h2>
+    @if (column.status !== cancelledStatus) {
+      <button
+        type="button"
+        class="flex h-5 w-5 items-center justify-center rounded-full text-[var(--p-surface-300)] hover:bg-[var(--p-surface-600)] hover:text-[var(--p-surface-200)]"
+        title="Add engagement"
+        (click)="add.emit(column.status)"
+      >
+        +
+      </button>
+    }
+  </div>
+  <div
+    class="flex min-h-[60px] flex-col gap-2"
+    cdkDropList
+    [id]="column.status"
+    [cdkDropListData]="column.engagements"
+    [cdkDropListConnectedTo]="connectedTo"
+    (cdkDropListDropped)="dropped.emit($event)"
+  >
+    @for (engagement of column.engagements; track engagement.id) {
+      <app-engagement-card
+        [engagement]="engagement"
+        [class.opacity-60]="column.status === cancelledStatus"
+        (select)="select.emit($event)"
+      />
+    }
+  </div>
+</div>

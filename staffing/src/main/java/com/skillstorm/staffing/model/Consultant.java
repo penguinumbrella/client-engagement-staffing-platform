@@ -9,7 +9,11 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "consultants")
@@ -28,8 +32,9 @@ public class Consultant {
     @Column(name = "primary_skill_area", nullable = false)
     private String primarySkillArea;
 
-    @Column(name = "user_id", unique = true)
-    private String userId;
+    @Column(name = "user_id", unique = true, nullable = false)
+    @JdbcTypeCode(SqlTypes.UUID)
+    private UUID userId;
 
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
@@ -43,10 +48,11 @@ public class Consultant {
     protected Consultant() {
     }
 
-    public Consultant(String name, String titleRole, String primarySkillArea) {
+    public Consultant(String name, String titleRole, String primarySkillArea, UUID userId) {
         this.name = name;
         this.titleRole = titleRole;
         this.primarySkillArea = primarySkillArea;
+        this.userId = userId;
     }
 
     @PrePersist
@@ -89,7 +95,11 @@ public class Consultant {
         this.primarySkillArea = primarySkillArea;
     }
 
-    public String getUserId() {
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
+    public UUID getUserId() {
         return userId;
     }
 

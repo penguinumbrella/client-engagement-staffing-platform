@@ -13,12 +13,16 @@ public class AssignmentResponse {
     private final Long engagementId;
     private final String engagementRole;
     private final LocalDate assignmentStartDate;
+    private final LocalDate assignmentEndDate;
+    private final String status;
+    private final boolean statusOverridden;
     private final boolean active;
     private final OffsetDateTime createdAt;
     private final OffsetDateTime updatedAt;
 
     public AssignmentResponse(Long id, Long consultantId, String consultantName, Long engagementId,
-                               String engagementRole, LocalDate assignmentStartDate, boolean active,
+                               String engagementRole, LocalDate assignmentStartDate, LocalDate assignmentEndDate,
+                               String status, boolean statusOverridden, boolean active,
                                OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         this.id = id;
         this.consultantId = consultantId;
@@ -26,6 +30,9 @@ public class AssignmentResponse {
         this.engagementId = engagementId;
         this.engagementRole = engagementRole;
         this.assignmentStartDate = assignmentStartDate;
+        this.assignmentEndDate = assignmentEndDate;
+        this.status = status;
+        this.statusOverridden = statusOverridden;
         this.active = active;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -39,6 +46,9 @@ public class AssignmentResponse {
                 assignment.getEngagementId(),
                 assignment.getEngagementRole(),
                 assignment.getAssignmentStartDate(),
+                assignment.getAssignmentEndDate(),
+                assignment.getStatus(),
+                assignment.isStatusOverridden(),
                 assignment.isActive(),
                 assignment.getCreatedAt(),
                 assignment.getUpdatedAt()
@@ -67,6 +77,18 @@ public class AssignmentResponse {
 
     public LocalDate getAssignmentStartDate() {
         return assignmentStartDate;
+    }
+
+    public LocalDate getAssignmentEndDate() {
+        return assignmentEndDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public boolean isStatusOverridden() {
+        return statusOverridden;
     }
 
     public boolean isActive() {

@@ -11,6 +11,7 @@ public class EngagementResponse {
     private final String engagementName;
     private final Long clientId;
     private final String engagementType;
+    private final String summary;
     private final LocalDate startDate;
     private final LocalDate targetEndDate;
     private final String status;
@@ -18,13 +19,14 @@ public class EngagementResponse {
     private final OffsetDateTime createdAt;
     private final OffsetDateTime updatedAt;
 
-    public EngagementResponse(Long id, String engagementName, Long clientId, String engagementType,
+    public EngagementResponse(Long id, String engagementName, Long clientId, String engagementType, String summary,
                                LocalDate startDate, LocalDate targetEndDate, String status, boolean active,
                                OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         this.id = id;
         this.engagementName = engagementName;
         this.clientId = clientId;
         this.engagementType = engagementType;
+        this.summary = summary;
         this.startDate = startDate;
         this.targetEndDate = targetEndDate;
         this.status = status;
@@ -39,6 +41,7 @@ public class EngagementResponse {
                 engagement.getEngagementName(),
                 engagement.getClientId(),
                 engagement.getEngagementType(),
+                engagement.getSummary(),
                 engagement.getStartDate(),
                 engagement.getTargetEndDate(),
                 engagement.getStatus(),
@@ -62,6 +65,10 @@ public class EngagementResponse {
 
     public String getEngagementType() {
         return engagementType;
+    }
+
+    public String getSummary() {
+        return summary;
     }
 
     public LocalDate getStartDate() {

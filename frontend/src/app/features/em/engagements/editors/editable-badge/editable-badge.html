@@ -1,0 +1,27 @@
+@if (editing) {
+  <select
+    #draftSelect
+    class="rounded-full border bg-[var(--p-surface-800)] px-2 py-0.5 text-[10px] font-medium outline-none"
+    [class]="selectClass"
+    name="draft"
+    [(ngModel)]="draft"
+    (change)="save()"
+    (blur)="cancelEdit()"
+  >
+    @for (option of options; track option) {
+      <option [value]="option">{{ option }}</option>
+    }
+  </select>
+} @else {
+  <span
+    class="inline-flex cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
+    [class]="badgeClass"
+    title="Click to edit"
+    (click)="startEdit()"
+  >
+    @if (icon) {
+      <i class="pi {{ icon(value) }} text-[10px]"></i>
+    }
+    {{ value }}
+  </span>
+}

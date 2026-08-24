@@ -1,0 +1,30 @@
+<div class="w-full rounded-lg bg-[var(--p-surface-700)] p-3">
+  <div class="mb-3 flex items-center gap-1">
+    @for (tab of tabs; track tab.value) {
+      <button
+        type="button"
+        (click)="activeFilter.set(tab.value)"
+        class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
+        [class]="
+          activeFilter() === tab.value
+            ? 'bg-[var(--p-surface-800)] text-[var(--p-surface-50)] shadow-sm'
+            : 'text-[var(--p-surface-300)] hover:text-[var(--p-surface-200)]'
+        "
+      >
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  <div class="grid min-h-[60px] grid-cols-4 gap-3">
+    @for (client of filteredClients(); track client.id) {
+      <app-client-card
+        [client]="client"
+        (select)="select.emit($event)"
+        (delete)="delete.emit($event)"
+      />
+    } @empty {
+      <p class="col-span-4 m-0 px-1 py-4 text-center text-xs text-[var(--p-surface-400)]">No clients found.</p>
+    }
+  </div>
+</div>

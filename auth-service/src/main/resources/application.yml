@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: auth-service
+
+  output:
+    ansi:
+      enabled: always
+
+  datasource:
+    url: ${AUTH_DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  config:
+    import: optional:file:.env[.properties]
+
+server:
+  port: ${PORT:8084}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  jwt:
+    issuer: ${JWT_ISSUER:client-engagement-auth-service}
+    access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:PT15M}
+    private-key: ${JWT_PRIVATE_KEY:classpath:keys/private.pem}
+    public-key: ${JWT_PUBLIC_KEY:classpath:keys/public.pem}
+
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:4200}
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}

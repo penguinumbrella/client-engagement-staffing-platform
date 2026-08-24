@@ -15,7 +15,7 @@
             "type": "java",
             "name": "Spring Boot-ClientApplication<client>",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/client",
             "mainClass": "com.skillstorm.client.ClientApplication",
             "projectName": "client",
             "args": "",
@@ -26,7 +26,7 @@
             "type": "java",
             "name": "Spring Boot-EngagementApplication<engagement>",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/engagement",
             "mainClass": "com.skillstorm.engagement.EngagementApplication",
             "projectName": "engagement",
             "args": "",
@@ -37,7 +37,7 @@
             "type": "java",
             "name": "Spring Boot-StaffingApplication<staffing>",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/staffing",
             "mainClass": "com.skillstorm.staffing.StaffingApplication",
             "projectName": "staffing",
             "args": "",
@@ -63,6 +63,16 @@
             "args": "",
             "envFile": "${workspaceFolder}/.env",
             "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=60204 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=notification"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-AuthServiceApplication<auth-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.skillstorm.auth_service.AuthServiceApplication",
+            "projectName": "auth-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
