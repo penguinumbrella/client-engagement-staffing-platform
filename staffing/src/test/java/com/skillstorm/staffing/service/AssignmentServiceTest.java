@@ -7,6 +7,8 @@ import com.skillstorm.staffing.dto.UpdateAssignmentStatusRequest;
 import com.skillstorm.staffing.enums.AssignmentStatus;
 import com.skillstorm.staffing.enums.EngagementRole;
 import com.skillstorm.staffing.enums.SkillArea;
+import com.skillstorm.staffing.kafka.NotificationEvent;
+import com.skillstorm.staffing.kafka.NotificationEventPublisher;
 import com.skillstorm.staffing.model.Assignment;
 import com.skillstorm.staffing.model.Consultant;
 import com.skillstorm.staffing.repository.AssignmentRepository;
@@ -46,11 +48,14 @@ class AssignmentServiceTest {
     @Mock
     private EngagementClient engagementClient;
 
+    @Mock
+    private NotificationEventPublisher notificationEventPublisher;
+
     private AssignmentService assignmentService;
 
     @BeforeEach
     void setUp() {
-        assignmentService = new AssignmentService(assignmentRepository, consultantRepository, consultantService, engagementClient);
+        assignmentService = new AssignmentService(assignmentRepository, consultantRepository, consultantService, engagementClient, notificationEventPublisher);
     }
 
     private Consultant consultant(Long id) {
@@ -157,6 +162,7 @@ class AssignmentServiceTest {
 
         assertThat(response.getStatus()).isEqualTo(AssignmentStatus.ACTIVE.getLabel());
         assertThat(response.getConsultantName()).isEqualTo("Jane Doe");
+        verify(notificationEventPublisher).publish(any(NotificationEvent.class));
     }
 
     @Test

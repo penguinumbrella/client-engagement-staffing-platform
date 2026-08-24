@@ -7,6 +7,8 @@ import com.skillstorm.engagement.dto.EngagementResponse;
 import com.skillstorm.engagement.dto.UpdateEngagementRequest;
 import com.skillstorm.engagement.enums.EngagementStatus;
 import com.skillstorm.engagement.enums.EngagementType;
+import com.skillstorm.engagement.kafka.NotificationEvent;
+import com.skillstorm.engagement.kafka.NotificationEventPublisher;
 import com.skillstorm.engagement.model.Engagement;
 import com.skillstorm.engagement.repository.EngagementRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,13 +44,16 @@ class EngagementServiceTest {
     @Mock
     private ClientClient clientClient;
 
+    @Mock
+    private NotificationEventPublisher notificationEventPublisher;
+
     private EngagementService engagementService;
 
     private static final String TOKEN = "test-token";
 
     @BeforeEach
     void setUp() {
-        engagementService = new EngagementService(engagementRepository, staffingClient, clientClient);
+        engagementService = new EngagementService(engagementRepository, staffingClient, clientClient, notificationEventPublisher);
     }
 
     private Engagement activeEngagement(Long id, String status) {
@@ -90,6 +95,7 @@ class EngagementServiceTest {
         assertThat(response.getEngagementName()).isEqualTo("Audit Rollout");
         assertThat(response.getClientId()).isEqualTo(10L);
         verify(engagementRepository).save(any(Engagement.class));
+        verify(notificationEventPublisher).publish(any(NotificationEvent.class));
     }
 
     @Test
