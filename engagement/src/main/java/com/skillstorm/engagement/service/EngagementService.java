@@ -306,6 +306,16 @@ public class EngagementService {
         }
 
 
+        notificationEventPublisher.publish(new NotificationEvent(
+                "ENGAGEMENT_UPDATED",
+                "engagement",
+                saved.getId(),
+                saved.getClientId(),
+                "Engagement updated",
+                "Engagement \"" + saved.getEngagementName() + "\" was updated."
+        ));
+
+
         return EngagementResponse.from(
                 saved
         );
@@ -335,9 +345,20 @@ public class EngagementService {
         engagement.setActive(false);
 
 
-        engagementRepository.save(
-                engagement
-        );
+        Engagement saved =
+                engagementRepository.save(
+                        engagement
+                );
+
+
+        notificationEventPublisher.publish(new NotificationEvent(
+                "ENGAGEMENT_DELETED",
+                "engagement",
+                saved.getId(),
+                saved.getClientId(),
+                "Engagement removed",
+                "Engagement \"" + saved.getEngagementName() + "\" was removed."
+        ));
     }
 
 
@@ -392,6 +413,16 @@ public class EngagementService {
                 saved.getId(),
                 token
         );
+
+
+        notificationEventPublisher.publish(new NotificationEvent(
+                "ENGAGEMENT_CANCELLED",
+                "engagement",
+                saved.getId(),
+                saved.getClientId(),
+                "Engagement cancelled",
+                "Engagement \"" + saved.getEngagementName() + "\" was cancelled."
+        ));
 
 
         return EngagementResponse.from(

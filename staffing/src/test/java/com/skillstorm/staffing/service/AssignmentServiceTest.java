@@ -308,6 +308,7 @@ class AssignmentServiceTest {
     void removeAssignment_deactivatesAndCancelsAssignment() {
         Assignment existing = assignment(5L, 1L, 10L, AssignmentStatus.ACTIVE.getLabel(), true);
         when(assignmentRepository.findById(5L)).thenReturn(Optional.of(existing));
+        when(assignmentRepository.save(any(Assignment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         assignmentService.removeAssignment(5L);
 
