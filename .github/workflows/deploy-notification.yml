@@ -8,8 +8,8 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  EB_APPLICATION_NAME: Client-engagement-staffing-Notification
-  EB_ENVIRONMENT_NAME: Client-engagement-staffing-Notif-env
+  EB_APPLICATION_NAME: Client-notifications-env
+  EB_ENVIRONMENT_NAME: Client-notifications-env-env
   S3_BUCKET: elasticbeanstalk-us-east-1-397345411365
 
 jobs:
