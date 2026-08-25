@@ -5,7 +5,7 @@ spring:
         ansi:
             enabled: always
     datasource:
-        url: ${CLIENT_DB_URL}
+        url: ${ENGAGEMENT_DB_URL}
         username: ${DB_USERNAME}
         password: ${DB_PASSWORD}
     jpa:
