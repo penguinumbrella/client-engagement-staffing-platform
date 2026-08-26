@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum NotificationType {
     ENGAGEMENT_CREATED("ENGAGEMENT_CREATED"),
     ASSIGNMENT_CREATED("ASSIGNMENT_CREATED"),
+    CLIENT_CREATED("CLIENT_CREATED"),
+    CLIENT_DELETED("CLIENT_DELETED"),
     GENERAL("GENERAL");
 
     private final String label;
