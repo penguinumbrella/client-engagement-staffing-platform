@@ -6,7 +6,7 @@ public class NotificationEvent {
     private String sourceService;
     private Long sourceId;
     private Long recipientId;
-    private String title;
+    private String title; 
     private String message;
 
     public NotificationEvent() {
