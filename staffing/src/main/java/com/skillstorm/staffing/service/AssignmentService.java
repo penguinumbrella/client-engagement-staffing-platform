@@ -280,6 +280,18 @@ public class AssignmentService {
 
         assignmentRepository.saveAll(assignments);
 
+        assignments.forEach(assignment ->
+                notificationEventPublisher.publish(new NotificationEvent(
+                        "ASSIGNMENT_CANCELLED",
+                        "staffing",
+                        assignment.getId(),
+                        assignment.getConsultantId(),
+                        "Assignment cancelled",
+                        "Your assignment on engagement " + assignment.getEngagementId()
+                                + " was cancelled."
+                ))
+        );
+
         log.info(
                 "Cascaded deletion of engagement id={} to {} assignment(s)",
                 engagementId,
@@ -308,7 +320,18 @@ public class AssignmentService {
                 AssignmentStatus.CANCELLED.getLabel()
         );
 
-        assignmentRepository.save(assignment);
+        Assignment saved =
+                assignmentRepository.save(assignment);
+
+        notificationEventPublisher.publish(new NotificationEvent(
+                "ASSIGNMENT_REMOVED",
+                "staffing",
+                saved.getId(),
+                saved.getConsultantId(),
+                "Assignment removed",
+                "Your assignment on engagement " + saved.getEngagementId()
+                        + " was removed."
+        ));
     }
 
     /*
@@ -397,6 +420,16 @@ public class AssignmentService {
         Assignment saved =
                 assignmentRepository.save(assignment);
 
+        notificationEventPublisher.publish(new NotificationEvent(
+                "ASSIGNMENT_UPDATED",
+                "staffing",
+                saved.getId(),
+                saved.getConsultantId(),
+                "Assignment status updated",
+                "Your assignment on engagement " + saved.getEngagementId()
+                        + " was updated to " + saved.getStatus() + "."
+        ));
+
         Consultant consultant =
                 consultantRepository
                         .findById(
@@ -445,6 +478,18 @@ public class AssignmentService {
         );
 
         assignmentRepository.saveAll(assignments);
+
+        assignments.forEach(assignment ->
+                notificationEventPublisher.publish(new NotificationEvent(
+                        "ASSIGNMENT_UPDATED",
+                        "staffing",
+                        assignment.getId(),
+                        assignment.getConsultantId(),
+                        "Assignment status updated",
+                        "Your assignment on engagement " + assignment.getEngagementId()
+                                + " was updated to " + target.getLabel() + "."
+                ))
+        );
 
         log.info(
                 "Cascaded engagement id={} status '{}' to {} assignment(s) as '{}'",

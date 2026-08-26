@@ -275,6 +275,7 @@ class EngagementServiceTest {
     void deleteEngagement_softDeletesAndCascadesToStaffingClient() {
         Engagement existing = activeEngagement(1L, EngagementStatus.IN_PROGRESS.getLabel());
         when(engagementRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(engagementRepository.save(any(Engagement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         engagementService.deleteEngagement(1L, TOKEN);
 
