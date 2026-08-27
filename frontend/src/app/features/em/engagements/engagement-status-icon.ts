@@ -52,9 +52,9 @@ export function engagementColumnPastelBackground(status: string): string {
   return STATUS_PASTEL_BACKGROUNDS[status as EngagementStatus] ?? '#eeeeee';
 }
 
-/** Each column's base pastel, fading to a faint muted green on the right — a subtle nod to "progress" without a jarring hue swap. */
+/** Each column's flat pastel background. */
 export function engagementColumnGradient(status: string): string {
-  return `linear-gradient(to right, ${engagementColumnPastelBackground(status)}, #dfe9e1)`;
+  return engagementColumnPastelBackground(status);
 }
 
 /** A deeper, still-muted shade of the same hue, for the column's dashed border. */
