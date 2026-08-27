@@ -1,6 +1,7 @@
 export enum UserRole {
   CONSULTANT = 'CONSULTANT',
   ENGAGEMENT_MANAGER = 'ENGAGEMENT_MANAGER',
+  ADMIN = 'ADMIN'
 }
 
 export interface User {

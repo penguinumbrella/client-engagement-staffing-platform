@@ -1,0 +1,43 @@
+.admin-dashboard {
+  padding: 2rem;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.metric-card h3 {
+  margin-top: 0;
+}
+
+.metric-card p {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.login-attempts table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.login-attempts th,
+.login-attempts td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.error {
+  color: red;
+}

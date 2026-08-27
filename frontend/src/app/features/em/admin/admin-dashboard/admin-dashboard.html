@@ -1,0 +1,137 @@
+<div class="admin-dashboard">
+
+  <h1>Admin Dashboard</h1>
+
+  @if (loading()) {
+
+    <p>
+      Loading dashboard...
+    </p>
+
+  } @else if (errorMessage()) {
+
+    <p class="error">
+      {{ errorMessage() }}
+    </p>
+
+  } @else {
+
+    @if (metrics(); as metricsData) {
+
+      <section class="metrics">
+
+        <div class="metric-card">
+
+          <h3>Total Attempts</h3>
+
+          <p>
+            {{ metricsData.totalAttempts }}
+          </p>
+
+        </div>
+
+        <div class="metric-card">
+
+          <h3>Successful</h3>
+
+          <p>
+            {{ metricsData.successfulAttempts }}
+          </p>
+
+        </div>
+
+        <div class="metric-card">
+
+          <h3>Failed</h3>
+
+          <p>
+            {{ metricsData.failedAttempts }}
+          </p>
+
+        </div>
+
+        <div class="metric-card">
+
+          <h3>Failure Rate</h3>
+
+          <p>
+            {{
+              metricsData.failureRate
+                | number:'1.1-1'
+            }}%
+          </p>
+
+        </div>
+
+      </section>
+
+    }
+
+    <section class="login-attempts">
+
+      <h2>
+        Recent Login Attempts
+      </h2>
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Reason</th>
+            <th>Time</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          @for (
+            attempt of loginAttempts();
+            track attempt.id
+          ) {
+
+            <tr>
+
+              <td>
+                {{ attempt.email }}
+              </td>
+
+              <td>
+
+                @if (attempt.successful) {
+                  Success
+                } @else {
+                  Failed
+                }
+
+              </td>
+
+              <td>
+                {{
+                  attempt.failureReason ?? '-'
+                }}
+              </td>
+
+              <td>
+                {{
+                  attempt.attemptedAt
+                    | date:'short'
+                }}
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </section>
+
+  }
+
+</div>

@@ -22,3 +22,19 @@ export interface AuthResponse {
   expiresIn: number;
   user: AuthUser;
 }
+
+export interface LoginAttempt {
+  id: string;
+  userId: string | null;
+  email: string;
+  successful: boolean;
+  failureReason: string | null;
+  attemptedAt: string;
+}
+
+export interface LoginMetrics {
+  totalAttempts: number;
+  successfulAttempts: number;
+  failedAttempts: number;
+  failureRate: number;
+}
