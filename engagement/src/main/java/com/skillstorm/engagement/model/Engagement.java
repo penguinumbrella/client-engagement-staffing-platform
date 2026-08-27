@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "engagements")
@@ -25,6 +26,9 @@ public class Engagement {
 
     @Column(name = "client_id", nullable = false)
     private Long clientId;
+
+    @Column(name = "owner_id")
+    private UUID ownerId;
 
     @Column(name = "engagement_type", nullable = false)
     private String engagementType;
@@ -89,6 +93,14 @@ public class Engagement {
 
     public Long getClientId() {
         return clientId;
+    }
+
+    public UUID getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 
     public String getEngagementType() {

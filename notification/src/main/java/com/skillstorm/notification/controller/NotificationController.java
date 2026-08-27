@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -35,7 +36,7 @@ public class NotificationController {
 
     @GetMapping
     public ResponseEntity<List<NotificationResponse>> getAll(
-            @RequestParam(required = false) Long recipientId) {
+            @RequestParam(required = false) UUID recipientId) {
         return ResponseEntity.ok(notificationService.getNotifications(recipientId));
     }
 

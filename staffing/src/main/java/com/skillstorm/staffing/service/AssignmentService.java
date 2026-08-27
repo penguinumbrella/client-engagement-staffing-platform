@@ -116,7 +116,7 @@ public class AssignmentService {
                 "ASSIGNMENT_CREATED",
                 "staffing",
                 saved.getId(),
-                saved.getConsultantId(),
+                consultant.getUserId(),
                 "New assignment",
                 "You were staffed on engagement " + saved.getEngagementId()
                         + " as " + saved.getEngagementRole() + "."
@@ -280,12 +280,23 @@ public class AssignmentService {
 
         assignmentRepository.saveAll(assignments);
 
+        Map<Long, UUID> consultantUserIdsById =
+                consultantRepository
+                        .findAllById(
+                                assignments.stream()
+                                        .map(Assignment::getConsultantId)
+                                        .distinct()
+                                        .toList()
+                        )
+                        .stream()
+                        .collect(Collectors.toMap(Consultant::getId, Consultant::getUserId));
+
         assignments.forEach(assignment ->
                 notificationEventPublisher.publish(new NotificationEvent(
                         "ASSIGNMENT_CANCELLED",
                         "staffing",
                         assignment.getId(),
-                        assignment.getConsultantId(),
+                        consultantUserIdsById.get(assignment.getConsultantId()),
                         "Assignment cancelled",
                         "Your assignment on engagement " + assignment.getEngagementId()
                                 + " was cancelled."
@@ -323,11 +334,17 @@ public class AssignmentService {
         Assignment saved =
                 assignmentRepository.save(assignment);
 
+        UUID recipientId =
+                consultantRepository
+                        .findById(saved.getConsultantId())
+                        .map(Consultant::getUserId)
+                        .orElse(null);
+
         notificationEventPublisher.publish(new NotificationEvent(
                 "ASSIGNMENT_REMOVED",
                 "staffing",
                 saved.getId(),
-                saved.getConsultantId(),
+                recipientId,
                 "Assignment removed",
                 "Your assignment on engagement " + saved.getEngagementId()
                         + " was removed."
@@ -420,22 +437,22 @@ public class AssignmentService {
         Assignment saved =
                 assignmentRepository.save(assignment);
 
-        notificationEventPublisher.publish(new NotificationEvent(
-                "ASSIGNMENT_UPDATED",
-                "staffing",
-                saved.getId(),
-                saved.getConsultantId(),
-                "Assignment status updated",
-                "Your assignment on engagement " + saved.getEngagementId()
-                        + " was updated to " + saved.getStatus() + "."
-        ));
-
         Consultant consultant =
                 consultantRepository
                         .findById(
                                 saved.getConsultantId()
                         )
                         .orElse(null);
+
+        notificationEventPublisher.publish(new NotificationEvent(
+                "ASSIGNMENT_UPDATED",
+                "staffing",
+                saved.getId(),
+                consultant != null ? consultant.getUserId() : null,
+                "Assignment status updated",
+                "Your assignment on engagement " + saved.getEngagementId()
+                        + " was updated to " + saved.getStatus() + "."
+        ));
 
         return AssignmentResponse.from(
                 saved,
@@ -479,12 +496,23 @@ public class AssignmentService {
 
         assignmentRepository.saveAll(assignments);
 
+        Map<Long, UUID> consultantUserIdsById =
+                consultantRepository
+                        .findAllById(
+                                assignments.stream()
+                                        .map(Assignment::getConsultantId)
+                                        .distinct()
+                                        .toList()
+                        )
+                        .stream()
+                        .collect(Collectors.toMap(Consultant::getId, Consultant::getUserId));
+
         assignments.forEach(assignment ->
                 notificationEventPublisher.publish(new NotificationEvent(
                         "ASSIGNMENT_UPDATED",
                         "staffing",
                         assignment.getId(),
-                        assignment.getConsultantId(),
+                        consultantUserIdsById.get(assignment.getConsultantId()),
                         "Assignment status updated",
                         "Your assignment on engagement " + assignment.getEngagementId()
                                 + " was updated to " + target.getLabel() + "."

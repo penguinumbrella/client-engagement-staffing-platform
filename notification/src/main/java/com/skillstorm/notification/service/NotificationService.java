@@ -6,14 +6,19 @@ import com.skillstorm.notification.dto.NotificationResponse;
 import com.skillstorm.notification.enums.NotificationType;
 import com.skillstorm.notification.model.Notification;
 import com.skillstorm.notification.repository.NotificationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class NotificationService {
+
+    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
     private final NotificationRepository notificationRepository;
 
@@ -38,7 +43,11 @@ public class NotificationService {
 
     public NotificationResponse createFromEvent(NotificationEvent event) {
         if (event.getRecipientId() == null) {
-            throw new IllegalArgumentException("recipientId is required on notification event");
+            // Source records created before recipient tracking was added (e.g. an engagement with
+            // no owner_id) have no valid recipient. Skip rather than retry forever on a poison event.
+            log.warn("Skipping notification event type={} source={}:{} — no recipientId",
+                    event.getEventType(), event.getSourceService(), event.getSourceId());
+            return null;
         }
         if (event.getTitle() == null || event.getTitle().isBlank()) {
             throw new IllegalArgumentException("title is required on notification event");
@@ -61,7 +70,7 @@ public class NotificationService {
         return NotificationResponse.from(notificationRepository.save(notification));
     }
 
-    public List<NotificationResponse> getNotifications(Long recipientId) {
+    public List<NotificationResponse> getNotifications(UUID recipientId) {
         List<Notification> notifications = recipientId != null
                 ? notificationRepository.findByRecipientIdAndActiveTrue(recipientId)
                 : notificationRepository.findByActiveTrue();

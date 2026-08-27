@@ -86,15 +86,37 @@
           <span class="text-sm font-semibold text-[var(--p-surface-100)]">Client and Staffing Engagement Platform</span>
         </div>
 
-        <button
-          type="button"
-          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
-          [title]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
-          (click)="toggleDarkMode()"
-        >
-          <i class="pi" [class.pi-sun]="darkMode()" [class.pi-moon]="!darkMode()"></i>
-        </button>
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+            title="Notifications"
+            (click)="toggleNotifications()"
+          >
+            <i class="pi pi-bell"></i>
+            @if (unreadNotificationCount() > 0) {
+              <span class="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-red-500"></span>
+            }
+          </button>
+
+          <button
+            type="button"
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+            [title]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+            (click)="toggleDarkMode()"
+          >
+            <i class="pi" [class.pi-sun]="darkMode()" [class.pi-moon]="!darkMode()"></i>
+          </button>
+        </div>
       </header>
+
+      @if (notificationsOpen() && currentUser(); as user) {
+        <app-notifications-modal
+          [recipientId]="user.id"
+          (close)="toggleNotifications()"
+          (unreadCountChange)="unreadNotificationCount.set($event)"
+        />
+      }
 
       <main class="flex-1 overflow-y-auto px-3 pb-3">
         <router-outlet />

@@ -21,6 +21,7 @@ spring:
     sql:
         init:
             mode: always
+            separator: "@@@@"
     security:
         oauth2:
             resourceserver:

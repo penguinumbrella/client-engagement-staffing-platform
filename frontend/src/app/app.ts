@@ -9,6 +9,8 @@ import {
 import { filter } from 'rxjs';
 import { Toast } from 'primeng/toast';
 import { Auth } from './features/em/auth/auth';
+import { NotificationsModal } from './shared/notifications-modal/notifications-modal';
+import { NotificationService } from './services/notification.service';
 
 interface NavItem {
   label: string;
@@ -18,7 +20,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Toast],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Toast, NotificationsModal],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
@@ -26,12 +28,15 @@ export class App {
 
   private readonly router = inject(Router);
   private readonly auth = inject(Auth);
+  private readonly notificationService = inject(NotificationService);
 
   private static readonly DARK_MODE_STORAGE_KEY = 'theme-dark-mode';
 
   protected readonly sidebarOpen = signal(true);
   protected readonly authPage = signal(false);
   protected readonly darkMode = signal(localStorage.getItem(App.DARK_MODE_STORAGE_KEY) === 'true');
+  protected readonly notificationsOpen = signal(false);
+  protected readonly unreadNotificationCount = signal(0);
 
   protected readonly currentUser = this.auth.currentUser;
 
@@ -86,6 +91,19 @@ export class App {
       localStorage.setItem(App.DARK_MODE_STORAGE_KEY, String(this.darkMode()));
     });
 
+    effect(() => {
+      const user = this.currentUser();
+
+      if (!user) {
+        this.unreadNotificationCount.set(0);
+        return;
+      }
+
+      this.notificationService.getForRecipient(user.id).subscribe(notifications => {
+        this.unreadNotificationCount.set(notifications.filter(n => !n.read).length);
+      });
+    });
+
     this.updateLayout(this.router.url);
 
     this.router.events
@@ -106,6 +124,10 @@ export class App {
 
   protected toggleDarkMode(): void {
     this.darkMode.set(!this.darkMode());
+  }
+
+  protected toggleNotifications(): void {
+    this.notificationsOpen.set(!this.notificationsOpen());
   }
 
   private updateLayout(url: string): void {

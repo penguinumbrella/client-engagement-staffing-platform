@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS engagements (
 -- CREATE TABLE IF NOT EXISTS above is a no-op against an already-existing table.
 ALTER TABLE engagements ADD COLUMN IF NOT EXISTS summary TEXT;
 
+-- Retrofit owner_id (the engagement manager who created it) for the notifications feature.
+ALTER TABLE engagements ADD COLUMN IF NOT EXISTS owner_id UUID;
+
 -- Index for searching engagements by client or active status
 CREATE INDEX IF NOT EXISTS idx_engagements_client_id ON engagements(client_id);
 CREATE INDEX IF NOT EXISTS idx_engagements_is_active ON engagements(is_active);

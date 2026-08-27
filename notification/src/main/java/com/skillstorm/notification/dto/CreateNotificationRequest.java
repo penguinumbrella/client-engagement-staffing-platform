@@ -4,10 +4,12 @@ import com.skillstorm.notification.enums.NotificationType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.UUID;
+
 public class CreateNotificationRequest {
 
     @NotNull(message = "recipientId is required")
-    private Long recipientId;
+    private UUID recipientId;
 
     @NotBlank(message = "title is required")
     private String title;
@@ -21,11 +23,11 @@ public class CreateNotificationRequest {
 
     private Long sourceId;
 
-    public Long getRecipientId() {
+    public UUID getRecipientId() {
         return recipientId;
     }
 
-    public void setRecipientId(Long recipientId) {
+    public void setRecipientId(UUID recipientId) {
         this.recipientId = recipientId;
     }
 

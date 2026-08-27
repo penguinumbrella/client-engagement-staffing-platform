@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class EngagementService {
@@ -48,7 +49,8 @@ public class EngagementService {
      */
     public EngagementResponse createEngagement(
             CreateEngagementRequest request,
-            String token) {
+            String token,
+            UUID ownerId) {
 
         clientClient.validateClientExists(
                 request.getClientId(),
@@ -78,6 +80,8 @@ public class EngagementService {
                 request.getSummary()
         );
 
+        engagement.setOwnerId(ownerId);
+
         Engagement saved =
                 engagementRepository.save(engagement);
 
@@ -85,7 +89,7 @@ public class EngagementService {
                 "ENGAGEMENT_CREATED",
                 "engagement",
                 saved.getId(),
-                saved.getClientId(),
+                saved.getOwnerId(),
                 "New engagement",
                 "Engagement \"" + saved.getEngagementName() + "\" was created."
         ));
@@ -310,7 +314,7 @@ public class EngagementService {
                 "ENGAGEMENT_UPDATED",
                 "engagement",
                 saved.getId(),
-                saved.getClientId(),
+                saved.getOwnerId(),
                 "Engagement updated",
                 "Engagement \"" + saved.getEngagementName() + "\" was updated."
         ));
@@ -355,7 +359,7 @@ public class EngagementService {
                 "ENGAGEMENT_DELETED",
                 "engagement",
                 saved.getId(),
-                saved.getClientId(),
+                saved.getOwnerId(),
                 "Engagement removed",
                 "Engagement \"" + saved.getEngagementName() + "\" was removed."
         ));
@@ -419,7 +423,7 @@ public class EngagementService {
                 "ENGAGEMENT_CANCELLED",
                 "engagement",
                 saved.getId(),
-                saved.getClientId(),
+                saved.getOwnerId(),
                 "Engagement cancelled",
                 "Engagement \"" + saved.getEngagementName() + "\" was cancelled."
         ));
