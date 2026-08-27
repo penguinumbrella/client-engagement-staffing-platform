@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.skillstorm.client.clients.AuthClient;
 import com.skillstorm.client.clients.EngagementClient;
+import com.skillstorm.client.dtos.AuthUserResponse;
 import com.skillstorm.client.dtos.ClientRequest;
 import com.skillstorm.client.dtos.ClientResponse;
 import com.skillstorm.client.kafka.NotificationEvent;
@@ -52,10 +55,16 @@ class ClientServiceTest {
     private EngagementClient engagementClient;
 
     @Mock
+    private AuthClient authClient;
+
+    @Mock
     private NotificationEventPublisher notificationEventPublisher;
 
     @InjectMocks
     private ClientService clientService;
+
+    private static final UUID ACTOR_ID = UUID.randomUUID();
+    private static final UUID OTHER_EM_ID = UUID.randomUUID();
 
     private Client activeClient;
     private ClientResponse clientResponse;
@@ -69,6 +78,13 @@ class ClientServiceTest {
         clientResponse = new ClientResponse(1L, "Acme Corp", "Manufacturing", "Jane Doe", "jane@acme.com", RelationshipStatus.ACTIVE);
 
         clientRequest = new ClientRequest("Acme Corp", "Manufacturing", "Jane Doe", "jane@acme.com", RelationshipStatus.ACTIVE);
+    }
+
+    private void stubEngagementManagers() {
+        when(authClient.getUsersByRole("ENGAGEMENT_MANAGER", "test-token")).thenReturn(List.of(
+                new AuthUserResponse(ACTOR_ID, "Acting", "Manager", "acting@skillstorm.com", "ENGAGEMENT_MANAGER", true),
+                new AuthUserResponse(OTHER_EM_ID, "Other", "Manager", "other@skillstorm.com", "ENGAGEMENT_MANAGER", true)
+        ));
     }
 
     // ----- getAllClients -----
@@ -128,8 +144,9 @@ class ClientServiceTest {
     void createClient_success_returnsCreated() {
         when(clientRepo.save(any(Client.class))).thenReturn(activeClient);
         when(clientMapper.toDto(activeClient)).thenReturn(clientResponse);
+        stubEngagementManagers();
 
-        ResponseEntity<ClientResponse> result = clientService.createClient(clientRequest);
+        ResponseEntity<ClientResponse> result = clientService.createClient(clientRequest, "test-token", ACTOR_ID);
 
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
         assertEquals(clientResponse, result.getBody());
@@ -141,7 +158,7 @@ class ClientServiceTest {
         when(clientRepo.save(any(Client.class))).thenThrow(new DataIntegrityViolationException("duplicate"));
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-                () -> clientService.createClient(clientRequest));
+                () -> clientService.createClient(clientRequest, "test-token", ACTOR_ID));
 
         assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
         verify(notificationEventPublisher, never()).publish(any(NotificationEvent.class));
@@ -198,8 +215,9 @@ class ClientServiceTest {
     void deleteClient_activeClientNoEngagements_returnsNoContent() {
         when(clientRepo.findById(1L)).thenReturn(Optional.of(activeClient));
         when(engagementClient.hasActiveEngagements(1L, "test-token")).thenReturn(false);
+        stubEngagementManagers();
 
-        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token");
+        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token", ACTOR_ID);
 
         assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
         verify(clientRepo, times(1)).save(activeClient);
@@ -211,7 +229,7 @@ class ClientServiceTest {
         when(clientRepo.findById(1L)).thenReturn(Optional.of(activeClient));
         when(engagementClient.hasActiveEngagements(1L, "test-token")).thenReturn(true);
 
-        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token");
+        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token", ACTOR_ID);
 
         assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
         verify(clientRepo, never()).save(any(Client.class));
@@ -224,7 +242,7 @@ class ClientServiceTest {
         when(engagementClient.hasActiveEngagements(1L, "test-token"))
                 .thenThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Engagement service is not available"));
 
-        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token");
+        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token", ACTOR_ID);
 
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, result.getStatusCode());
         verify(clientRepo, never()).save(any(Client.class));
@@ -236,7 +254,7 @@ class ClientServiceTest {
         activeClient.setActive(false);
         when(clientRepo.findById(1L)).thenReturn(Optional.of(activeClient));
 
-        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token");
+        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token", ACTOR_ID);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
         verify(engagementClient, never()).hasActiveEngagements(anyLong(), anyString());
@@ -246,7 +264,7 @@ class ClientServiceTest {
     void deleteClient_notFound_returnsNotFound() {
         when(clientRepo.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseEntity<Void> result = clientService.deleteClient(99L, "test-token");
+        ResponseEntity<Void> result = clientService.deleteClient(99L, "test-token", ACTOR_ID);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }

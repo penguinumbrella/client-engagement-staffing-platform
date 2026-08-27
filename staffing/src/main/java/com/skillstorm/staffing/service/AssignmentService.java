@@ -1,7 +1,9 @@
 package com.skillstorm.staffing.service;
 
+import com.skillstorm.staffing.client.AuthClient;
 import com.skillstorm.staffing.client.EngagementClient;
 import com.skillstorm.staffing.dto.AssignmentResponse;
+import com.skillstorm.staffing.dto.AuthUserResponse;
 import com.skillstorm.staffing.dto.CreateAssignmentRequest;
 import com.skillstorm.staffing.dto.UpdateAssignmentStatusRequest;
 import com.skillstorm.staffing.enums.AssignmentStatus;
@@ -33,6 +35,7 @@ public class AssignmentService {
     private final ConsultantRepository consultantRepository;
     private final ConsultantService consultantService;
     private final EngagementClient engagementClient;
+    private final AuthClient authClient;
     private final NotificationEventPublisher notificationEventPublisher;
 
     public AssignmentService(
@@ -40,19 +43,71 @@ public class AssignmentService {
             ConsultantRepository consultantRepository,
             ConsultantService consultantService,
             EngagementClient engagementClient,
+            AuthClient authClient,
             NotificationEventPublisher notificationEventPublisher) {
 
         this.assignmentRepository = assignmentRepository;
         this.consultantRepository = consultantRepository;
         this.consultantService = consultantService;
         this.engagementClient = engagementClient;
+        this.authClient = authClient;
         this.notificationEventPublisher = notificationEventPublisher;
+    }
+
+    /**
+     * All engagement managers, split into "the acting EM" (for attributing
+     * broadcast messages, e.g. "Bob staffed Alice...") and "everyone else"
+     * (the actual broadcast recipients — EMs can all do the same things,
+     * so every EM-triggered action is visible to the rest of the group,
+     * minus the one who just did it).
+     */
+    private record EmBroadcastContext(String actorName, List<AuthUserResponse> others) {
+    }
+
+    private EmBroadcastContext resolveEmBroadcastContext(String token, UUID actorId) {
+
+        List<AuthUserResponse> engagementManagers =
+                authClient.getUsersByRole("ENGAGEMENT_MANAGER", token);
+
+        String actorName = engagementManagers
+                .stream()
+                .filter(em -> em.id().equals(actorId))
+                .findFirst()
+                .map(em -> em.firstName() + " " + em.lastName())
+                .orElse("An engagement manager");
+
+        List<AuthUserResponse> others = engagementManagers
+                .stream()
+                .filter(em -> !em.id().equals(actorId))
+                .toList();
+
+        return new EmBroadcastContext(actorName, others);
+    }
+
+    private void notifyOtherEngagementManagers(
+            EmBroadcastContext context,
+            String eventType,
+            Long sourceId,
+            String title,
+            String message) {
+
+        context.others().forEach(em ->
+                notificationEventPublisher.publish(new NotificationEvent(
+                        eventType,
+                        "staffing",
+                        sourceId,
+                        em.id(),
+                        title,
+                        message
+                ))
+        );
     }
 
     @Transactional
     public AssignmentResponse assignConsultant(
             CreateAssignmentRequest request,
-            String token) {
+            String token,
+            UUID actorId) {
 
         Consultant consultant =
                 consultantService.findActiveOrThrow(
@@ -122,9 +177,23 @@ public class AssignmentService {
                         + " as " + saved.getEngagementRole() + "."
         ));
 
+        EmBroadcastContext emContext =
+                resolveEmBroadcastContext(token, actorId);
+
+        notifyOtherEngagementManagers(
+                emContext,
+                "ASSIGNMENT_CREATED",
+                saved.getId(),
+                "New assignment",
+                emContext.actorName() + " staffed " + consultant.getName()
+                        + " on engagement " + saved.getEngagementId()
+                        + " as " + saved.getEngagementRole() + "."
+        );
+
         return AssignmentResponse.from(
                 saved,
-                consultant.getName()
+                consultant.getName(),
+                consultant.getUserId()
         );
     }
 
@@ -190,7 +259,8 @@ public class AssignmentService {
                 .map(a ->
                         AssignmentResponse.from(
                                 a,
-                                consultant.getName()
+                                consultant.getName(),
+                                consultant.getUserId()
                         )
                 )
                 .toList();
@@ -225,7 +295,7 @@ public class AssignmentService {
     private List<AssignmentResponse> toResponses(
             List<Assignment> assignments) {
 
-        Map<Long, String> consultantNamesById =
+        Map<Long, Consultant> consultantsById =
                 consultantRepository
                         .findAllById(
                                 assignments
@@ -240,20 +310,20 @@ public class AssignmentService {
                         .collect(
                                 Collectors.toMap(
                                         Consultant::getId,
-                                        Consultant::getName
+                                        c -> c
                                 )
                         );
 
         return assignments
                 .stream()
-                .map(a ->
-                        AssignmentResponse.from(
-                                a,
-                                consultantNamesById.get(
-                                        a.getConsultantId()
-                                )
-                        )
-                )
+                .map(a -> {
+                    Consultant consultant = consultantsById.get(a.getConsultantId());
+                    return AssignmentResponse.from(
+                            a,
+                            consultant != null ? consultant.getName() : null,
+                            consultant != null ? consultant.getUserId() : null
+                    );
+                })
                 .toList();
     }
 
@@ -310,7 +380,7 @@ public class AssignmentService {
         );
     }
 
-    public void removeAssignment(Long id) {
+    public void removeAssignment(Long id, String token, UUID actorId) {
 
         Assignment assignment =
                 assignmentRepository
@@ -334,21 +404,33 @@ public class AssignmentService {
         Assignment saved =
                 assignmentRepository.save(assignment);
 
-        UUID recipientId =
+        Consultant consultant =
                 consultantRepository
                         .findById(saved.getConsultantId())
-                        .map(Consultant::getUserId)
                         .orElse(null);
 
         notificationEventPublisher.publish(new NotificationEvent(
                 "ASSIGNMENT_REMOVED",
                 "staffing",
                 saved.getId(),
-                recipientId,
+                consultant != null ? consultant.getUserId() : null,
                 "Assignment removed",
                 "Your assignment on engagement " + saved.getEngagementId()
                         + " was removed."
         ));
+
+        EmBroadcastContext emContext =
+                resolveEmBroadcastContext(token, actorId);
+
+        notifyOtherEngagementManagers(
+                emContext,
+                "ASSIGNMENT_REMOVED",
+                saved.getId(),
+                "Assignment removed",
+                emContext.actorName() + " removed "
+                        + (consultant != null ? consultant.getName() : "a consultant")
+                        + " from engagement " + saved.getEngagementId() + "."
+        );
     }
 
     /*
@@ -414,7 +496,9 @@ public class AssignmentService {
     @Transactional
     public AssignmentResponse updateStatus(
             Long id,
-            UpdateAssignmentStatusRequest request) {
+            UpdateAssignmentStatusRequest request,
+            String token,
+            UUID actorId) {
 
         Assignment assignment =
                 assignmentRepository
@@ -454,10 +538,26 @@ public class AssignmentService {
                         + " was updated to " + saved.getStatus() + "."
         ));
 
+        EmBroadcastContext emContext =
+                resolveEmBroadcastContext(token, actorId);
+
+        notifyOtherEngagementManagers(
+                emContext,
+                "ASSIGNMENT_UPDATED",
+                saved.getId(),
+                "Assignment status updated",
+                emContext.actorName() + " updated "
+                        + (consultant != null ? consultant.getName() : "a consultant") + "'s assignment on engagement "
+                        + saved.getEngagementId() + " to " + saved.getStatus() + "."
+        );
+
         return AssignmentResponse.from(
                 saved,
                 consultant != null
                         ? consultant.getName()
+                        : null,
+                consultant != null
+                        ? consultant.getUserId()
                         : null
         );
     }
@@ -573,7 +673,8 @@ public class AssignmentService {
                 .map(assignment ->
                         AssignmentResponse.from(
                                 assignment,
-                                consultant.getName()
+                                consultant.getName(),
+                                consultant.getUserId()
                         )
                 )
                 .toList();

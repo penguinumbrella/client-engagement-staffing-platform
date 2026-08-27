@@ -1,6 +1,6 @@
-package com.skillstorm.staffing.client;
+package com.skillstorm.client.clients;
 
-import com.skillstorm.staffing.dto.AuthUserResponse;
+import com.skillstorm.client.dtos.AuthUserResponse;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.core.ParameterizedTypeReference;
@@ -26,43 +26,16 @@ public class AuthClient {
         this.loadBalancerClient = loadBalancerClient;
     }
 
-    public AuthUserResponse getUserByEmail(String email, String token) {
-
-        ServiceInstance instance =
-                loadBalancerClient.choose("auth-service");
-
-        if (instance == null) {
-                throw new ResponseStatusException(
-                        HttpStatus.SERVICE_UNAVAILABLE,
-                        "Auth service is not available"
-                );
-        }
-
-        return restClient
-                .get()
-                .uri(
-                        instance.getUri()
-                                + "/api/users/by-email?email={email}",
-                        email
-                )
-                .header(
-                        HttpHeaders.AUTHORIZATION,
-                        "Bearer " + token
-                )
-                .retrieve()
-                .body(AuthUserResponse.class);
-    }
-
     public List<AuthUserResponse> getUsersByRole(String role, String token) {
 
         ServiceInstance instance =
                 loadBalancerClient.choose("auth-service");
 
         if (instance == null) {
-                throw new ResponseStatusException(
-                        HttpStatus.SERVICE_UNAVAILABLE,
-                        "Auth service is not available"
-                );
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Auth service is not available"
+            );
         }
 
         List<AuthUserResponse> users =

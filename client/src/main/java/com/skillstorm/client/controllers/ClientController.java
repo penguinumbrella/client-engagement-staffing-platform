@@ -21,6 +21,8 @@ import com.skillstorm.client.services.ClientService;
 
 import jakarta.validation.Valid;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/clients")
 public class ClientController {
@@ -45,9 +47,14 @@ public class ClientController {
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @PostMapping
     public ResponseEntity<ClientResponse> createClient(
-            @Valid @RequestBody ClientRequest dto) {
+            @Valid @RequestBody ClientRequest dto,
+            @AuthenticationPrincipal Jwt jwt) {
 
-        return clientService.createClient(dto);
+        return clientService.createClient(
+                dto,
+                jwt.getTokenValue(),
+                UUID.fromString(jwt.getSubject())
+        );
     }
 
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
@@ -62,7 +69,11 @@ public class ClientController {
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClient(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
-        return clientService.deleteClient(id, jwt.getTokenValue());
+        return clientService.deleteClient(
+                id,
+                jwt.getTokenValue(),
+                UUID.fromString(jwt.getSubject())
+        );
     }
 
 }

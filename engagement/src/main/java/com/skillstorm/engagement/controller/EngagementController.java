@@ -154,7 +154,8 @@ public class EngagementController {
                         .updateEngagement(
                                 id,
                                 request,
-                                jwt.getTokenValue()
+                                jwt.getTokenValue(),
+                                UUID.fromString(jwt.getSubject())
                         )
         );
     }
@@ -172,7 +173,8 @@ public class EngagementController {
 
         engagementService.deleteEngagement(
                 id,
-                jwt.getTokenValue()
+                jwt.getTokenValue(),
+                UUID.fromString(jwt.getSubject())
         );
 
         return ResponseEntity
@@ -202,7 +204,8 @@ public class EngagementController {
                 engagementService
                         .cancelEngagement(
                                 id,
-                                jwt.getTokenValue()
+                                jwt.getTokenValue(),
+                                UUID.fromString(jwt.getSubject())
                         )
         );
     }

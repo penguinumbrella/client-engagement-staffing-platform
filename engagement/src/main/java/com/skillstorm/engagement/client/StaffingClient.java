@@ -13,6 +13,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class StaffingClient {
@@ -158,6 +159,70 @@ public class StaffingClient {
                     ex.getMessage()
             );
         }
+    }
+
+    /**
+     * The user UUIDs of every consultant currently (actively) staffed on
+     * an engagement, for fanning out engagement-change notifications to
+     * them. Falls back to an empty list if staffing is unreachable —
+     * a missed consultant notification isn't worth failing the whole
+     * engagement update over.
+     */
+    public List<UUID> getStaffedConsultantUserIds(Long engagementId, String token) {
+
+        ServiceInstance instance =
+                loadBalancerClient.choose("staffing");
+
+        if (instance == null) {
+            log.warn(
+                    "Staffing service is not available; skipped consultant notification lookup for engagement id={}",
+                    engagementId
+            );
+            return List.of();
+        }
+
+        try {
+            List<StaffedAssignmentSummary> assignments =
+                    restClient
+                            .get()
+                            .uri(
+                                    instance.getUri()
+                                            + "/api/assignments/engagement/{engagementId}",
+                                    engagementId
+                            )
+                            .header(
+                                    HttpHeaders.AUTHORIZATION,
+                                    "Bearer " + token
+                            )
+                            .retrieve()
+                            .body(
+                                    new ParameterizedTypeReference<List<StaffedAssignmentSummary>>() {
+                                    }
+                            );
+
+            if (assignments == null) {
+                return List.of();
+            }
+
+            return assignments
+                    .stream()
+                    .map(StaffedAssignmentSummary::consultantUserId)
+                    .filter(userId -> userId != null)
+                    .distinct()
+                    .toList();
+
+        } catch (RestClientException ex) {
+            log.warn(
+                    "Failed to fetch staffed consultants for engagement id={}: {}",
+                    engagementId,
+                    ex.getMessage()
+            );
+            return List.of();
+        }
+    }
+
+    /** Only the fields needed to notify staffed consultants; other AssignmentResponse fields are ignored. */
+    private record StaffedAssignmentSummary(UUID consultantUserId) {
     }
 
     private ServiceInstance getStaffingInstance() {

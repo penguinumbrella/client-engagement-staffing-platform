@@ -1,7 +1,9 @@
 package com.skillstorm.engagement.service;
 
+import com.skillstorm.engagement.client.AuthClient;
 import com.skillstorm.engagement.client.ClientClient;
 import com.skillstorm.engagement.client.StaffingClient;
+import com.skillstorm.engagement.dto.AuthUserResponse;
 import com.skillstorm.engagement.dto.CreateEngagementRequest;
 import com.skillstorm.engagement.dto.EngagementResponse;
 import com.skillstorm.engagement.dto.UpdateEngagementRequest;
@@ -26,18 +28,89 @@ public class EngagementService {
     private final EngagementRepository engagementRepository;
     private final StaffingClient staffingClient;
     private final ClientClient clientClient;
+    private final AuthClient authClient;
     private final NotificationEventPublisher notificationEventPublisher;
 
     public EngagementService(
             EngagementRepository engagementRepository,
             StaffingClient staffingClient,
             ClientClient clientClient,
+            AuthClient authClient,
             NotificationEventPublisher notificationEventPublisher) {
 
         this.engagementRepository = engagementRepository;
         this.staffingClient = staffingClient;
         this.clientClient = clientClient;
+        this.authClient = authClient;
         this.notificationEventPublisher = notificationEventPublisher;
+    }
+
+    /**
+     * All engagement managers, split into "the acting EM" (for attributing
+     * broadcast messages, e.g. "Jane cancelled...") and "everyone else"
+     * (the actual broadcast recipients — EMs can all do the same things,
+     * so every EM-triggered action is visible to the rest of the group,
+     * minus the one who just did it).
+     */
+    private record EmBroadcastContext(String actorName, List<AuthUserResponse> others) {
+    }
+
+    private EmBroadcastContext resolveEmBroadcastContext(String token, UUID actorId) {
+
+        List<AuthUserResponse> engagementManagers =
+                authClient.getUsersByRole("ENGAGEMENT_MANAGER", token);
+
+        String actorName = engagementManagers
+                .stream()
+                .filter(em -> em.id().equals(actorId))
+                .findFirst()
+                .map(em -> em.firstName() + " " + em.lastName())
+                .orElse("An engagement manager");
+
+        List<AuthUserResponse> others = engagementManagers
+                .stream()
+                .filter(em -> !em.id().equals(actorId))
+                .toList();
+
+        return new EmBroadcastContext(actorName, others);
+    }
+
+    private void notifyOtherEngagementManagers(
+            EmBroadcastContext context,
+            String eventType,
+            Long engagementId,
+            String title,
+            String message) {
+
+        context.others().forEach(em ->
+                notificationEventPublisher.publish(new NotificationEvent(
+                        eventType,
+                        "engagement",
+                        engagementId,
+                        em.id(),
+                        title,
+                        message
+                ))
+        );
+    }
+
+    private void notifyStaffedConsultants(
+            List<UUID> consultantUserIds,
+            Long engagementId,
+            String eventType,
+            String title,
+            String message) {
+
+        consultantUserIds.forEach(userId ->
+                notificationEventPublisher.publish(new NotificationEvent(
+                        eventType,
+                        "engagement",
+                        engagementId,
+                        userId,
+                        title,
+                        message
+                ))
+        );
     }
 
 
@@ -50,7 +123,7 @@ public class EngagementService {
     public EngagementResponse createEngagement(
             CreateEngagementRequest request,
             String token,
-            UUID ownerId) {
+            UUID actorId) {
 
         clientClient.validateClientExists(
                 request.getClientId(),
@@ -80,19 +153,19 @@ public class EngagementService {
                 request.getSummary()
         );
 
-        engagement.setOwnerId(ownerId);
-
         Engagement saved =
                 engagementRepository.save(engagement);
 
-        notificationEventPublisher.publish(new NotificationEvent(
+        EmBroadcastContext emContext =
+                resolveEmBroadcastContext(token, actorId);
+
+        notifyOtherEngagementManagers(
+                emContext,
                 "ENGAGEMENT_CREATED",
-                "engagement",
                 saved.getId(),
-                saved.getOwnerId(),
                 "New engagement",
-                "Engagement \"" + saved.getEngagementName() + "\" was created."
-        ));
+                emContext.actorName() + " created \"" + saved.getEngagementName() + "\"."
+        );
 
         return EngagementResponse.from(saved);
     }
@@ -199,7 +272,8 @@ public class EngagementService {
     public EngagementResponse updateEngagement(
             Long id,
             UpdateEngagementRequest request,
-            String token) {
+            String token,
+            UUID actorId) {
 
         Engagement engagement =
                 findActiveOrThrow(id);
@@ -310,15 +384,25 @@ public class EngagementService {
         }
 
 
-        notificationEventPublisher.publish(new NotificationEvent(
-                "ENGAGEMENT_UPDATED",
-                "engagement",
-                saved.getId(),
-                saved.getOwnerId(),
-                "Engagement updated",
-                "Engagement \"" + saved.getEngagementName() + "\" was updated."
-        ));
+        EmBroadcastContext emContext =
+                resolveEmBroadcastContext(token, actorId);
 
+        notifyOtherEngagementManagers(
+                emContext,
+                "ENGAGEMENT_UPDATED",
+                saved.getId(),
+                "Engagement updated",
+                emContext.actorName() + " updated \"" + saved.getEngagementName() + "\"."
+        );
+
+        notifyStaffedConsultants(
+                staffingClient.getStaffedConsultantUserIds(saved.getId(), token),
+                saved.getId(),
+                "ENGAGEMENT_UPDATED",
+                "Engagement updated",
+                emContext.actorName() + " updated \"" + saved.getEngagementName()
+                        + "\", which you're staffed on."
+        );
 
         return EngagementResponse.from(
                 saved
@@ -334,10 +418,17 @@ public class EngagementService {
      */
     public void deleteEngagement(
             Long id,
-            String token) {
+            String token,
+            UUID actorId) {
 
         Engagement engagement =
                 findActiveOrThrow(id);
+
+
+        // Captured before the cascade below deactivates these assignments,
+        // since the lookup only returns actively-staffed consultants.
+        List<UUID> staffedConsultantUserIds =
+                staffingClient.getStaffedConsultantUserIds(id, token);
 
 
         staffingClient.cascadeEngagementCancelled(
@@ -355,14 +446,25 @@ public class EngagementService {
                 );
 
 
-        notificationEventPublisher.publish(new NotificationEvent(
+        EmBroadcastContext emContext =
+                resolveEmBroadcastContext(token, actorId);
+
+        notifyOtherEngagementManagers(
+                emContext,
                 "ENGAGEMENT_DELETED",
-                "engagement",
                 saved.getId(),
-                saved.getOwnerId(),
                 "Engagement removed",
-                "Engagement \"" + saved.getEngagementName() + "\" was removed."
-        ));
+                emContext.actorName() + " removed \"" + saved.getEngagementName() + "\"."
+        );
+
+        notifyStaffedConsultants(
+                staffedConsultantUserIds,
+                saved.getId(),
+                "ENGAGEMENT_DELETED",
+                "Engagement removed",
+                emContext.actorName() + " removed \"" + saved.getEngagementName()
+                        + "\", which you were staffed on."
+        );
     }
 
 
@@ -374,7 +476,8 @@ public class EngagementService {
      */
     public EngagementResponse cancelEngagement(
             Long id,
-            String token) {
+            String token,
+            UUID actorId) {
 
         Engagement engagement =
                 findActiveOrThrow(id);
@@ -413,21 +516,37 @@ public class EngagementService {
                 );
 
 
+        // Captured before the cascade below deactivates these assignments,
+        // since the lookup only returns actively-staffed consultants.
+        List<UUID> staffedConsultantUserIds =
+                staffingClient.getStaffedConsultantUserIds(saved.getId(), token);
+
+
         staffingClient.cascadeEngagementCancelled(
                 saved.getId(),
                 token
         );
 
 
-        notificationEventPublisher.publish(new NotificationEvent(
-                "ENGAGEMENT_CANCELLED",
-                "engagement",
-                saved.getId(),
-                saved.getOwnerId(),
-                "Engagement cancelled",
-                "Engagement \"" + saved.getEngagementName() + "\" was cancelled."
-        ));
+        EmBroadcastContext emContext =
+                resolveEmBroadcastContext(token, actorId);
 
+        notifyOtherEngagementManagers(
+                emContext,
+                "ENGAGEMENT_CANCELLED",
+                saved.getId(),
+                "Engagement cancelled",
+                emContext.actorName() + " cancelled \"" + saved.getEngagementName() + "\"."
+        );
+
+        notifyStaffedConsultants(
+                staffedConsultantUserIds,
+                saved.getId(),
+                "ENGAGEMENT_CANCELLED",
+                "Engagement cancelled",
+                emContext.actorName() + " cancelled \"" + saved.getEngagementName()
+                        + "\", which you were staffed on."
+        );
 
         return EngagementResponse.from(
                 saved
