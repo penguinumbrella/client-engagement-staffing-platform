@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { MessageService } from 'primeng/api';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -22,6 +23,7 @@ export interface ConsultantRow extends Consultant {
 export class Consultants implements OnInit {
   private readonly consultantService = inject(ConsultantService);
   private readonly assignmentService = inject(AssignmentService);
+  private readonly messageService = inject(MessageService);
 
   readonly consultants = signal<ConsultantRow[]>([]);
   readonly loading = signal(true);
@@ -77,8 +79,18 @@ export class Consultants implements OnInit {
           this.consultants.set(rows);
           this.loading.set(false);
         },
-        error: () => {
-          this.error.set('Failed to load consultants.');
+        error: (err) => {
+          if (err.status === 503) {
+            const detail = err?.error?.message ?? 'The staffing service is currently unavailable. Please try again later.';
+            this.error.set(detail);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Service Unavailable',
+              detail,
+            });
+          } else {
+            this.error.set('Failed to load consultants.');
+          }
           this.loading.set(false);
         },
       });

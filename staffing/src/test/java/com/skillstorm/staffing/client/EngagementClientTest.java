@@ -9,11 +9,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.cloud.client.circuitbreaker.ConfigBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.InetSocketAddress;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,7 +36,39 @@ class EngagementClientTest {
 
     @BeforeEach
     void setUp() {
-        engagementClient = new EngagementClient(RestClient.builder(), loadBalancerClient);
+        engagementClient = new EngagementClient(RestClient.builder(), loadBalancerClient, new PassthroughCircuitBreakerFactory());
+    }
+
+    /**
+     * Runs the supplier directly and routes any exception straight to the
+     * fallback, with no sliding-window/open-state logic of its own. Good
+     * enough for exercising a client's own call/fallback wiring without
+     * pulling in resilience4j's registries just to build one.
+     */
+    private static final class PassthroughCircuitBreakerFactory extends CircuitBreakerFactory<Object, ConfigBuilder<Object>> {
+        @Override
+        public CircuitBreaker create(String id) {
+            return new CircuitBreaker() {
+                @Override
+                public <T> T run(Supplier<T> toRun, Function<Throwable, T> fallback) {
+                    try {
+                        return toRun.get();
+                    } catch (Exception ex) {
+                        return fallback.apply(ex);
+                    }
+                }
+            };
+        }
+
+        @Override
+        protected ConfigBuilder<Object> configBuilder(String id) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void configureDefault(Function<String, Object> defaultConfiguration) {
+            // no-op — tests don't exercise breaker tuning
+        }
     }
 
     @AfterEach

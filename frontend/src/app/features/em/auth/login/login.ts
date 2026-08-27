@@ -96,6 +96,12 @@ export class Login {
             summary: 'Login Failed',
             detail: 'Invalid email or password.'
           });
+        } else if (error.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: error?.error?.message ?? 'The auth service is currently unavailable. Please try again later.'
+          });
         } else {
           this.messageService.add({
             severity: 'error',

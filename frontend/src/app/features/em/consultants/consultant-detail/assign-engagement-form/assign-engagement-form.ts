@@ -77,11 +77,19 @@ export class AssignEngagementForm implements OnInit {
           engagements.filter((e) => !AssignEngagementForm.UNASSIGNABLE_STATUSES.has(e.status)),
         ),
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load engagements.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load engagements.',
+          });
+        }
         console.error(err);
       },
     });
@@ -120,6 +128,12 @@ export class AssignEngagementForm implements OnInit {
               severity: 'warn',
               summary: 'Cannot Assign',
               detail: err?.error?.message ?? 'This consultant is already staffed on that engagement.',
+            });
+          } else if (err.status === 503) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Service Unavailable',
+              detail: err?.error?.message ?? 'The staffing service is currently unavailable. Please try again later.',
             });
           } else {
             this.messageService.add({

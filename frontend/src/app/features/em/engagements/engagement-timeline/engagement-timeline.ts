@@ -60,7 +60,7 @@ export class EngagementTimeline {
   constructor() {
     this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
-      error: (err) => this.notifyError('Failed to load clients.', err),
+      error: (err) => this.notifyError('Failed to load clients.', err, 'client'),
     });
 
     this.engagementService.getAll().subscribe({
@@ -68,7 +68,7 @@ export class EngagementTimeline {
         this.engagements.set(engagements);
         engagements.forEach((e) => this.loadConsultants(e.id));
       },
-      error: (err) => this.notifyError('Failed to load engagements.', err),
+      error: (err) => this.notifyError('Failed to load engagements.', err, 'engagement'),
     });
   }
 
@@ -199,7 +199,7 @@ export class EngagementTimeline {
         this.stopLoading(engagementId);
       },
       error: (err) => {
-        this.notifyError('Failed to load consultants for an engagement.', err);
+        this.notifyError('Failed to load consultants for an engagement.', err, 'staffing');
         this.stopLoading(engagementId);
       },
     });
@@ -211,11 +211,19 @@ export class EngagementTimeline {
     this.loadingConsultants.set(next);
   }
 
-  private notifyError(detail: string, err: unknown): void {
+  /**
+   * `service` names which downstream service the failed call was ultimately
+   * headed to, so a 503 (the whole service down, per the gateway's circuit
+   * breaker) can say so specifically instead of a generic message.
+   */
+  private notifyError(detail: string, err: any, service?: string): void {
+    const unavailable = err?.status === 503;
     this.messageService.add({
       severity: 'error',
-      summary: 'Error',
-      detail,
+      summary: unavailable ? 'Service Unavailable' : 'Error',
+      detail: unavailable
+        ? (err?.error?.message ?? `The ${service} service is currently unavailable. Please try again later.`)
+        : detail,
     });
     console.error(detail, err);
   }

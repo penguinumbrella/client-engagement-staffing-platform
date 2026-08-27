@@ -118,6 +118,12 @@ export class ConsultantForm {
             summary: 'Cannot Create',
             detail: err?.error?.message ?? 'A consultant profile already exists for this user.',
           });
+        } else if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The auth service is currently unavailable. Please try again later.',
+          });
         } else {
           this.messageService.add({
             severity: 'error',

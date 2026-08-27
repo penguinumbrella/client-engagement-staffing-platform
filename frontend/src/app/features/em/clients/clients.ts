@@ -89,11 +89,19 @@ export class Clients implements OnInit {
         }
       },
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Update Failed',
-          detail: err?.error?.message ?? 'Failed to update client. Please try again.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The client service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Update Failed',
+            detail: err?.error?.message ?? 'Failed to update client. Please try again.',
+          });
+        }
         console.error(`Failed to update client ${id}`, err);
       },
     });
@@ -115,8 +123,12 @@ export class Clients implements OnInit {
         this.clients.set(page.content);
         this.loading.set(false);
       },
-      error: () => {
-        this.error.set('Failed to load clients.');
+      error: (err) => {
+        this.error.set(
+          err.status === 503
+            ? (err?.error?.message ?? 'The client service is currently unavailable. Please try again later.')
+            : 'Failed to load clients.',
+        );
         this.loading.set(false);
       },
     });

@@ -48,6 +48,9 @@ public class SecurityConfig {
                 // Allow Spring's internal error dispatch to surface the real error
                 .requestMatchers("/error").permitAll()
 
+                // Circuit breaker fallback responses (503s for a downed service)
+                .requestMatchers("/fallback/**").permitAll()
+
                 // Everything else requires JWT
                 .anyRequest().authenticated()
             )

@@ -62,11 +62,19 @@ export class ClientDetail {
         this.loadingEngagements.set(false);
       },
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load engagements for this client.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load engagements for this client.',
+          });
+        }
         console.error(`Failed to load engagements for client ${clientId}`, err);
         this.loadingEngagements.set(false);
       },

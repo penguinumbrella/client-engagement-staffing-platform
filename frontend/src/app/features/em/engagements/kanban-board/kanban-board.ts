@@ -47,12 +47,12 @@ export class KanbanBoard {
   constructor() {
     this.consultantService.getAll().subscribe({
       next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
-      error: (err) => this.notifyError('Failed to load consultants.', err),
+      error: (err) => this.notifyError('Failed to load consultants.', err, 'staffing'),
     });
 
     this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
-      error: (err) => this.notifyError('Failed to load clients.', err),
+      error: (err) => this.notifyError('Failed to load clients.', err, 'client'),
     });
 
     this.engagementService.getAll().subscribe({
@@ -60,7 +60,7 @@ export class KanbanBoard {
         this.engagements.set(engagements);
         engagements.forEach((e) => this.refreshConsultants(e.id));
       },
-      error: (err) => this.notifyError('Failed to load engagements.', err),
+      error: (err) => this.notifyError('Failed to load engagements.', err, 'engagement'),
     });
   }
 
@@ -113,7 +113,7 @@ export class KanbanBoard {
         next.set(engagementId, badges);
         this.consultantsByEngagement.set(next);
       },
-      error: (err) => this.notifyError('Failed to load consultants for an engagement.', err),
+      error: (err) => this.notifyError('Failed to load consultants for an engagement.', err, 'staffing'),
     });
   }
 
@@ -137,11 +137,19 @@ export class KanbanBoard {
         );
       },
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Move Failed',
-          detail: err?.error?.message ?? 'Failed to update the engagement status. Please try again.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Move Failed',
+            detail: err?.error?.message ?? 'Failed to update the engagement status. Please try again.',
+          });
+        }
         console.error(err);
       },
     });
@@ -184,11 +192,19 @@ export class KanbanBoard {
         this.creatingStatus.set(null);
       },
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Create Failed',
-          detail: err?.error?.message ?? 'Failed to create engagement. Please try again.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Create Failed',
+            detail: err?.error?.message ?? 'Failed to create engagement. Please try again.',
+          });
+        }
         console.error(err);
       },
     });
@@ -264,20 +280,31 @@ export class KanbanBoard {
     });
   }
 
-  private notifyError(detail: string, err: unknown): void {
+  /**
+   * `service` names which downstream service the failed call was ultimately
+   * headed to, so a 503 (the whole service down, per the gateway's circuit
+   * breaker) can say so specifically instead of a generic message.
+   */
+  private notifyError(detail: string, err: any, service?: string): void {
+    const unavailable = err?.status === 503;
     this.messageService.add({
       severity: 'error',
-      summary: 'Error',
-      detail,
+      summary: unavailable ? 'Service Unavailable' : 'Error',
+      detail: unavailable
+        ? (err?.error?.message ?? `The ${service} service is currently unavailable. Please try again later.`)
+        : detail,
     });
     console.error(detail, err);
   }
 
-  private notifyUpdateError(field: string, engagementId: number, err: unknown): void {
+  private notifyUpdateError(field: string, engagementId: number, err: any): void {
+    const unavailable = err?.status === 503;
     this.messageService.add({
       severity: 'error',
-      summary: 'Update Failed',
-      detail: (err as { error?: { message?: string } })?.error?.message ?? `Failed to update the engagement ${field}. Please try again.`,
+      summary: unavailable ? 'Service Unavailable' : 'Update Failed',
+      detail: unavailable
+        ? (err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.')
+        : (err?.error?.message ?? `Failed to update the engagement ${field}. Please try again.`),
     });
     console.error(`Failed to update engagement ${engagementId} ${field}`, err);
   }
