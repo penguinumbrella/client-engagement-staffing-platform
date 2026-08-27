@@ -14,6 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.skillstorm.client.clients.EngagementClient;
 import com.skillstorm.client.dtos.ClientRequest;
 import com.skillstorm.client.dtos.ClientResponse;
+import com.skillstorm.client.kafka.NotificationEvent;
+import com.skillstorm.client.kafka.NotificationEventPublisher;
 import com.skillstorm.client.mappers.ClientMapper;
 import com.skillstorm.client.models.Client;
 import com.skillstorm.client.repositories.ClientRepository;
@@ -24,11 +26,14 @@ public class ClientService {
     private final ClientRepository clientRepo;
     private final ClientMapper clientMapper;
     private final EngagementClient engagementClient;
+    private final NotificationEventPublisher notificationEventPublisher;
 
-    public ClientService(ClientRepository clientRepo, ClientMapper clientMapper, EngagementClient engagementClient) {
+    public ClientService(ClientRepository clientRepo, ClientMapper clientMapper, EngagementClient engagementClient,
+            NotificationEventPublisher notificationEventPublisher) {
         this.clientRepo = clientRepo;
         this.clientMapper = clientMapper;
         this.engagementClient = engagementClient;
+        this.notificationEventPublisher = notificationEventPublisher;
     }
 
     public ResponseEntity<Page<ClientResponse>> getAllClients(int page, int size) {
@@ -50,6 +55,16 @@ public class ClientService {
 
         try {
             Client client = this.clientRepo.save(new Client(dto.companyName(), dto.industry(), dto.primaryContactName(), dto.primaryContactEmail(), dto.relationshipStatus()));
+
+            notificationEventPublisher.publish(new NotificationEvent(
+                    "CLIENT_CREATED",
+                    "client",
+                    client.getId(),
+                    client.getId(),
+                    "New client",
+                    "Client \"" + client.getCompanyName() + "\" was created."
+            ));
+
             return ResponseEntity.status(201).body(this.clientMapper.toDto(client));
         } catch (DataIntegrityViolationException ex) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -95,6 +110,16 @@ public class ClientService {
             Client temp = current.get();
             temp.setActive(false);
             this.clientRepo.save(temp);
+
+            notificationEventPublisher.publish(new NotificationEvent(
+                    "CLIENT_DELETED",
+                    "client",
+                    temp.getId(),
+                    temp.getId(),
+                    "Client removed",
+                    "Client \"" + temp.getCompanyName() + "\" was deactivated."
+            ));
+
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.status(404).build();

@@ -32,6 +32,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.skillstorm.client.clients.EngagementClient;
 import com.skillstorm.client.dtos.ClientRequest;
 import com.skillstorm.client.dtos.ClientResponse;
+import com.skillstorm.client.kafka.NotificationEvent;
+import com.skillstorm.client.kafka.NotificationEventPublisher;
 import com.skillstorm.client.mappers.ClientMapper;
 import com.skillstorm.client.models.Client;
 import com.skillstorm.client.models.enums.RelationshipStatus;
@@ -48,6 +50,9 @@ class ClientServiceTest {
 
     @Mock
     private EngagementClient engagementClient;
+
+    @Mock
+    private NotificationEventPublisher notificationEventPublisher;
 
     @InjectMocks
     private ClientService clientService;
@@ -128,6 +133,7 @@ class ClientServiceTest {
 
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
         assertEquals(clientResponse, result.getBody());
+        verify(notificationEventPublisher).publish(any(NotificationEvent.class));
     }
 
     @Test
@@ -138,6 +144,7 @@ class ClientServiceTest {
                 () -> clientService.createClient(clientRequest));
 
         assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(notificationEventPublisher, never()).publish(any(NotificationEvent.class));
     }
 
     // ----- updateClient -----
@@ -196,6 +203,7 @@ class ClientServiceTest {
 
         assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
         verify(clientRepo, times(1)).save(activeClient);
+        verify(notificationEventPublisher).publish(any(NotificationEvent.class));
     }
 
     @Test
@@ -207,6 +215,7 @@ class ClientServiceTest {
 
         assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
         verify(clientRepo, never()).save(any(Client.class));
+        verify(notificationEventPublisher, never()).publish(any(NotificationEvent.class));
     }
 
     @Test
@@ -219,6 +228,7 @@ class ClientServiceTest {
 
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, result.getStatusCode());
         verify(clientRepo, never()).save(any(Client.class));
+        verify(notificationEventPublisher, never()).publish(any(NotificationEvent.class));
     }
 
     @Test
