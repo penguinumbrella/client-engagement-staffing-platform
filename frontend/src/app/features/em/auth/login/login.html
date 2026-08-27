@@ -11,7 +11,7 @@
 
       <div class="relative z-10 max-w-[470px]">
 
-        <div class="w-14 h-14 flex items-center justify-center mb-9 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm text-2xl">
+        <div class="w-14 h-14 flex items-center justify-center mb-9 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-sm text-2xl">
           <i class="pi pi-briefcase"></i>
         </div>
 
@@ -28,21 +28,21 @@
         <div class="flex flex-col gap-4">
 
           <div class="flex items-center gap-3 text-white/90 text-sm">
-            <span class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10">
+            <span class="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10">
               <i class="pi pi-building"></i>
             </span>
             <span>Client Management</span>
           </div>
 
           <div class="flex items-center gap-3 text-white/90 text-sm">
-            <span class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10">
+            <span class="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10">
               <i class="pi pi-users"></i>
             </span>
             <span>Consultant Staffing</span>
           </div>
 
           <div class="flex items-center gap-3 text-white/90 text-sm">
-            <span class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10">
+            <span class="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10">
               <i class="pi pi-briefcase"></i>
             </span>
             <span>Engagement Tracking</span>
@@ -91,7 +91,7 @@
             </label>
 
             <div
-              class="h-[52px] flex items-center rounded-xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-[52px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 loginForm.controls.email.touched &&
                 loginForm.controls.email.invalid
@@ -141,7 +141,7 @@
             </label>
 
             <div
-              class="h-[52px] flex items-center rounded-xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-[52px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 loginForm.controls.password.touched &&
                 loginForm.controls.password.invalid
@@ -176,7 +176,7 @@
 
           <!-- SUBMIT -->
           <button
-            class="w-full h-[52px] flex items-center justify-center gap-2.5 mt-1 rounded-xl bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-400)] text-[#1a1611] font-bold text-[0.95rem] shadow-lg shadow-[var(--p-primary-400)]/25 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            class="w-full h-[52px] flex items-center justify-center gap-2.5 mt-1 rounded-2xl bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-400)] text-[#1a1611] font-bold text-[0.95rem] shadow-lg shadow-[var(--p-primary-400)]/25 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             type="submit"
             [disabled]="loading"
           >

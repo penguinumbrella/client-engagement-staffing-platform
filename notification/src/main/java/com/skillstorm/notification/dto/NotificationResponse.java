@@ -3,11 +3,12 @@ package com.skillstorm.notification.dto;
 import com.skillstorm.notification.model.Notification;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public class NotificationResponse {
 
     private final Long id;
-    private final Long recipientId;
+    private final UUID recipientId;
     private final String title;
     private final String message;
     private final String type;
@@ -18,7 +19,7 @@ public class NotificationResponse {
     private final OffsetDateTime createdAt;
     private final OffsetDateTime updatedAt;
 
-    public NotificationResponse(Long id, Long recipientId, String title, String message, String type,
+    public NotificationResponse(Long id, UUID recipientId, String title, String message, String type,
                                 String sourceService, Long sourceId, boolean read, boolean active,
                                 OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         this.id = id;
@@ -54,7 +55,7 @@ public class NotificationResponse {
         return id;
     }
 
-    public Long getRecipientId() {
+    public UUID getRecipientId() {
         return recipientId;
     }
 

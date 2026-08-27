@@ -1,5 +1,6 @@
 package com.skillstorm.auth_service.Services;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -155,6 +156,16 @@ public class AuthService {
                 );
 
         return toUserResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getUsersByRole(UserRole role) {
+
+        return userRepository
+                .findByRole(role)
+                .stream()
+                .map(this::toUserResponse)
+                .toList();
     }
 
     private User createUserAccount(

@@ -38,3 +38,34 @@ const STATUS_HEX_COLORS: Record<EngagementStatus, string> = {
 export function engagementStatusColor(status: string): string {
   return STATUS_HEX_COLORS[status as EngagementStatus] ?? '#6b7280';
 }
+
+/** Muted pastel background for each Kanban column, so lanes read apart at a glance regardless of the active theme. */
+const STATUS_PASTEL_BACKGROUNDS: Record<EngagementStatus, string> = {
+  [EngagementStatus.PLANNED]: '#e6ebf0',
+  [EngagementStatus.IN_PROGRESS]: '#e9e8f0',
+  [EngagementStatus.ON_HOLD]: '#f0ecdf',
+  [EngagementStatus.COMPLETED]: '#e3ece5',
+  [EngagementStatus.CANCELLED]: '#eeeeee',
+};
+
+export function engagementColumnPastelBackground(status: string): string {
+  return STATUS_PASTEL_BACKGROUNDS[status as EngagementStatus] ?? '#eeeeee';
+}
+
+/** Each column's flat pastel background. */
+export function engagementColumnGradient(status: string): string {
+  return engagementColumnPastelBackground(status);
+}
+
+/** A deeper, still-muted shade of the same hue, for the column's dashed border. */
+const STATUS_PASTEL_BORDERS: Record<EngagementStatus, string> = {
+  [EngagementStatus.PLANNED]: '#aebbc9',
+  [EngagementStatus.IN_PROGRESS]: '#b3b0c9',
+  [EngagementStatus.ON_HOLD]: '#c9bd93',
+  [EngagementStatus.COMPLETED]: '#a9c2af',
+  [EngagementStatus.CANCELLED]: '#c7c7c7',
+};
+
+export function engagementColumnPastelBorder(status: string): string {
+  return STATUS_PASTEL_BORDERS[status as EngagementStatus] ?? '#c7c7c7';
+}

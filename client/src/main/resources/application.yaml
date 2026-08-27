@@ -48,6 +48,7 @@ eureka:
         registry-fetch-interval-seconds: 5
     instance:
         leaseRenewalIntervalInSeconds: 10
+        prefer-ip-address: true
 
 ---
 spring:

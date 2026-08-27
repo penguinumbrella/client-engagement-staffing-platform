@@ -1,4 +1,4 @@
-package com.skillstorm.staffing.dto;
+package com.skillstorm.engagement.dto;
 
 import java.util.UUID;
 

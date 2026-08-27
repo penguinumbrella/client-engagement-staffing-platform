@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/engagements")
@@ -59,7 +60,8 @@ public class EngagementController {
                         engagementService
                                 .createEngagement(
                                         request,
-                                        jwt.getTokenValue()
+                                        jwt.getTokenValue(),
+                                        UUID.fromString(jwt.getSubject())
                                 )
                 );
     }
@@ -152,7 +154,8 @@ public class EngagementController {
                         .updateEngagement(
                                 id,
                                 request,
-                                jwt.getTokenValue()
+                                jwt.getTokenValue(),
+                                UUID.fromString(jwt.getSubject())
                         )
         );
     }
@@ -170,7 +173,8 @@ public class EngagementController {
 
         engagementService.deleteEngagement(
                 id,
-                jwt.getTokenValue()
+                jwt.getTokenValue(),
+                UUID.fromString(jwt.getSubject())
         );
 
         return ResponseEntity
@@ -200,7 +204,8 @@ public class EngagementController {
                 engagementService
                         .cancelEngagement(
                                 id,
-                                jwt.getTokenValue()
+                                jwt.getTokenValue(),
+                                UUID.fromString(jwt.getSubject())
                         )
         );
     }

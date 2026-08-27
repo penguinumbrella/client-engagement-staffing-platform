@@ -47,7 +47,7 @@ jobs:
 
       - name: Run tests
         env:
-          DB_URL: jdbc:postgresql://localhost:5432/notification_test
+          NOTIFICATION_DB_URL: jdbc:postgresql://localhost:5432/notification_test
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
         run: mvn -B test

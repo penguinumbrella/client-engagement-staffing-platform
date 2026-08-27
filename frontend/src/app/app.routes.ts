@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Engagements } from './features/em/engagements/engagements';
+import { Timeline } from './features/em/engagements/timeline/timeline';
 import { Clients } from './features/em/clients/clients';
 import { Consultants } from './features/em/consultants/consultants';
 import { Login } from './features/em/auth/login/login';
@@ -12,6 +13,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full'},
 
   { path: 'em/engagements', component: Engagements, canActivate: [authGuard]},
+  { path: 'em/timeline', component: Timeline, canActivate: [authGuard]},
   { path: 'em/clients', component: Clients, canActivate: [authGuard]},
   { path: 'em/consultants', component: Consultants, canActivate: [authGuard, managerGuard]},
   { path: 'login', component: Login},

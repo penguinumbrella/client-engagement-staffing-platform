@@ -44,7 +44,8 @@ public class AssignmentController {
                 .body(
                         assignmentService.assignConsultant(
                                 request,
-                                jwt.getTokenValue()
+                                jwt.getTokenValue(),
+                                UUID.fromString(jwt.getSubject())
                         )
                 );
     }
@@ -88,9 +89,14 @@ public class AssignmentController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remove(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @AuthenticationPrincipal Jwt jwt) {
 
-        assignmentService.removeAssignment(id);
+        assignmentService.removeAssignment(
+                id,
+                jwt.getTokenValue(),
+                UUID.fromString(jwt.getSubject())
+        );
 
         return ResponseEntity.noContent().build();
     }
@@ -149,12 +155,15 @@ public class AssignmentController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<AssignmentResponse> updateStatus(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateAssignmentStatusRequest request) {
+            @Valid @RequestBody UpdateAssignmentStatusRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
 
         return ResponseEntity.ok(
                 assignmentService.updateStatus(
                         id,
-                        request
+                        request,
+                        jwt.getTokenValue(),
+                        UUID.fromString(jwt.getSubject())
                 )
         );
     }

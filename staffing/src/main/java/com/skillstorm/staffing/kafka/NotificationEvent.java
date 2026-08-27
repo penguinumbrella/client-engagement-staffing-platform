@@ -1,11 +1,13 @@
 package com.skillstorm.staffing.kafka;
 
+import java.util.UUID;
+
 public class NotificationEvent {
 
     private String eventType;
     private String sourceService;
     private Long sourceId;
-    private Long recipientId;
+    private UUID recipientId;
     private String title;
     private String message;
 
@@ -13,7 +15,7 @@ public class NotificationEvent {
     }
 
     public NotificationEvent(String eventType, String sourceService, Long sourceId,
-                             Long recipientId, String title, String message) {
+                             UUID recipientId, String title, String message) {
         this.eventType = eventType;
         this.sourceService = sourceService;
         this.sourceId = sourceId;
@@ -46,11 +48,11 @@ public class NotificationEvent {
         this.sourceId = sourceId;
     }
 
-    public Long getRecipientId() {
+    public UUID getRecipientId() {
         return recipientId;
     }
 
-    public void setRecipientId(Long recipientId) {
+    public void setRecipientId(UUID recipientId) {
         this.recipientId = recipientId;
     }
 

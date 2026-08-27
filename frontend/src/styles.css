@@ -9,16 +9,19 @@
 }
 
 body {
-  background-color: var(--p-surface-950, #12100c);
+  font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  background: var(--p-surface-950, #12100c);
   color: var(--p-surface-50, #efe9df);
 }
 
-a {
-  color: var(--color-accent-blue);
-}
+@layer base {
+  a {
+    color: var(--color-accent-blue);
+  }
 
-a:hover {
-  color: var(--color-accent-blue-hover);
+  a:hover {
+    color: var(--color-accent-blue-hover);
+  }
 }
 
 .cdk-drag-preview {
@@ -32,3 +35,28 @@ a:hover {
 .cdk-drop-list-dragging .cdk-drag {
   transition: transform 200ms ease;
 }
+
+@keyframes modal-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-backdrop-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes modal-panel-in {
+  from { opacity: 0; transform: scale(0.96) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes modal-panel-out {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to { opacity: 0; transform: scale(0.96) translateY(4px); }
+}
+
+.modal-backdrop-in { animation: modal-backdrop-in 150ms ease-out; }
+.modal-backdrop-out { animation: modal-backdrop-out 120ms ease-in; }
+.modal-panel-in { animation: modal-panel-in 150ms ease-out; }
+.modal-panel-out { animation: modal-panel-out 120ms ease-in; }

@@ -1,6 +1,8 @@
 package com.skillstorm.client.services;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -11,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.skillstorm.client.clients.AuthClient;
 import com.skillstorm.client.clients.EngagementClient;
+import com.skillstorm.client.dtos.AuthUserResponse;
 import com.skillstorm.client.dtos.ClientRequest;
 import com.skillstorm.client.dtos.ClientResponse;
 import com.skillstorm.client.kafka.NotificationEvent;
@@ -26,14 +30,65 @@ public class ClientService {
     private final ClientRepository clientRepo;
     private final ClientMapper clientMapper;
     private final EngagementClient engagementClient;
+    private final AuthClient authClient;
     private final NotificationEventPublisher notificationEventPublisher;
 
     public ClientService(ClientRepository clientRepo, ClientMapper clientMapper, EngagementClient engagementClient,
-            NotificationEventPublisher notificationEventPublisher) {
+            AuthClient authClient, NotificationEventPublisher notificationEventPublisher) {
         this.clientRepo = clientRepo;
         this.clientMapper = clientMapper;
         this.engagementClient = engagementClient;
+        this.authClient = authClient;
         this.notificationEventPublisher = notificationEventPublisher;
+    }
+
+    /**
+     * All engagement managers, split into "the acting EM" (for attributing
+     * broadcast messages, e.g. "Jane created...") and "everyone else" (the
+     * actual broadcast recipients — EMs can all do the same things, so
+     * every EM-triggered action is visible to the rest of the group, minus
+     * the one who just did it).
+     */
+    private record EmBroadcastContext(String actorName, List<AuthUserResponse> others) {
+    }
+
+    private EmBroadcastContext resolveEmBroadcastContext(String token, UUID actorId) {
+
+        List<AuthUserResponse> engagementManagers =
+                authClient.getUsersByRole("ENGAGEMENT_MANAGER", token);
+
+        String actorName = engagementManagers
+                .stream()
+                .filter(em -> em.id().equals(actorId))
+                .findFirst()
+                .map(em -> em.firstName() + " " + em.lastName())
+                .orElse("An engagement manager");
+
+        List<AuthUserResponse> others = engagementManagers
+                .stream()
+                .filter(em -> !em.id().equals(actorId))
+                .toList();
+
+        return new EmBroadcastContext(actorName, others);
+    }
+
+    private void notifyOtherEngagementManagers(
+            EmBroadcastContext context,
+            String eventType,
+            Long sourceId,
+            String title,
+            String message) {
+
+        context.others().forEach(em ->
+                notificationEventPublisher.publish(new NotificationEvent(
+                        eventType,
+                        "client",
+                        sourceId,
+                        em.id(),
+                        title,
+                        message
+                ))
+        );
     }
 
     public ResponseEntity<Page<ClientResponse>> getAllClients(int page, int size) {
@@ -51,19 +106,21 @@ public class ClientService {
         return ResponseEntity.notFound().build();
     }
 
-    public ResponseEntity<ClientResponse> createClient(ClientRequest dto) {
+    public ResponseEntity<ClientResponse> createClient(ClientRequest dto, String token, UUID actorId) {
 
         try {
             Client client = this.clientRepo.save(new Client(dto.companyName(), dto.industry(), dto.primaryContactName(), dto.primaryContactEmail(), dto.relationshipStatus()));
 
-            notificationEventPublisher.publish(new NotificationEvent(
+            EmBroadcastContext emContext =
+                    resolveEmBroadcastContext(token, actorId);
+
+            notifyOtherEngagementManagers(
+                    emContext,
                     "CLIENT_CREATED",
-                    "client",
-                    client.getId(),
                     client.getId(),
                     "New client",
-                    "Client \"" + client.getCompanyName() + "\" was created."
-            ));
+                    emContext.actorName() + " created \"" + client.getCompanyName() + "\"."
+            );
 
             return ResponseEntity.status(201).body(this.clientMapper.toDto(client));
         } catch (DataIntegrityViolationException ex) {
@@ -94,7 +151,7 @@ public class ClientService {
         return ResponseEntity.notFound().build();
     }
 
-    public ResponseEntity<Void> deleteClient(Long id, String token) {
+    public ResponseEntity<Void> deleteClient(Long id, String token, UUID actorId) {
         Optional<Client> current = this.clientRepo.findById(id);
 
         if(current.isPresent() && current.get().isActive()) {
@@ -111,14 +168,16 @@ public class ClientService {
             temp.setActive(false);
             this.clientRepo.save(temp);
 
-            notificationEventPublisher.publish(new NotificationEvent(
+            EmBroadcastContext emContext =
+                    resolveEmBroadcastContext(token, actorId);
+
+            notifyOtherEngagementManagers(
+                    emContext,
                     "CLIENT_DELETED",
-                    "client",
-                    temp.getId(),
                     temp.getId(),
                     "Client removed",
-                    "Client \"" + temp.getCompanyName() + "\" was deactivated."
-            ));
+                    emContext.actorName() + " deactivated \"" + temp.getCompanyName() + "\"."
+            );
 
             return ResponseEntity.noContent().build();
         }
