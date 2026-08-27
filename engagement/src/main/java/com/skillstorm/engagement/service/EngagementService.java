@@ -186,6 +186,37 @@ public class EngagementService {
 
 
     /*
+     * MANAGER:
+     * Search all active engagements by name/summary.
+     */
+    public List<EngagementResponse> searchEngagements(String q) {
+
+        return engagementRepository
+                .findByActiveTrueAndEngagementNameContainingIgnoreCaseOrActiveTrueAndSummaryContainingIgnoreCase(q, q)
+                .stream()
+                .map(EngagementResponse::from)
+                .toList();
+    }
+
+
+    /*
+     * CONSULTANT:
+     * Search only engagements assigned to the
+     * currently authenticated consultant, by name/summary.
+     */
+    public List<EngagementResponse> searchEngagementsForCurrentConsultant(String q, String token) {
+
+        String needle = q.toLowerCase();
+
+        return getEngagementsForCurrentConsultant(token)
+                .stream()
+                .filter(e -> e.getEngagementName().toLowerCase().contains(needle)
+                        || (e.getSummary() != null && e.getSummary().toLowerCase().contains(needle)))
+                .toList();
+    }
+
+
+    /*
      * CONSULTANT:
      * View only engagements assigned to the
      * currently authenticated consultant.

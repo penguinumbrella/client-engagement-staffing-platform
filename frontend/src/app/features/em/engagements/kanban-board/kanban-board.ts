@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MessageService } from 'primeng/api';
 import { KanbanColumn } from '../kanban-column/kanban-column';
@@ -33,6 +34,7 @@ export class KanbanBoard {
   private readonly assignmentService = inject(AssignmentService);
   private readonly clientService = inject(ClientService);
   private readonly messageService = inject(MessageService);
+  private readonly route = inject(ActivatedRoute);
 
   private readonly engagements = signal<Engagement[]>([]);
   private readonly consultantsById = signal<Map<number, Consultant>>(new Map());
@@ -44,7 +46,29 @@ export class KanbanBoard {
   protected readonly connectedLists = COLUMN_STATUSES;
   protected readonly cancelledStatus = EngagementStatus.CANCELLED;
 
+  private readonly pendingOpenId = signal<number | null>(null);
+
   constructor() {
+    // Re-run whenever the search bar navigates here with a new ?openId=,
+    // even if we're already sitting on this route (component isn't re-created).
+    this.route.queryParamMap.subscribe((params) => {
+      this.pendingOpenId.set(Number(params.get('openId')) || null);
+    });
+
+    effect(() => {
+      const openId = this.pendingOpenId();
+      if (!openId) return;
+
+      const card = this.columns()
+        .flatMap((column) => column.engagements)
+        .find((c) => c.id === openId);
+
+      if (card) {
+        this.selected.set(card);
+        this.pendingOpenId.set(null);
+      }
+    });
+
     this.consultantService.getAll().subscribe({
       next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
       error: (err) => this.notifyError('Failed to load consultants.', err),

@@ -1,16 +1,16 @@
 @if (everOpened()) {
 <div
   class="fixed inset-0 z-50 bg-black/40 transition-opacity duration-300 ease-out"
-  [class.opacity-100]="visible()"
-  [class.opacity-0]="!visible()"
-  [class.pointer-events-none]="!visible()"
+  [class.opacity-100]="panelVisible()"
+  [class.opacity-0]="!panelVisible()"
+  [class.pointer-events-none]="!panelVisible()"
   (click)="close()"
 ></div>
 
 <div
   class="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col overflow-y-auto bg-[var(--p-surface-800)] shadow-lg transition-transform duration-300 ease-out"
-  [class.translate-x-0]="visible()"
-  [class.translate-x-full]="!visible()"
+  [class.translate-x-0]="panelVisible()"
+  [class.translate-x-full]="!panelVisible()"
 >
   @if (consultant(); as consultant) {
       <div class="flex items-start justify-between border-b border-[var(--p-surface-600)] p-4">

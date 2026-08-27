@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
 import { ClientService } from '../../../services/ClientService';
@@ -16,6 +17,7 @@ import { ClientTable } from './client-table/client-table';
 export class Clients implements OnInit {
   private readonly clientService = inject(ClientService);
   private readonly messageService = inject(MessageService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly clients = signal<Client[]>([]);
   readonly loading = signal(true);
@@ -30,6 +32,10 @@ export class Clients implements OnInit {
 
   ngOnInit(): void {
     this.loadClients();
+
+    // Re-run whenever the search bar navigates here with a new ?openId=,
+    // even if we're already sitting on this route (component isn't re-created).
+    this.route.queryParamMap.subscribe(() => this.openDetailFromQueryParam());
   }
 
   openCreate(): void {
@@ -114,11 +120,20 @@ export class Clients implements OnInit {
       next: (page) => {
         this.clients.set(page.content);
         this.loading.set(false);
+        this.openDetailFromQueryParam();
       },
       error: () => {
         this.error.set('Failed to load clients.');
         this.loading.set(false);
       },
     });
+  }
+
+  private openDetailFromQueryParam(): void {
+    const openId = Number(this.route.snapshot.queryParamMap.get('openId'));
+    if (!openId) return;
+
+    const client = this.clients().find((c) => c.id === openId);
+    if (client) this.openDetail(client);
   }
 }

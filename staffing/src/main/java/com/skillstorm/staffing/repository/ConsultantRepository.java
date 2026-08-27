@@ -14,6 +14,9 @@ public interface ConsultantRepository
 
     List<Consultant> findByActiveTrue();
 
+    List<Consultant> findByActiveTrueAndNameContainingIgnoreCaseOrActiveTrueAndTitleRoleContainingIgnoreCaseOrActiveTrueAndPrimarySkillAreaContainingIgnoreCase(
+            String name, String titleRole, String primarySkillArea);
+
     @Query(value = "SELECT * FROM consultants WHERE CAST(user_id AS text) = CAST(:userId AS text)", nativeQuery = true)
     Optional<Consultant> findByUserId(@Param("userId") UUID userId);
 

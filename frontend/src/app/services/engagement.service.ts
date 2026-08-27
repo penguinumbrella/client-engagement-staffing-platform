@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -25,6 +25,11 @@ export class EngagementService {
 
   getByClient(clientId: number): Observable<Engagement[]> {
     return this.http.get<Engagement[]>(`${this.baseUrl}/client/${clientId}`);
+  }
+
+  search(q: string): Observable<Engagement[]> {
+    const params = new HttpParams().set('q', q);
+    return this.http.get<Engagement[]>(`${this.baseUrl}/search`, { params });
   }
 
   create(request: CreateEngagementRequest): Observable<Engagement> {

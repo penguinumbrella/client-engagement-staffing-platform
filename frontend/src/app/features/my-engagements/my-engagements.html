@@ -6,7 +6,9 @@
   @if (loading()) {
     <p class="text-sm text-[var(--p-surface-300)]">Loading engagements…</p>
   } @else if (rows().length === 0) {
-    <p class="text-sm text-[var(--p-surface-300)]">No engagements assigned to you.</p>
+    <p class="text-sm text-[var(--p-surface-300)]">
+      {{ hasAssignments() ? 'No engagements match your search.' : 'No engagements assigned to you.' }}
+    </p>
   } @else {
     <ul class="flex flex-col gap-2">
       @for (row of rows(); track row.id) {

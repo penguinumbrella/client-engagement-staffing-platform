@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -22,6 +23,7 @@ export interface ConsultantRow extends Consultant {
 export class Consultants implements OnInit {
   private readonly consultantService = inject(ConsultantService);
   private readonly assignmentService = inject(AssignmentService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly consultants = signal<ConsultantRow[]>([]);
   readonly loading = signal(true);
@@ -37,6 +39,10 @@ export class Consultants implements OnInit {
 
   ngOnInit(): void {
     this.loadConsultants();
+
+    // Re-run whenever the search bar navigates here with a new ?openId=,
+    // even if we're already sitting on this route (component isn't re-created).
+    this.route.queryParamMap.subscribe(() => this.openDetailFromQueryParam());
   }
 
   openDetail(consultant: Consultant): void {
@@ -76,11 +82,20 @@ export class Consultants implements OnInit {
         next: (rows) => {
           this.consultants.set(rows);
           this.loading.set(false);
+          this.openDetailFromQueryParam();
         },
         error: () => {
           this.error.set('Failed to load consultants.');
           this.loading.set(false);
         },
       });
+  }
+
+  private openDetailFromQueryParam(): void {
+    const openId = Number(this.route.snapshot.queryParamMap.get('openId'));
+    if (!openId) return;
+
+    const consultant = this.consultants().find((c) => c.id === openId);
+    if (consultant) this.openDetail(consultant);
   }
 }

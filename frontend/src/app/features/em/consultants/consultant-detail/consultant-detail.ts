@@ -44,6 +44,15 @@ export class ConsultantDetail {
   readonly everOpened = signal(false);
   readonly assignFormVisible = signal(false);
 
+  /**
+   * Mirrors `visible()`, except on the very first open it's held at `false`
+   * for one extra frame after the panel is mounted (`everOpened` flips true)
+   * so the browser paints the off-screen state before we transition it
+   * on-screen — otherwise the slide-in CSS transition has no prior state
+   * to animate from and the panel just appears.
+   */
+  readonly panelVisible = signal(false);
+
   readonly initialsOf = initialsOf;
   readonly colorOf = colorOf;
   readonly EngagementStatus = EngagementStatus;
@@ -88,9 +97,18 @@ export class ConsultantDetail {
   constructor() {
     effect(() => {
       const consultant = this.consultant();
+
       if (this.visible() && consultant) {
-        this.everOpened.set(true);
         this.loadAssignments(consultant.id);
+
+        if (!this.everOpened()) {
+          this.everOpened.set(true);
+          requestAnimationFrame(() => this.panelVisible.set(true));
+        } else {
+          this.panelVisible.set(true);
+        }
+      } else {
+        this.panelVisible.set(false);
       }
     });
   }

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -118,6 +119,23 @@ public class EngagementController {
                                 jwt.getTokenValue()
                         )
         );
+    }
+
+
+    /*
+     * MANAGER:
+     * searches all engagements.
+     *
+     * CONSULTANT:
+     * searches only engagements they are staffed on.
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<EngagementResponse>> search(@RequestParam String q, @AuthenticationPrincipal Jwt jwt) {
+        if (isEngagementManager(jwt)) {
+            return ResponseEntity.ok(engagementService.searchEngagements(q));
+        }
+
+        return ResponseEntity.ok(engagementService.searchEngagementsForCurrentConsultant(q, jwt.getTokenValue()));
     }
 
 

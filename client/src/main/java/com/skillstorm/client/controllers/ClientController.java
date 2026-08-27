@@ -1,5 +1,7 @@
 package com.skillstorm.client.controllers;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,6 +44,11 @@ public class ClientController {
     @GetMapping("/{id}")
     public ResponseEntity<ClientResponse> getClientById(@PathVariable Long id) {
         return clientService.getClientById(id);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ClientResponse>> searchClients(@RequestParam String q) {
+        return clientService.searchClients(q);
     }
 
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
