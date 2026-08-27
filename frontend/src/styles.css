@@ -9,7 +9,15 @@
 }
 
 body {
-  background-color: var(--p-surface-950, #12100c);
+  font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  background:
+    radial-gradient(at 12% 18%, rgba(59, 130, 246, 0.16), transparent 45%),
+    radial-gradient(at 85% 8%, rgba(236, 72, 153, 0.13), transparent 45%),
+    radial-gradient(at 8% 85%, rgba(16, 185, 129, 0.15), transparent 45%),
+    radial-gradient(at 92% 80%, rgba(245, 158, 11, 0.13), transparent 45%),
+    radial-gradient(at 55% 45%, rgba(139, 92, 246, 0.1), transparent 55%),
+    var(--p-surface-950, #12100c);
+  background-attachment: fixed;
   color: var(--p-surface-50, #efe9df);
 }
 
@@ -32,3 +40,28 @@ a:hover {
 .cdk-drop-list-dragging .cdk-drag {
   transition: transform 200ms ease;
 }
+
+@keyframes modal-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-backdrop-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes modal-panel-in {
+  from { opacity: 0; transform: scale(0.96) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes modal-panel-out {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to { opacity: 0; transform: scale(0.96) translateY(4px); }
+}
+
+.modal-backdrop-in { animation: modal-backdrop-in 150ms ease-out; }
+.modal-backdrop-out { animation: modal-backdrop-out 120ms ease-in; }
+.modal-panel-in { animation: modal-panel-in 150ms ease-out; }
+.modal-panel-out { animation: modal-panel-out 120ms ease-in; }

@@ -1,5 +1,5 @@
 <div
-  class="cursor-pointer rounded-md bg-[var(--p-surface-800)] p-3 shadow-sm"
+  class="cursor-pointer rounded-lg bg-[var(--p-surface-800)] p-3 shadow-sm"
   (click)="select.emit(client())"
 >
   <div class="mb-2 flex items-start justify-between gap-2">
@@ -29,7 +29,7 @@
     <button
       type="button"
       (click)="$event.stopPropagation(); delete.emit(client().id!)"
-      class="rounded px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50"
+      class="rounded-lg px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50"
     >
       Delete
     </button>

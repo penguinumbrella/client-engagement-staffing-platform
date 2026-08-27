@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import {
   NavigationEnd,
   Router,
@@ -13,6 +13,7 @@ import { Auth } from './features/em/auth/auth';
 interface NavItem {
   label: string;
   path: string;
+  icon: string;
 }
 
 @Component({
@@ -26,8 +27,11 @@ export class App {
   private readonly router = inject(Router);
   private readonly auth = inject(Auth);
 
+  private static readonly DARK_MODE_STORAGE_KEY = 'theme-dark-mode';
+
   protected readonly sidebarOpen = signal(true);
   protected readonly authPage = signal(false);
+  protected readonly darkMode = signal(localStorage.getItem(App.DARK_MODE_STORAGE_KEY) === 'true');
 
   protected readonly currentUser = this.auth.currentUser;
 
@@ -42,7 +46,8 @@ export class App {
       return [
         {
           label: 'My Engagements',
-          path: '/my-engagements'
+          path: '/my-engagements',
+          icon: 'pi-briefcase'
         }
       ];
     }
@@ -51,15 +56,23 @@ export class App {
       return [
         {
           label: 'Engagements',
-          path: '/em/engagements'
+          path: '/em/engagements',
+          icon: 'pi-sitemap'
+        },
+        {
+          label: 'Timeline',
+          path: '/em/timeline',
+          icon: 'pi-calendar'
         },
         {
           label: 'Clients',
-          path: '/em/clients'
+          path: '/em/clients',
+          icon: 'pi-building'
         },
         {
           label: 'Consultants',
-          path: '/em/consultants'
+          path: '/em/consultants',
+          icon: 'pi-users'
         }
       ];
     }
@@ -68,6 +81,11 @@ export class App {
   });
 
   constructor() {
+    effect(() => {
+      document.documentElement.classList.toggle('app-dark', this.darkMode());
+      localStorage.setItem(App.DARK_MODE_STORAGE_KEY, String(this.darkMode()));
+    });
+
     this.updateLayout(this.router.url);
 
     this.router.events
@@ -84,6 +102,10 @@ export class App {
 
   protected toggleSidebar(): void {
     this.sidebarOpen.set(!this.sidebarOpen());
+  }
+
+  protected toggleDarkMode(): void {
+    this.darkMode.set(!this.darkMode());
   }
 
   private updateLayout(url: string): void {

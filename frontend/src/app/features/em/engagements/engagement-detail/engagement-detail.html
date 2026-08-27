@@ -1,5 +1,15 @@
-<div class="fixed inset-0 flex items-center justify-center bg-black/40" (click)="close.emit()">
-  <div class="flex h-[720px] max-h-[90vh] w-[640px] max-w-[90vw] overflow-hidden rounded-lg bg-[var(--p-surface-800)]" (click)="$event.stopPropagation()">
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+  animate.enter="modal-backdrop-in"
+  animate.leave="modal-backdrop-out"
+  (click)="close.emit()"
+>
+  <div
+    class="flex h-[720px] max-h-[90vh] w-[640px] max-w-[90vw] overflow-hidden rounded-xl bg-[var(--p-surface-800)]"
+    animate.enter="modal-panel-in"
+    animate.leave="modal-panel-out"
+    (click)="$event.stopPropagation()"
+  >
     @if (isCreateMode) {
       <form class="flex w-full flex-col gap-3 overflow-y-auto p-6" #engagementForm="ngForm" (ngSubmit)="submit()">
         <h3 class="m-0 mb-2 text-lg font-semibold">New Engagement</h3>
@@ -7,7 +17,7 @@
         <label class="flex flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
           Engagement Name
           <input
-            class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+            class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
             type="text"
             name="engagementName"
             [(ngModel)]="form.engagementName"
@@ -18,7 +28,7 @@
         <label class="flex flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
           Client
           <select
-            class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+            class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
             name="clientId"
             [(ngModel)]="form.clientId"
             required
@@ -34,7 +44,7 @@
           <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
             Engagement Type
             <select
-              class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+              class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
               name="engagementType"
               [(ngModel)]="form.engagementType"
               required
@@ -48,7 +58,7 @@
           <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
             Status
             <select
-              class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+              class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
               name="status"
               [(ngModel)]="form.status"
             >
@@ -63,7 +73,7 @@
           <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
             Start Date
             <input
-              class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+              class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
               type="date"
               name="startDate"
               [(ngModel)]="form.startDate"
@@ -74,7 +84,7 @@
           <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
             Target End Date
             <input
-              class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+              class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
               type="date"
               name="targetEndDate"
               [(ngModel)]="form.targetEndDate"
@@ -86,19 +96,19 @@
         <label class="flex flex-1 flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
           Summary
           <textarea
-            class="min-h-[100px] flex-1 rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+            class="min-h-[100px] flex-1 rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
             name="summary"
             [(ngModel)]="form.summary"
           ></textarea>
         </label>
 
         <div class="mt-auto flex justify-end gap-2 pt-2">
-          <button type="button" class="rounded-md px-3 py-1.5 text-sm text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]" (click)="close.emit()">
+          <button type="button" class="rounded-lg px-3 py-1.5 text-sm text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]" (click)="close.emit()">
             Cancel
           </button>
           <button
             type="submit"
-            class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            class="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             [disabled]="engagementForm.invalid"
           >
             Create
@@ -124,13 +134,13 @@
               type="button"
               (click)="menuOpen = !menuOpen"
               title="More options"
-              class="flex h-7 w-7 items-center justify-center rounded-md text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+              class="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
             >
               ⋯
             </button>
 
             @if (menuOpen) {
-              <div class="absolute right-0 z-10 mt-1 w-48 rounded-md border border-[var(--p-surface-600)] bg-[var(--p-surface-800)] py-1 shadow-lg">
+              <div class="absolute right-0 z-10 mt-1 w-48 rounded-lg border border-[var(--p-surface-600)] bg-[var(--p-surface-800)] py-1 shadow-lg">
                 @if (canCancel) {
                   <button
                     type="button"
@@ -174,7 +184,7 @@
         </div>
 
         <p
-          class="m-0 mb-3 inline-flex cursor-pointer items-center gap-1.5 rounded-md p-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
+          class="m-0 mb-3 inline-flex cursor-pointer items-center gap-1.5 rounded-lg p-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
           title="Click to edit"
           (click)="startEditDates()"
         >
@@ -191,10 +201,10 @@
 
         <ul class="flex flex-col gap-1">
           @for (group of roleGroups(); track group.role) {
-            <li class="rounded-md">
+            <li class="rounded-lg">
               <button
                 type="button"
-                class="flex w-full items-center gap-2 rounded-md p-1.5 text-left hover:bg-[var(--p-surface-800)]"
+                class="flex w-full items-center gap-2 rounded-lg p-1.5 text-left hover:bg-[var(--p-surface-800)]"
                 (click)="toggleRole(group.role)"
               >
                 <span class="flex-1 text-xs font-semibold text-[var(--p-surface-100)]">{{ group.label }}</span>
@@ -211,7 +221,7 @@
                 <ul class="flex flex-col gap-1 py-1 pl-2">
                   @for (assignment of group.assignments; track assignment.id) {
                     <li
-                      class="group flex cursor-pointer items-center gap-2 rounded-md p-1.5 hover:bg-[var(--p-surface-800)]"
+                      class="group flex cursor-pointer items-center gap-2 rounded-lg p-1.5 hover:bg-[var(--p-surface-800)]"
                       (click)="openConsultant(assignment.consultantId)"
                     >
                       <span
@@ -227,7 +237,7 @@
                         type="button"
                         title="Unstaff"
                         (click)="$event.stopPropagation(); confirmUnstaff(assignment)"
-                        class="invisible flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[var(--p-surface-400)] hover:bg-red-50 hover:text-red-600 group-hover:visible"
+                        class="invisible flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-400)] hover:bg-red-50 hover:text-red-600 group-hover:visible"
                       >
                         <i class="pi pi-trash text-[11px]"></i>
                       </button>
@@ -245,7 +255,7 @@
             <label class="flex flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
               Consultant
               <select
-                class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-xs text-[var(--p-surface-100)]"
+                class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-xs text-[var(--p-surface-100)]"
                 name="newConsultantId"
                 [(ngModel)]="newConsultantId"
               >
@@ -259,7 +269,7 @@
             <label class="flex flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
               Role
               <select
-                class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-xs text-[var(--p-surface-100)]"
+                class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-xs text-[var(--p-surface-100)]"
                 name="newConsultantRole"
                 [(ngModel)]="newConsultantRole"
               >
@@ -275,7 +285,7 @@
               </button>
               <button
                 type="button"
-                class="rounded-md bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                class="rounded-lg bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                 [disabled]="newConsultantId === null"
                 (click)="submitAddConsultant()"
               >
@@ -298,7 +308,7 @@
 
 @if (unstaffTarget(); as target) {
   <div class="fixed inset-0 z-60 flex items-center justify-center bg-black/50" (click)="cancelUnstaff()">
-    <div class="w-105 max-w-[90vw] rounded-lg bg-[var(--p-surface-800)] p-5 shadow-xl" (click)="$event.stopPropagation()">
+    <div class="w-105 max-w-[90vw] rounded-xl bg-[var(--p-surface-800)] p-5 shadow-xl" (click)="$event.stopPropagation()">
       <div class="mb-3 flex items-center gap-2">
         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">!</span>
         <h3 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Unstaff {{ target.consultantName }}?</h3>
@@ -312,7 +322,7 @@
         <button
           type="button"
           (click)="cancelUnstaff()"
-          class="rounded-md px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
+          class="rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
         >
           Cancel
         </button>
@@ -320,7 +330,7 @@
           type="button"
           [disabled]="unstaffing()"
           (click)="performUnstaff()"
-          class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          class="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {{ unstaffing() ? 'Removing…' : 'Unstaff' }}
         </button>
@@ -340,7 +350,7 @@
 
 @if (deleteModalOpen() && engagement; as eng) {
   <div class="fixed inset-0 z-60 flex items-center justify-center bg-black/50" (click)="closeDeleteModal()">
-    <div class="w-105 max-w-[90vw] rounded-lg bg-[var(--p-surface-800)] p-5 shadow-xl" (click)="$event.stopPropagation()">
+    <div class="w-105 max-w-[90vw] rounded-xl bg-[var(--p-surface-800)] p-5 shadow-xl" (click)="$event.stopPropagation()">
       <div class="mb-3 flex items-center gap-2">
         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">!</span>
         <h3 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Delete "{{ eng.engagementName }}"?</h3>
@@ -359,7 +369,7 @@
           </p>
           <ul class="mb-3 flex max-h-40 flex-col gap-1 overflow-y-auto">
             @for (a of deleteHistory(); track a.id) {
-              <li class="rounded-md bg-[var(--p-surface-800)] px-2 py-1.5 text-xs text-[var(--p-surface-200)]">
+              <li class="rounded-lg bg-[var(--p-surface-800)] px-2 py-1.5 text-xs text-[var(--p-surface-200)]">
                 <span class="font-medium">{{ a.consultantName }}</span> — {{ a.engagementRole }}
               </li>
             }
@@ -373,7 +383,7 @@
             [(ngModel)]="deleteConfirmName"
             name="deleteConfirmName"
             autocomplete="off"
-            class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+            class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
           />
         </label>
 
@@ -381,7 +391,7 @@
           <button
             type="button"
             (click)="closeDeleteModal()"
-            class="rounded-md px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
+            class="rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
           >
             Cancel
           </button>
@@ -389,7 +399,7 @@
             type="button"
             [disabled]="deleting() || !deleteNameConfirmed"
             (click)="performDelete()"
-            class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            class="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {{ deleting() ? 'Deleting…' : 'Delete Engagement' }}
           </button>
@@ -401,7 +411,7 @@
 
 @if (cancelModalOpen() && engagement; as eng) {
   <div class="fixed inset-0 z-60 flex items-center justify-center bg-black/50" (click)="closeCancelModal()">
-    <div class="w-105 max-w-[90vw] rounded-lg bg-[var(--p-surface-800)] p-5 shadow-xl" (click)="$event.stopPropagation()">
+    <div class="w-105 max-w-[90vw] rounded-xl bg-[var(--p-surface-800)] p-5 shadow-xl" (click)="$event.stopPropagation()">
       <div class="mb-3 flex items-center gap-2">
         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">!</span>
         <h3 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Cancel "{{ eng.engagementName }}"?</h3>
@@ -417,7 +427,7 @@
         </p>
         <ul class="mb-3 flex max-h-32 flex-col gap-1 overflow-y-auto">
           @for (a of staffedAssignments; track a.id) {
-            <li class="rounded-md bg-[var(--p-surface-800)] px-2 py-1.5 text-xs text-[var(--p-surface-200)]">
+            <li class="rounded-lg bg-[var(--p-surface-800)] px-2 py-1.5 text-xs text-[var(--p-surface-200)]">
               <span class="font-medium">{{ a.consultantName }}</span> — {{ a.engagementRole }}
               <span class="ml-1 text-amber-600">({{ a.status }})</span>
             </li>
@@ -429,7 +439,7 @@
         <button
           type="button"
           (click)="closeCancelModal()"
-          class="rounded-md px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
+          class="rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
         >
           Keep Engagement
         </button>
@@ -437,7 +447,7 @@
           type="button"
           [disabled]="cancelling()"
           (click)="performCancel()"
-          class="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+          class="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {{ cancelling() ? 'Cancelling…' : 'Cancel Engagement' }}
         </button>

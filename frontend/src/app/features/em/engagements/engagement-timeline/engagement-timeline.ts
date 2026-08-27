@@ -1,18 +1,25 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { MessageService } from 'primeng/api';
-import { Engagement, EngagementStatus } from '../../../../types/engagement.types';
+import { Engagement, EngagementStatus, EngagementType } from '../../../../types/engagement.types';
+import { Assignment } from '../../../../types/assignment.types';
 import { EngagementService } from '../../../../services/engagement.service';
 import { AssignmentService } from '../../../../services/assignment.service';
 import { ClientService } from '../../../../services/ClientService';
+import { ConsultantService } from '../../../../services/consultant.service';
 import { Client } from '../../../../types/client.types';
+import { Consultant } from '../../../../types/consultant.types';
 import { initialsOf, colorOf } from '../../../../shared/avatar';
 import { engagementStatusColor } from '../engagement-status-icon';
+import { EngagementDetail } from '../engagement-detail/engagement-detail';
+import { EngagementCard, ConsultantBadge } from '../engagement-detail/engagement.model';
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 const MIN_PX_PER_DAY = 1;
 const MAX_PX_PER_DAY = 48;
 const DEFAULT_PX_PER_DAY = 4;
 const ZOOM_FACTOR = 1.5;
+/** Trailing space reserved past the last date so its month-marker/today label has room to render instead of clipping against the track edge. */
+const TRAILING_LABEL_PX = 64;
 
 interface Bar {
   leftPx: number;
@@ -38,8 +45,14 @@ interface MonthMarker {
   leftPx: number;
 }
 
+type SortBy = 'startDate' | 'company';
+
+/** Statuses hidden by default — an "ongoing engagements" view shouldn't open buried in finished work. */
+const DEFAULT_HIDDEN_STATUSES = new Set<EngagementStatus>([EngagementStatus.COMPLETED, EngagementStatus.CANCELLED]);
+
 @Component({
   selector: 'app-engagement-timeline',
+  imports: [EngagementDetail],
   templateUrl: './engagement-timeline.html',
   styleUrl: './engagement-timeline.css',
 })
@@ -47,15 +60,27 @@ export class EngagementTimeline {
   private readonly engagementService = inject(EngagementService);
   private readonly assignmentService = inject(AssignmentService);
   private readonly clientService = inject(ClientService);
+  private readonly consultantService = inject(ConsultantService);
   private readonly messageService = inject(MessageService);
 
   private readonly engagements = signal<Engagement[]>([]);
   private readonly clientsById = signal<Map<number, Client>>(new Map());
+  private readonly consultantsById = signal<Map<number, Consultant>>(new Map());
+  private readonly assignmentsByEngagement = signal<Map<number, Assignment[]>>(new Map());
   private readonly consultantRowsByEngagement = signal<Map<number, ConsultantTimelineRow[]>>(new Map());
 
   protected readonly expanded = signal<Set<number>>(new Set());
   protected readonly loadingConsultants = signal<Set<number>>(new Set());
   protected readonly pxPerDay = signal(DEFAULT_PX_PER_DAY);
+  protected readonly hiddenStatuses = signal<Set<EngagementStatus>>(new Set(DEFAULT_HIDDEN_STATUSES));
+  protected readonly allStatuses = Object.values(EngagementStatus);
+  protected readonly hiddenClientIds = signal<Set<number>>(new Set());
+  protected readonly companyFilterOpen = signal(false);
+  protected readonly sortBy = signal<SortBy>('startDate');
+
+  protected readonly selected = signal<EngagementCard | null>(null);
+
+  private readonly scrollContainer = viewChild<ElementRef<HTMLDivElement>>('scrollContainer');
 
   constructor() {
     this.clientService.getAllClients(0, 100).subscribe({
@@ -63,18 +88,78 @@ export class EngagementTimeline {
       error: (err) => this.notifyError('Failed to load clients.', err),
     });
 
+    this.consultantService.getAll().subscribe({
+      next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
+      error: (err) => this.notifyError('Failed to load consultants.', err),
+    });
+
     this.engagementService.getAll().subscribe({
       next: (engagements) => {
         this.engagements.set(engagements);
         engagements.forEach((e) => this.loadConsultants(e.id));
+        setTimeout(() => this.jumpToToday());
       },
       error: (err) => this.notifyError('Failed to load engagements.', err),
     });
   }
 
+  protected isStatusHidden(status: EngagementStatus): boolean {
+    return this.hiddenStatuses().has(status);
+  }
+
+  protected toggleStatusFilter(status: EngagementStatus): void {
+    const next = new Set(this.hiddenStatuses());
+    if (next.has(status)) {
+      next.delete(status);
+    } else {
+      next.add(status);
+    }
+    this.hiddenStatuses.set(next);
+  }
+
+  protected readonly clientOptions = computed<Client[]>(() =>
+    Array.from(this.clientsById().values()).sort((a, b) => a.companyName.localeCompare(b.companyName)),
+  );
+
+  protected isClientHidden(clientId: number): boolean {
+    return this.hiddenClientIds().has(clientId);
+  }
+
+  protected toggleClientFilter(clientId: number): void {
+    const next = new Set(this.hiddenClientIds());
+    if (next.has(clientId)) {
+      next.delete(clientId);
+    } else {
+      next.add(clientId);
+    }
+    this.hiddenClientIds.set(next);
+  }
+
+  protected showAllClients(): void {
+    this.hiddenClientIds.set(new Set());
+  }
+
+  protected hideAllClients(): void {
+    this.hiddenClientIds.set(new Set(this.clientOptions().map((c) => c.id!)));
+  }
+
+  protected toggleCompanyFilterOpen(): void {
+    this.companyFilterOpen.set(!this.companyFilterOpen());
+  }
+
+  protected setSortBy(sortBy: SortBy): void {
+    this.sortBy.set(sortBy);
+  }
+
+  private readonly visibleEngagements = computed<Engagement[]>(() => {
+    const hiddenStatuses = this.hiddenStatuses();
+    const hiddenClientIds = this.hiddenClientIds();
+    return this.engagements().filter((e) => !hiddenStatuses.has(e.status) && !hiddenClientIds.has(e.clientId));
+  });
+
   /** Shared date range every bar (engagement and consultant) is positioned against, so they all line up on one axis. */
   private readonly range = computed<{ start: number; end: number }>(() => {
-    const engagements = this.engagements();
+    const engagements = this.visibleEngagements();
     if (!engagements.length) {
       const now = Date.parse(new Date().toISOString());
       return { start: now, end: now + 1 };
@@ -90,7 +175,7 @@ export class EngagementTimeline {
 
   protected readonly trackWidthPx = computed<number>(() => {
     const { start, end } = this.range();
-    return Math.max(((end - start) / DAY_MS) * this.pxPerDay(), 1);
+    return Math.max(((end - start) / DAY_MS) * this.pxPerDay(), 1) + TRAILING_LABEL_PX;
   });
 
   private toBar(startDate: string, endDate: string | null): Bar {
@@ -111,6 +196,16 @@ export class EngagementTimeline {
     this.pxPerDay.set(Math.max(this.pxPerDay() / ZOOM_FACTOR, MIN_PX_PER_DAY));
   }
 
+  /** Scrolls the track so "today" is centered in the visible viewport — the quickest way back to the current timeline after panning/zooming around. */
+  protected jumpToToday(): void {
+    const todayPx = this.todayLinePx();
+    const el = this.scrollContainer()?.nativeElement;
+    if (todayPx === null || !el) {
+      return;
+    }
+    el.scrollTo({ left: Math.max(todayPx - el.clientWidth / 2, 0), behavior: 'smooth' });
+  }
+
   protected readonly statusBarColor = engagementStatusColor;
 
   /** Pixel offset of "now" within the track, relative to the label column, or null if today falls outside the loaded date range. */
@@ -123,14 +218,27 @@ export class EngagementTimeline {
     return ((now - start) / DAY_MS) * this.pxPerDay();
   });
 
+  protected readonly todayLabel = new Date().toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
   protected readonly rows = computed<EngagementTimelineRow[]>(() => {
     const clientsById = this.clientsById();
-    return this.engagements()
+    const nameOf = (e: Engagement) => clientsById.get(e.clientId)?.companyName ?? 'Unknown Client';
+    const sortBy = this.sortBy();
+
+    return this.visibleEngagements()
       .slice()
-      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+      .sort((a, b) =>
+        sortBy === 'company'
+          ? nameOf(a).localeCompare(nameOf(b)) || new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+          : new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
+      )
       .map((engagement) => ({
         engagement,
-        clientName: clientsById.get(engagement.clientId)?.companyName ?? 'Unknown Client',
+        clientName: nameOf(engagement),
         ...this.toBar(engagement.startDate, engagement.targetEndDate),
       }));
   });
@@ -176,13 +284,17 @@ export class EngagementTimeline {
     this.expanded.set(next);
   }
 
-  private loadConsultants(engagementId: number): void {
+  protected loadConsultants(engagementId: number): void {
     const loading = new Set(this.loadingConsultants());
     loading.add(engagementId);
     this.loadingConsultants.set(loading);
 
     this.assignmentService.getByEngagement(engagementId).subscribe({
       next: (assignments) => {
+        const nextAssignments = new Map(this.assignmentsByEngagement());
+        nextAssignments.set(engagementId, assignments);
+        this.assignmentsByEngagement.set(nextAssignments);
+
         const rows = assignments.map((a) => ({
           consultantName: a.consultantName,
           engagementRole: a.engagementRole,
@@ -203,6 +315,108 @@ export class EngagementTimeline {
         this.stopLoading(engagementId);
       },
     });
+  }
+
+  protected openDetail(engagement: Engagement): void {
+    this.selected.set(this.toCard(engagement));
+  }
+
+  protected closeDetail(): void {
+    this.selected.set(null);
+  }
+
+  private toCard(engagement: Engagement): EngagementCard {
+    const companyName = this.clientsById().get(engagement.clientId)?.companyName ?? 'Unknown Client';
+    const consultantsById = this.consultantsById();
+    const consultants: ConsultantBadge[] = (this.assignmentsByEngagement().get(engagement.id) ?? []).map((a) => ({
+      name: a.consultantName,
+      titleRole: consultantsById.get(a.consultantId)?.titleRole ?? '',
+      initials: initialsOf(a.consultantName),
+      color: colorOf(a.consultantName),
+      projectRole: a.engagementRole,
+    }));
+
+    return {
+      ...engagement,
+      client: { companyName, initials: initialsOf(companyName), color: colorOf(companyName) },
+      consultants,
+    };
+  }
+
+  private patchSelected(id: number, patch: Partial<Engagement>): void {
+    const current = this.selected();
+    if (current && current.id === id) {
+      this.selected.set({ ...current, ...patch });
+    }
+  }
+
+  protected onEngagementDeleted(id: number): void {
+    this.engagements.set(this.engagements().filter((e) => e.id !== id));
+    this.selected.set(null);
+  }
+
+  protected onEngagementCancelled(updated: Engagement): void {
+    this.engagements.set(this.engagements().map((e) => (e.id === updated.id ? updated : e)));
+    this.patchSelected(updated.id, { status: updated.status });
+  }
+
+  protected updateSummary(id: number, summary: string): void {
+    this.engagementService.update(id, { summary }).subscribe({
+      next: (updated) => {
+        this.engagements.set(this.engagements().map((e) => (e.id === id ? updated : e)));
+        this.patchSelected(id, { summary: updated.summary });
+      },
+      error: (err) => this.notifyUpdateError('summary', id, err),
+    });
+  }
+
+  protected updateName(id: number, engagementName: string): void {
+    this.engagementService.update(id, { engagementName }).subscribe({
+      next: (updated) => {
+        this.engagements.set(this.engagements().map((e) => (e.id === id ? updated : e)));
+        this.patchSelected(id, { engagementName: updated.engagementName });
+      },
+      error: (err) => this.notifyUpdateError('name', id, err),
+    });
+  }
+
+  protected updateDates(id: number, dates: { startDate: string; targetEndDate: string }): void {
+    this.engagementService.update(id, dates).subscribe({
+      next: (updated) => {
+        this.engagements.set(this.engagements().map((e) => (e.id === id ? updated : e)));
+        this.patchSelected(id, { startDate: updated.startDate, targetEndDate: updated.targetEndDate });
+      },
+      error: (err) => this.notifyUpdateError('dates', id, err),
+    });
+  }
+
+  protected updateType(id: number, engagementType: EngagementType): void {
+    this.engagementService.update(id, { engagementType }).subscribe({
+      next: (updated) => {
+        this.engagements.set(this.engagements().map((e) => (e.id === id ? updated : e)));
+        this.patchSelected(id, { engagementType: updated.engagementType });
+      },
+      error: (err) => this.notifyUpdateError('type', id, err),
+    });
+  }
+
+  protected updateStatus(id: number, status: EngagementStatus): void {
+    this.engagementService.updateStatus(id, status).subscribe({
+      next: (updated) => {
+        this.engagements.set(this.engagements().map((e) => (e.id === id ? updated : e)));
+        this.patchSelected(id, { status: updated.status });
+      },
+      error: (err) => this.notifyUpdateError('status', id, err),
+    });
+  }
+
+  private notifyUpdateError(field: string, engagementId: number, err: unknown): void {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Update Failed',
+      detail: (err as { error?: { message?: string } })?.error?.message ?? `Failed to update the engagement ${field}. Please try again.`,
+    });
+    console.error(`Failed to update engagement ${engagementId} ${field}`, err);
   }
 
   private stopLoading(engagementId: number): void {

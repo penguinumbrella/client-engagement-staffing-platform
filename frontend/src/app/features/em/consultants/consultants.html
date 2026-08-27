@@ -4,7 +4,7 @@
     <button
       type="button"
       (click)="openCreate()"
-      class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+      class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
     >
       + Add User
     </button>
@@ -15,7 +15,7 @@
   } @else if (error()) {
     <p class="text-sm text-red-600">{{ error() }}</p>
   } @else {
-    <div class="w-full overflow-hidden rounded-lg border border-[var(--p-surface-600)]">
+    <div class="w-full overflow-hidden rounded-xl border border-[var(--p-surface-600)]">
       <table class="w-full border-collapse text-left text-sm">
         <thead class="bg-[var(--p-surface-700)]">
           <tr>
