@@ -90,6 +90,13 @@ const HoneyHive = definePreset(Aura, {
       },
     },
   },
+  components: {
+    toast: {
+      error: {
+        detailColor: 'light-dark({surface.50}, {surface.0})',
+      },
+    },
+  },
 });
 
 export const appConfig: ApplicationConfig = {
