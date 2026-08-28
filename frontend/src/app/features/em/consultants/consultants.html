@@ -1,10 +1,10 @@
-<div class="p-4">
+<div class="px-4 pb-4" animate.enter="page-fade-in">
   <div class="mb-4 flex items-center justify-between">
     <h1 class="m-0 text-lg font-semibold text-[var(--p-surface-50)]">Consultants</h1>
     <button
       type="button"
       (click)="openCreate()"
-      class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+      class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
     >
       + Add User
     </button>
@@ -27,7 +27,7 @@
         </thead>
         <tbody>
           @for (consultant of consultants(); track consultant.id) {
-            <tr class="border-t border-[var(--p-surface-600)] hover:bg-[var(--p-surface-800)]">
+            <tr class="border-t border-[var(--p-surface-600)] even:bg-amber-500/10 hover:bg-amber-500/20">
               <td class="px-3 py-2">
                 <button
                   type="button"
@@ -40,7 +40,7 @@
                   >
                     {{ initialsOf(consultant.name) }}
                   </span>
-                  <span class="font-medium text-blue-600 hover:underline">{{ consultant.name }}</span>
+                  <span class="font-medium text-amber-500 hover:underline">{{ consultant.name }}</span>
                 </button>
               </td>
               <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.titleRole }}</td>

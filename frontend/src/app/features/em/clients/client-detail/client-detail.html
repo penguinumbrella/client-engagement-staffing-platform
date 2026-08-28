@@ -8,48 +8,85 @@
 ></div>
 
 <div
-  class="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col overflow-y-auto bg-[var(--p-surface-800)] shadow-lg transition-transform duration-300 ease-out"
+  class="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col overflow-y-auto bg-[var(--p-surface-800)] shadow-lg transition-transform duration-300 ease-out"
   [class.translate-x-0]="panelVisible()"
   [class.translate-x-full]="!panelVisible()"
 >
   @if (client(); as client) {
-    <div class="flex items-start justify-between gap-2 border-b border-[var(--p-surface-600)] p-4">
+    <div class="flex items-start justify-between gap-3 p-5">
       <div class="min-w-0 flex-1">
-        <app-editable-company-name [value]="client.companyName" (valueChange)="updateCompanyName.emit($event)" />
-
-        <div class="flex flex-wrap items-center gap-1.5">
+        <div class="mb-1.5 flex flex-wrap items-center gap-1.5">
           <app-editable-relationship-status
             [value]="client.relationshipStatus"
             (valueChange)="updateRelationshipStatus.emit($event)"
           />
         </div>
+
+        <div class="flex min-w-0 items-center gap-3">
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+            [style.background-color]="colorOf(client.companyName)"
+          >
+            {{ initialsOf(client.companyName) }}
+          </div>
+
+          <div class="min-w-0 flex-1">
+            <app-editable-company-name [value]="client.companyName" (valueChange)="updateCompanyName.emit($event)" />
+            <app-editable-industry [value]="client.industry" (valueChange)="updateIndustry.emit($event)" />
+          </div>
+        </div>
       </div>
 
-      <button
-        type="button"
-        (click)="close()"
-        class="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
-      >
-        ✕
-      </button>
+      <div class="flex shrink-0 items-center gap-1">
+        <button
+          type="button"
+          title="Delete client"
+          (click)="delete.emit()"
+          class="rounded-lg px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+        >
+          Delete
+        </button>
+
+        <button
+          type="button"
+          (click)="close()"
+          class="rounded-lg px-2 py-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+        >
+          ✕
+        </button>
+      </div>
     </div>
 
-    <div class="border-b border-[var(--p-surface-600)] p-4">
-      <div class="grid grid-cols-2 gap-x-6 gap-y-3">
-        <app-editable-industry [value]="client.industry" (valueChange)="updateIndustry.emit($event)" />
+    <div class="px-5 pb-2">
+      <div class="rounded-lg border border-[var(--p-surface-600)] p-3">
         <app-editable-primary-contact-name
           [value]="client.primaryContactName"
           (valueChange)="updatePrimaryContactName.emit($event)"
         />
-        <app-editable-primary-contact-email
-          [value]="client.primaryContactEmail"
-          (valueChange)="updatePrimaryContactEmail.emit($event)"
-        />
+
+        <div class="mt-0.5 flex items-center gap-1">
+          @if (client.primaryContactEmail) {
+            <a
+              [href]="'mailto:' + client.primaryContactEmail"
+              title="Email {{ client.primaryContactName || 'contact' }}"
+              class="flex h-5 w-5 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)] hover:text-[var(--p-surface-100)]"
+            >
+              <i class="pi pi-envelope text-sm"></i>
+            </a>
+          }
+
+          <div class="min-w-0 flex-1">
+            <app-editable-primary-contact-email
+              [value]="client.primaryContactEmail"
+              (valueChange)="updatePrimaryContactEmail.emit($event)"
+            />
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="flex-1 p-4">
-      <h3 class="m-0 mb-3 text-xs font-semibold tracking-wide text-[var(--p-surface-300)] uppercase">Engagements</h3>
+    <div class="flex-1 px-5 pt-2 pb-5">
+      <h3 class="m-0 mb-2 text-xs font-semibold tracking-wide text-[var(--p-surface-300)] uppercase">Engagements</h3>
 
       @if (loadingEngagements()) {
         <p class="text-sm text-[var(--p-surface-300)]">Loading engagements…</p>

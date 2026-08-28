@@ -1,4 +1,14 @@
-import { Component, effect, inject, input, model, signal } from '@angular/core';
+import {
+  Component,
+  Injector,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  input,
+  model,
+  signal,
+} from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -9,6 +19,8 @@ import { Assignment } from '../../../../types/assignment.types';
 import { Consultant } from '../../../../types/consultant.types';
 import { EngagementStatus } from '../../../../types/engagement.types';
 import { AssignEngagementForm } from './assign-engagement-form/assign-engagement-form';
+import { assignmentWarnings } from './assignment-warnings';
+import { EngagementWarningIcon } from '../../engagements/engagement-warning-icon/engagement-warning-icon';
 
 // NOTE: assignments previously carried their own independently-editable `status`/`statusOverridden`
 // (see Assignment type + assignment.service.updateStatus). For MVP, the badge shown here is derived
@@ -26,13 +38,14 @@ export interface AssignmentRow {
 
 @Component({
   selector: 'app-consultant-detail',
-  imports: [AssignEngagementForm],
+  imports: [AssignEngagementForm, EngagementWarningIcon],
   templateUrl: './consultant-detail.html',
   styleUrl: './consultant-detail.css',
 })
 export class ConsultantDetail {
   private readonly assignmentService = inject(AssignmentService);
   private readonly engagementService = inject(EngagementService);
+  private readonly injector = inject(Injector);
 
   readonly consultant = input<Consultant | null>(null);
   readonly visible = model<boolean>(false);
@@ -40,6 +53,12 @@ export class ConsultantDetail {
   readonly assignments = signal<AssignmentRow[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+
+  private readonly assignmentWarningsById = computed(() => assignmentWarnings(this.assignments()));
+
+  warningsFor(row: AssignmentRow): string[] {
+    return this.assignmentWarningsById().get(row.id) ?? [];
+  }
 
   readonly everOpened = signal(false);
   readonly assignFormVisible = signal(false);
@@ -103,7 +122,10 @@ export class ConsultantDetail {
 
         if (!this.everOpened()) {
           this.everOpened.set(true);
-          requestAnimationFrame(() => this.panelVisible.set(true));
+          afterNextRender(
+            () => requestAnimationFrame(() => this.panelVisible.set(true)),
+            { injector: this.injector },
+          );
         } else {
           this.panelVisible.set(true);
         }

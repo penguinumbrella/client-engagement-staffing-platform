@@ -1,76 +1,37 @@
-<div class="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-[var(--p-surface-950)] font-sans">
+<div class="honeycomb-bg min-h-screen flex items-center justify-center p-4 sm:p-8 bg-[var(--p-surface-950)]">
 
-  <div class="w-full max-w-[1200px] min-h-[720px] grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] overflow-hidden rounded-3xl bg-[var(--p-surface-800)] shadow-2xl shadow-black/40">
+  <div class="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-[480px_1fr] gap-8">
 
     <!-- LEFT SIDE -->
-    <section class="relative hidden lg:flex items-center overflow-hidden p-16 text-[var(--p-surface-50)] bg-gradient-to-br from-[#3a2708] via-[#573b0d] to-[#7a5212]">
+    <section class="relative hidden lg:flex items-center justify-center overflow-hidden rounded-3xl p-16 text-[var(--p-surface-50)] bg-gradient-to-br from-[#3a2708] via-[#573b0d] to-[#7a5212] shadow-2xl shadow-black/40">
 
       <div class="absolute w-[430px] h-[430px] -top-44 -right-36 rounded-full bg-white/10"></div>
       <div class="absolute w-[540px] h-[270px] -bottom-44 -left-24 rounded-full bg-white/10 -rotate-10"></div>
       <div class="absolute w-24 h-24 top-32 left-20 rounded-full border-8 border-white/25"></div>
 
-      <div class="relative z-10 max-w-[470px]">
-
-        <div class="w-14 h-14 flex items-center justify-center mb-9 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-sm text-2xl">
-          <i class="pi pi-briefcase"></i>
-        </div>
-
-        <h1 class="m-0 text-4xl lg:text-5xl leading-tight tracking-tight font-bold">
-          Client Engagement
-          <span class="block text-[#f9d24f]">& Staffing Platform</span>
-        </h1>
-
-        <p class="max-w-[420px] my-6 text-white/80 leading-relaxed">
-          Create your account to access your engagements,
-          assignments, and consulting team information.
-        </p>
-
-        <div class="flex flex-col gap-4">
-
-          <div class="flex items-center gap-3 text-white/90 text-sm">
-            <span class="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10">
-              <i class="pi pi-building"></i>
-            </span>
-            <span>Client Management</span>
-          </div>
-
-          <div class="flex items-center gap-3 text-white/90 text-sm">
-            <span class="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10">
-              <i class="pi pi-users"></i>
-            </span>
-            <span>Consultant Staffing</span>
-          </div>
-
-          <div class="flex items-center gap-3 text-white/90 text-sm">
-            <span class="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10">
-              <i class="pi pi-briefcase"></i>
-            </span>
-            <span>Engagement Tracking</span>
-          </div>
-
-        </div>
-
+      <div class="relative z-10 flex aspect-square w-full max-w-56 items-center justify-center rounded-[2.5rem] border border-white/20 bg-white/10 backdrop-blur-sm text-7xl">
+        <i class="pi pi-briefcase"></i>
       </div>
 
     </section>
 
 
     <!-- RIGHT SIDE -->
-    <section class="flex items-center justify-center p-8 sm:p-12 lg:p-16 bg-[var(--p-surface-800)]">
+    <section class="flex items-center justify-start p-6 sm:p-10 lg:p-12">
 
       <div class="w-full max-w-[520px]">
 
-        <div class="mb-8">
+        <div class="mb-4">
 
-          <p class="m-0 mb-2 text-xs font-bold tracking-[1.8px] text-[var(--color-accent-blue)]">
+          <p class="m-0 mb-1.5 text-[11px] font-bold tracking-[1.8px] text-[var(--color-accent-blue)]">
             GET STARTED
           </p>
 
-          <h2 class="m-0 text-3xl leading-tight tracking-tight font-bold text-[var(--p-surface-50)]">
+          <h2 class="m-0 text-xl leading-tight tracking-tight font-bold text-[var(--p-surface-50)]">
             Create your account
           </h2>
 
-          <p class="mt-2.5 text-[var(--p-surface-300)]">
+          <p class="mt-1.5 text-sm text-[var(--p-surface-300)]">
             Enter your information to join the platform.
           </p>
 
@@ -78,22 +39,22 @@
 
 
         <form
-          class="flex flex-col gap-4.5"
+          class="flex flex-col gap-3"
           [formGroup]="registerForm"
           (ngSubmit)="register()"
         >
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
             <!-- FIRST NAME -->
-            <div class="flex flex-col gap-1.5">
+            <div class="flex flex-col gap-1">
 
               <label for="firstName" class="text-sm font-semibold text-[var(--p-surface-200)]">
                 First Name
               </label>
 
               <div
-                class="h-[50px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
                 [class.border-red-500]="
                   registerForm.controls.firstName.touched &&
                   registerForm.controls.firstName.invalid
@@ -124,14 +85,14 @@
 
 
             <!-- LAST NAME -->
-            <div class="flex flex-col gap-1.5">
+            <div class="flex flex-col gap-1">
 
               <label for="lastName" class="text-sm font-semibold text-[var(--p-surface-200)]">
                 Last Name
               </label>
 
               <div
-                class="h-[50px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
                 [class.border-red-500]="
                   registerForm.controls.lastName.touched &&
                   registerForm.controls.lastName.invalid
@@ -164,14 +125,14 @@
 
 
           <!-- EMAIL -->
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1">
 
             <label for="email" class="text-sm font-semibold text-[var(--p-surface-200)]">
               Email address
             </label>
 
             <div
-              class="h-[50px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 registerForm.controls.email.touched &&
                 registerForm.controls.email.invalid
@@ -201,17 +162,17 @@
           </div>
 
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
             <!-- TITLE / ROLE -->
-            <div class="flex flex-col gap-1.5">
+            <div class="flex flex-col gap-1">
 
               <label for="titleRole" class="text-sm font-semibold text-[var(--p-surface-200)]">
                 Title
               </label>
 
               <div
-                class="h-[50px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
                 [class.border-red-500]="
                   registerForm.controls.titleRole.touched &&
                   registerForm.controls.titleRole.invalid
@@ -241,14 +202,14 @@
 
 
             <!-- SKILL AREA -->
-            <div class="flex flex-col gap-1.5">
+            <div class="flex flex-col gap-1">
 
               <label for="primarySkillArea" class="text-sm font-semibold text-[var(--p-surface-200)]">
                 Primary Skill Area
               </label>
 
               <div
-                class="h-[50px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
                 [class.border-red-500]="
                   registerForm.controls.primarySkillArea.touched &&
                   registerForm.controls.primarySkillArea.invalid
@@ -285,14 +246,14 @@
 
 
           <!-- PASSWORD -->
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1">
 
             <label for="password" class="text-sm font-semibold text-[var(--p-surface-200)]">
               Password
             </label>
 
             <div
-              class="h-[50px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 registerForm.controls.password.touched &&
                 registerForm.controls.password.invalid
@@ -341,14 +302,14 @@
 
 
           <!-- CONFIRM PASSWORD -->
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1">
 
             <label for="confirmPassword" class="text-sm font-semibold text-[var(--p-surface-200)]">
               Confirm Password
             </label>
 
             <div
-              class="h-[50px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 registerForm.controls.confirmPassword.touched &&
                 (
@@ -391,7 +352,7 @@
 
 
           <button
-            class="w-full h-[52px] flex items-center justify-center gap-2.5 mt-0.5 rounded-2xl bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-400)] text-[#1a1611] font-bold text-[0.95rem] shadow-lg shadow-[var(--p-primary-400)]/25 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            class="w-full h-11 flex items-center justify-center gap-2.5 mt-0.5 rounded-2xl bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-400)] text-[#1a1611] font-bold text-sm shadow-lg shadow-[var(--p-primary-400)]/25 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             type="submit"
             [disabled]="loading"
           >
@@ -407,7 +368,7 @@
         </form>
 
 
-        <div class="flex items-center justify-center gap-1.5 mt-6.5 text-[var(--p-surface-300)] text-sm">
+        <div class="flex items-center justify-center gap-1.5 mt-4 text-[var(--p-surface-300)] text-sm">
 
           <span>
             Already have an account?

@@ -24,14 +24,4 @@
     <p class="m-0">{{ client().primaryContactName }}</p>
     <p class="m-0 text-[var(--p-surface-300)]">{{ client().primaryContactEmail }}</p>
   </div>
-
-  <div class="mt-3 flex justify-end gap-2">
-    <button
-      type="button"
-      (click)="$event.stopPropagation(); delete.emit(client().id!)"
-      class="rounded-lg px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50"
-    >
-      Delete
-    </button>
-  </div>
 </div>

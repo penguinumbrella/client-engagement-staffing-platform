@@ -1,4 +1,14 @@
-import { Component, effect, inject, input, model, output, signal } from '@angular/core';
+import {
+  Component,
+  Injector,
+  afterNextRender,
+  effect,
+  inject,
+  input,
+  model,
+  output,
+  signal,
+} from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { EditableCompanyName } from '../editors/editable-company-name/editable-company-name';
 import { EditableIndustry } from '../editors/editable-industry/editable-industry';
@@ -9,6 +19,7 @@ import { ClientEngagementTable } from '../client-engagement-table/client-engagem
 import { Client, RelationshipStatus } from '../../../../types/client.types';
 import { Engagement } from '../../../../types/engagement.types';
 import { EngagementService } from '../../../../services/engagement.service';
+import { colorOf, initialsOf } from '../../../../shared/avatar';
 
 @Component({
   selector: 'app-client-detail',
@@ -26,6 +37,10 @@ import { EngagementService } from '../../../../services/engagement.service';
 export class ClientDetail {
   private readonly engagementService = inject(EngagementService);
   private readonly messageService = inject(MessageService);
+  private readonly injector = inject(Injector);
+
+  protected readonly initialsOf = initialsOf;
+  protected readonly colorOf = colorOf;
 
   readonly client = input<Client | null>(null);
   readonly visible = model<boolean>(false);
@@ -35,6 +50,7 @@ export class ClientDetail {
   updateIndustry = output<string>();
   updatePrimaryContactName = output<string>();
   updatePrimaryContactEmail = output<string>();
+  delete = output<void>();
 
   protected readonly engagements = signal<Engagement[]>([]);
   protected readonly loadingEngagements = signal(false);
@@ -58,7 +74,10 @@ export class ClientDetail {
 
         if (!this.everOpened()) {
           this.everOpened.set(true);
-          requestAnimationFrame(() => this.panelVisible.set(true));
+          afterNextRender(
+            () => requestAnimationFrame(() => this.panelVisible.set(true)),
+            { injector: this.injector },
+          );
         } else {
           this.panelVisible.set(true);
         }

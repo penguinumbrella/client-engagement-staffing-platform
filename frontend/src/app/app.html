@@ -32,8 +32,8 @@
           <a
             [routerLink]="item.path"
             [title]="item.label"
-            routerLinkActive="bg-[#3d3226] text-[#e8dab8]"
-            class="flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)] hover:text-[#e8dab8]"
+            routerLinkActive="!bg-[#3d3226] !text-[#fdf6e8] font-semibold"
+            class="flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)] hover:text-[var(--p-surface-50)]"
             [class.justify-center]="!sidebarOpen()"
           >
             <i class="pi {{ item.icon }} shrink-0 text-sm"></i>
@@ -158,17 +158,27 @@
         </div>
 
         <div class="flex items-center gap-1">
-          <button
-            type="button"
-            class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
-            title="Notifications"
-            (click)="toggleNotifications()"
-          >
-            <i class="pi pi-bell"></i>
-            @if (unreadNotificationCount() > 0) {
-              <span class="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-red-500"></span>
+          <div class="relative">
+            <button
+              type="button"
+              class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+              title="Notifications"
+              (click)="toggleNotifications()"
+            >
+              <i class="pi pi-bell"></i>
+              @if (unreadNotificationCount() > 0) {
+                <span class="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-red-500"></span>
+              }
+            </button>
+
+            @if (notificationsOpen() && currentUser(); as user) {
+              <app-notifications-modal
+                [recipientId]="user.id"
+                (close)="toggleNotifications()"
+                (unreadCountChange)="unreadNotificationCount.set($event)"
+              />
             }
-          </button>
+          </div>
 
           <button
             type="button"
@@ -181,15 +191,7 @@
         </div>
       </header>
 
-      @if (notificationsOpen() && currentUser(); as user) {
-        <app-notifications-modal
-          [recipientId]="user.id"
-          (close)="toggleNotifications()"
-          (unreadCountChange)="unreadNotificationCount.set($event)"
-        />
-      }
-
-      <main class="flex-1 overflow-y-auto px-3 pb-3">
+      <main #mainContent class="flex-1 overflow-y-auto px-3 pb-3">
         <router-outlet />
       </main>
     </div>

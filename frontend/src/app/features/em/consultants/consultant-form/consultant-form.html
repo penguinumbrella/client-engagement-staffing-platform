@@ -15,7 +15,7 @@
         Account Type
         <select
           formControlName="role"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
         >
           @for (role of userRoles; track role.value) {
             <option [value]="role.value">{{ role.label }}</option>
@@ -29,7 +29,7 @@
           type="text"
           formControlName="firstName"
           placeholder="Jane"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
         />
 
         @if (
@@ -48,7 +48,7 @@
           type="text"
           formControlName="lastName"
           placeholder="Doe"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
         />
 
         @if (
@@ -67,7 +67,7 @@
           type="email"
           formControlName="email"
           placeholder="jane.doe@example.com"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
         />
 
         @if (
@@ -86,7 +86,7 @@
           type="password"
           formControlName="password"
           placeholder="Minimum 8 characters"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
         />
 
         @if (
@@ -106,7 +106,7 @@
             type="text"
             formControlName="titleRole"
             placeholder="Senior Consultant"
-            class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+            class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
           />
 
           @if (
@@ -123,7 +123,7 @@
           Primary Skill Area
           <select
             formControlName="primarySkillArea"
-            class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+            class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
           >
             @for (area of skillAreas; track area) {
               <option [value]="area">{{ area }}</option>
@@ -144,7 +144,7 @@
         <button
           type="submit"
           [disabled]="submitting()"
-          class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-50"
         >
           {{ submitting() ? 'Saving…' : 'Create User' }}
         </button>

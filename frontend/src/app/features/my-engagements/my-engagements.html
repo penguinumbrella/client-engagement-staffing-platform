@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-4xl p-6">
+<div class="mx-auto max-w-4xl p-6" animate.enter="page-fade-in">
   <div class="mb-6 flex items-center justify-between gap-4">
     <h2 class="m-0 text-lg font-semibold text-[var(--p-surface-100)]">My Engagements</h2>
   </div>
@@ -42,7 +42,7 @@
                 class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
                 [class]="statusClasses(row.status)"
               >
-                <i class="pi {{ statusIcon(row.status) }} {{ statusIconColor(row.status) }} text-[11px]"></i>
+                <i class="pi {{ statusIcon(row.status) }} text-[11px]" [style.color]="statusIconColor(row.status)"></i>
                 {{ row.status }}
               </span>
 

@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   NavigationEnd,
@@ -34,6 +34,7 @@ interface NavItem {
 export class App {
 
   private readonly router = inject(Router);
+  private readonly mainContent = viewChild<ElementRef<HTMLElement>>('mainContent');
   private readonly auth = inject(Auth);
   private readonly notificationService = inject(NotificationService);
   private readonly globalSearchService = inject(GlobalSearchService);
@@ -99,11 +100,15 @@ export class App {
     return [];
   });
 
+  private readonly scrollIdleTimers = new WeakMap<EventTarget, ReturnType<typeof setTimeout>>();
+
   constructor() {
     effect(() => {
       document.documentElement.classList.toggle('app-dark', this.darkMode());
       localStorage.setItem(App.DARK_MODE_STORAGE_KEY, String(this.darkMode()));
     });
+
+    document.addEventListener('scroll', (event) => this.onScroll(event), { capture: true, passive: true });
 
     effect(() => {
       const user = this.currentUser();
@@ -154,6 +159,7 @@ export class App {
       )
       .subscribe(event => {
         this.updateLayout(event.urlAfterRedirects);
+        this.mainContent()?.nativeElement.scrollTo({ top: 0 });
       });
   }
 
@@ -167,6 +173,19 @@ export class App {
 
   protected toggleNotifications(): void {
     this.notificationsOpen.set(!this.notificationsOpen());
+  }
+
+  private onScroll(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    target.classList.add('is-scrolling');
+
+    clearTimeout(this.scrollIdleTimers.get(target));
+    this.scrollIdleTimers.set(
+      target,
+      setTimeout(() => target.classList.remove('is-scrolling'), 600),
+    );
   }
 
   protected onSearchInput(query: string): void {

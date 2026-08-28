@@ -1,10 +1,10 @@
 <div class="w-full rounded-xl bg-[var(--p-surface-700)] p-3">
-  <div class="mb-3 flex items-center gap-1">
+  <div class="mb-3 flex items-center gap-1 overflow-x-auto">
     @for (tab of tabs; track tab.value) {
       <button
         type="button"
         (click)="activeFilter.set(tab.value)"
-        class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
+        class="shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-colors"
         [class]="
           activeFilter() === tab.value
             ? 'bg-[var(--p-surface-800)] text-[var(--p-surface-50)] shadow-sm'
@@ -16,11 +16,11 @@
     }
   </div>
 
-  <div class="grid min-h-[60px] grid-cols-2 gap-3">
+  <div class="flex min-h-[60px] flex-col gap-3">
     @for (engagement of filteredEngagements(); track engagement.id) {
       <app-client-engagement-card [engagement]="engagement" />
     } @empty {
-      <p class="col-span-2 m-0 px-1 py-4 text-center text-xs text-[var(--p-surface-400)]">No engagements found.</p>
+      <p class="m-0 px-1 py-4 text-center text-xs text-[var(--p-surface-400)]">No engagements found.</p>
     }
   </div>
 </div>

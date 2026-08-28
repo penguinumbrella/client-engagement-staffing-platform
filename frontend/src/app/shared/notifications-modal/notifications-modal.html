@@ -1,15 +1,11 @@
+<div class="fixed inset-0 z-40" (click)="close.emit()"></div>
+
 <div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-  animate.enter="modal-backdrop-in"
-  animate.leave="modal-backdrop-out"
-  (click)="close.emit()"
+  class="absolute right-0 top-full z-50 mt-2 flex h-[520px] max-h-[70vh] w-[420px] max-w-[90vw] flex-col overflow-hidden rounded-xl bg-[var(--p-surface-800)] shadow-lg ring-1 ring-black/10"
+  animate.enter="modal-panel-in"
+  animate.leave="modal-panel-out"
+  (click)="$event.stopPropagation()"
 >
-  <div
-    class="flex h-[520px] max-h-[85vh] w-[420px] max-w-[90vw] flex-col overflow-hidden rounded-xl bg-[var(--p-surface-800)]"
-    animate.enter="modal-panel-in"
-    animate.leave="modal-panel-out"
-    (click)="$event.stopPropagation()"
-  >
     <div class="flex shrink-0 items-center justify-between border-b border-[var(--p-surface-700)] px-4 py-3">
       <h3 class="m-0 text-sm font-semibold text-[var(--p-surface-100)]">Notifications</h3>
       <button
@@ -53,5 +49,4 @@
         }
       }
     </div>
-  </div>
 </div>

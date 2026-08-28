@@ -1,7 +1,7 @@
 @if (editing) {
   <input
     #draftInput
-    class="m-0 mb-2 w-full rounded-lg border border-indigo-300 p-1 text-lg font-semibold text-[var(--p-surface-100)] outline-none"
+    class="m-0 w-full rounded-lg border border-indigo-300 px-1 text-lg font-semibold text-[var(--p-surface-100)] outline-none"
     type="text"
     name="draft"
     [(ngModel)]="draft"
@@ -11,7 +11,7 @@
   />
 } @else {
   <h3
-    class="m-0 mb-2 cursor-pointer rounded-lg p-1 text-lg font-semibold hover:bg-[var(--p-surface-800)]"
+    class="m-0 cursor-pointer rounded-lg px-1 text-lg font-semibold hover:bg-[var(--p-surface-800)]"
     title="Click to edit"
     (click)="startEdit()"
   >

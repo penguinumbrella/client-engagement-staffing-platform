@@ -1,7 +1,7 @@
 <p-confirmDialog />
 
 @if (visible()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" animate.enter="modal-backdrop-in" animate.leave="modal-backdrop-out">
+  <div class="fixed inset-0 z-60 flex items-center justify-center bg-black/40 p-4" animate.enter="modal-backdrop-in" animate.leave="modal-backdrop-out">
     <form
       [formGroup]="form"
       (ngSubmit)="onSubmit()"
@@ -23,7 +23,7 @@
           type="text"
           formControlName="companyName"
           placeholder="Acme Corporation"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)] disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         />
         @if (form.get('companyName')?.invalid && form.get('companyName')?.touched) {
           <small class="p-error">Company name is required</small>
@@ -36,7 +36,7 @@
           type="text"
           formControlName="industry"
           placeholder="Technology"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)] disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         />
       </label>
 
@@ -46,7 +46,7 @@
           type="text"
           formControlName="primaryContactName"
           placeholder="Jane Doe"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)] disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         />
       </label>
 
@@ -56,7 +56,7 @@
           type="email"
           formControlName="primaryContactEmail"
           placeholder="jane@acme.com"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)] disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         />
         @if (form.get('primaryContactEmail')?.invalid && form.get('primaryContactEmail')?.touched) {
           <small class="p-error">Must be a valid email</small>
@@ -67,7 +67,7 @@
         Relationship Status
         <select
           formControlName="relationshipStatus"
-          class="rounded-lg border border-[var(--p-surface-500)] px-2 py-1 text-sm disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)] disabled:bg-[var(--p-surface-700)] disabled:text-[var(--p-surface-300)]"
         >
           @for (status of relationshipStatuses; track status) {
             <option [value]="status">{{ status }}</option>
@@ -99,7 +99,7 @@
           <button
             type="submit"
             [disabled]="submitting()"
-            class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-50"
           >
             {{ submitting() ? 'Saving…' : (mode() === 'create' ? 'Create Client' : 'Save Changes') }}
           </button>
