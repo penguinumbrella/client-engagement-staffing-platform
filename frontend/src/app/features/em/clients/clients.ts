@@ -52,8 +52,12 @@ export class Clients implements OnInit {
     this.loadClients();
   }
 
-  onDeleted(): void {
+  onDeleted(id: number): void {
     this.loadClients();
+
+    if (this.detailClient()?.id === id) {
+      this.detailVisible.set(false);
+    }
   }
 
   openDetail(client: Client): void {

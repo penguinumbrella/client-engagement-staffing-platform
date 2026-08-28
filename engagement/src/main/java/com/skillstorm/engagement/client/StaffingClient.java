@@ -10,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -188,6 +187,13 @@ public class StaffingClient {
      * them. Falls back to an empty list if staffing is unreachable —
      * a missed consultant notification isn't worth failing the whole
      * engagement update over.
+     *
+     * Routed through the circuit breaker (like the cascade calls above)
+     * rather than a bare try/catch: an unguarded call has no timeout of
+     * its own, so a staffing instance that's up but merely slow could
+     * previously stall this call — and the whole engagement request it's
+     * part of — well past the gateway's own timeout, turning "slow" into
+     * a false "service unavailable" for the caller.
      */
     public List<UUID> getStaffedConsultantUserIds(Long engagementId, String token) {
 
@@ -202,44 +208,50 @@ public class StaffingClient {
             return List.of();
         }
 
-        try {
-            List<StaffedAssignmentSummary> assignments =
-                    restClient
-                            .get()
-                            .uri(
-                                    instance.getUri()
-                                            + "/api/assignments/engagement/{engagementId}",
-                                    engagementId
-                            )
-                            .header(
-                                    HttpHeaders.AUTHORIZATION,
-                                    "Bearer " + token
-                            )
-                            .retrieve()
-                            .body(
-                                    new ParameterizedTypeReference<List<StaffedAssignmentSummary>>() {
-                                    }
+        return circuitBreakerFactory.create(CIRCUIT_BREAKER_ID)
+                .run(
+                        () -> doGetStaffedConsultantUserIds(instance, engagementId, token),
+                        ex -> {
+                            log.warn(
+                                    "Failed to fetch staffed consultants for engagement id={}: {}",
+                                    engagementId,
+                                    ex.getMessage()
                             );
+                            return List.of();
+                        }
+                );
+    }
 
-            if (assignments == null) {
-                return List.of();
-            }
+    private List<UUID> doGetStaffedConsultantUserIds(ServiceInstance instance, Long engagementId, String token) {
 
-            return assignments
-                    .stream()
-                    .map(StaffedAssignmentSummary::consultantUserId)
-                    .filter(userId -> userId != null)
-                    .distinct()
-                    .toList();
+        List<StaffedAssignmentSummary> assignments =
+                restClient
+                        .get()
+                        .uri(
+                                instance.getUri()
+                                        + "/api/assignments/engagement/{engagementId}",
+                                engagementId
+                        )
+                        .header(
+                                HttpHeaders.AUTHORIZATION,
+                                "Bearer " + token
+                        )
+                        .retrieve()
+                        .body(
+                                new ParameterizedTypeReference<List<StaffedAssignmentSummary>>() {
+                                }
+                        );
 
-        } catch (RestClientException ex) {
-            log.warn(
-                    "Failed to fetch staffed consultants for engagement id={}: {}",
-                    engagementId,
-                    ex.getMessage()
-            );
+        if (assignments == null) {
             return List.of();
         }
+
+        return assignments
+                .stream()
+                .map(StaffedAssignmentSummary::consultantUserId)
+                .filter(userId -> userId != null)
+                .distinct()
+                .toList();
     }
 
     /** Only the fields needed to notify staffed consultants; other AssignmentResponse fields are ignored. */

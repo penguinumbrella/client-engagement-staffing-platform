@@ -1,3 +1,4 @@
+import { HttpResponse } from '@angular/common/http';
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { Engagement, EngagementStatus, EngagementType } from '../../../../types/engagement.types';
@@ -85,20 +86,28 @@ export class EngagementTimeline {
   private readonly scrollContainer = viewChild<ElementRef<HTMLDivElement>>('scrollContainer');
 
   constructor() {
-    this.clientService.getAllClients(0, 100).subscribe({
-      next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
+    this.clientService.getAllClientsResponse(0, 100).subscribe({
+      next: (response) => {
+        this.clientsById.set(new Map((response.body?.content ?? []).map((c) => [c.id!, c])));
+        this.notifyIfStale(response, 'client');
+      },
       error: (err) => this.notifyError('Failed to load clients.', err, 'client'),
     });
 
-    this.consultantService.getAll().subscribe({
-      next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
-      error: (err) => this.notifyError('Failed to load consultants.', err),
+    this.consultantService.getAllResponse().subscribe({
+      next: (response) => {
+        this.consultantsById.set(new Map((response.body ?? []).map((c) => [c.id, c])));
+        this.notifyIfStale(response, 'staffing');
+      },
+      error: (err) => this.notifyError('Failed to load consultants.', err, 'staffing'),
     });
 
-    this.engagementService.getAll().subscribe({
-      next: (engagements) => {
+    this.engagementService.getAllResponse().subscribe({
+      next: (response) => {
+        const engagements = response.body ?? [];
         this.engagements.set(engagements);
         engagements.forEach((e) => this.loadConsultants(e.id));
+        this.notifyIfStale(response, 'engagement');
         setTimeout(() => this.jumpToToday());
       },
       error: (err) => this.notifyError('Failed to load engagements.', err, 'engagement'),
@@ -418,6 +427,18 @@ export class EngagementTimeline {
         this.patchSelected(id, { status: updated.status });
       },
       error: (err) => this.notifyUpdateError('status', id, err),
+    });
+  }
+
+  private notifyIfStale(response: HttpResponse<unknown>, service: string): void {
+    if (response.headers.get('X-Cache-Status') !== 'stale') {
+      return;
+    }
+
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Service Unavailable',
+      detail: `The ${service} service is currently unavailable. Please try again later.`,
     });
   }
 

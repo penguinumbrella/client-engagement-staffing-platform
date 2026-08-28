@@ -355,6 +355,14 @@ export class KanbanBoard {
       return;
     }
 
+    const previousStatus = engagement.status;
+
+    // Move the card immediately so the board reflects the drop right away
+    // instead of waiting on the round trip; rolled back below on failure.
+    this.engagements.set(
+      this.engagements().map((e) => (e.id === engagement.id ? { ...e, status: destinationStatus } : e)),
+    );
+
     const request$ =
       destinationStatus === EngagementStatus.CANCELLED
         ? this.engagementService.cancel(engagement.id)
@@ -367,6 +375,10 @@ export class KanbanBoard {
         );
       },
       error: (err) => {
+        this.engagements.set(
+          this.engagements().map((e) => (e.id === engagement.id ? { ...e, status: previousStatus } : e)),
+        );
+
         if (err.status === 503) {
           this.messageService.add({
             severity: 'error',

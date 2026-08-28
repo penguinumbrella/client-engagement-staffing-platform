@@ -95,7 +95,7 @@ resilience4j:
     timelimiter:
         configs:
             default:
-                timeout-duration: 5s
+                timeout-duration: 12s
         instances:
             client:
                 base-config: default
