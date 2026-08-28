@@ -1,4 +1,5 @@
-const AVATAR_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#0ea5e9', '#a855f7', '#14b8a6', '#f43f5e'];
+/** Autumn-toned palette for avatar/logo placeholders, so initials read warm and cohesive instead of a jarring rainbow. */
+const AVATAR_COLORS = ['#c1440e', '#a63d2f', '#b8860b', '#6b4423', '#8b5e34', '#cc7722', '#7c2d12', '#5c5a1e'];
 
 export function initialsOf(name: string): string {
   return name

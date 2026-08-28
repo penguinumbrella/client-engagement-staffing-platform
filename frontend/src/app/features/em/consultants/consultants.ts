@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MessageService } from 'primeng/api';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -24,6 +25,7 @@ export class Consultants implements OnInit {
   private readonly consultantService = inject(ConsultantService);
   private readonly assignmentService = inject(AssignmentService);
   private readonly messageService = inject(MessageService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly consultants = signal<ConsultantRow[]>([]);
   readonly loading = signal(true);
@@ -39,6 +41,10 @@ export class Consultants implements OnInit {
 
   ngOnInit(): void {
     this.loadConsultants();
+
+    // Re-run whenever the search bar navigates here with a new ?openId=,
+    // even if we're already sitting on this route (component isn't re-created).
+    this.route.queryParamMap.subscribe(() => this.openDetailFromQueryParam());
   }
 
   openDetail(consultant: Consultant): void {
@@ -88,6 +94,7 @@ export class Consultants implements OnInit {
               detail: 'The staffing service is currently unavailable. Please try again later.',
             });
           }
+          this.openDetailFromQueryParam();
         },
         error: (err) => {
           if (err.status === 503) {
@@ -104,5 +111,13 @@ export class Consultants implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  private openDetailFromQueryParam(): void {
+    const openId = Number(this.route.snapshot.queryParamMap.get('openId'));
+    if (!openId) return;
+
+    const consultant = this.consultants().find((c) => c.id === openId);
+    if (consultant) this.openDetail(consultant);
   }
 }

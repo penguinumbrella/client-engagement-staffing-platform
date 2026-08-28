@@ -1,5 +1,5 @@
 <div
-  class="fixed inset-0 z-10 flex items-center justify-center bg-black/40"
+  class="fixed inset-0 z-60 flex items-center justify-center bg-black/40"
   animate.enter="modal-backdrop-in"
   animate.leave="modal-backdrop-out"
   (click)="cancel.emit()"
@@ -38,7 +38,7 @@
       </button>
       <button
         type="button"
-        class="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+        class="rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
         [disabled]="startDateDraft > targetEndDateDraft"
         (click)="submit()"
       >

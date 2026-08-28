@@ -7,7 +7,6 @@ import {
   engagementStatusIcon,
   engagementStatusIconColor,
   engagementColumnGradient,
-  engagementColumnPastelBorder,
 } from '../engagement-status-icon';
 
 @Component({
@@ -26,6 +25,5 @@ export class KanbanColumn {
   protected readonly statusIcon = engagementStatusIcon;
   protected readonly statusIconColor = engagementStatusIconColor;
   protected readonly columnBackground = engagementColumnGradient;
-  protected readonly columnBorder = engagementColumnPastelBorder;
   protected readonly cancelledStatus = EngagementStatus.CANCELLED;
 }

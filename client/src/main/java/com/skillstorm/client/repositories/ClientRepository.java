@@ -1,5 +1,7 @@
 package com.skillstorm.client.repositories;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +13,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Page<Client> findByIsActiveTrue(Pageable pageable);
 
     boolean existsByCompanyNameIgnoreCase(String companyName);
+
+    List<Client> findByIsActiveTrueAndCompanyNameContainingIgnoreCaseOrIsActiveTrueAndPrimaryContactNameContainingIgnoreCase(
+            String companyName, String primaryContactName);
 
 }

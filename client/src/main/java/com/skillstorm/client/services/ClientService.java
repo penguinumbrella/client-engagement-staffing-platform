@@ -97,6 +97,13 @@ public class ClientService {
         return ResponseEntity.ok(this.clientRepo.findByIsActiveTrue(pages).map(clientMapper::toDto));
     }
 
+    public ResponseEntity<List<ClientResponse>> searchClients(String q) {
+        List<Client> matches = this.clientRepo
+                .findByIsActiveTrueAndCompanyNameContainingIgnoreCaseOrIsActiveTrueAndPrimaryContactNameContainingIgnoreCase(q, q);
+
+        return ResponseEntity.ok(matches.stream().map(clientMapper::toDto).toList());
+    }
+
     public ResponseEntity<ClientResponse> getClientById(Long id) {
         Optional<Client> temp = clientRepo.findById(id);
 

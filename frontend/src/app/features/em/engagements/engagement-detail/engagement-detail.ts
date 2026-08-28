@@ -16,6 +16,7 @@ import { ConsultantService } from '../../../../services/consultant.service';
 import { EngagementService } from '../../../../services/engagement.service';
 import { initialsOf, colorOf } from '../../../../shared/avatar';
 import { engagementStatusIcon } from '../engagement-status-icon';
+import { engagementWarnings } from '../engagement-warnings';
 
 const NON_CANCELLABLE_STATUSES = new Set<EngagementStatus>([EngagementStatus.COMPLETED, EngagementStatus.CANCELLED]);
 const STAFFED_ASSIGNMENT_STATUSES = new Set<AssignmentStatus>([AssignmentStatus.ACTIVE, AssignmentStatus.PENDING]);
@@ -102,12 +103,27 @@ export class EngagementDetail implements OnInit {
   protected addingConsultant = false;
   protected newConsultantId: number | null = null;
   protected newConsultantRole: EngagementRole = EngagementRole.ASSOCIATE;
+  protected newConsultantStartDate = '';
+  protected newConsultantEndDate = '';
 
   protected readonly consultantDetailVisible = signal(false);
   protected readonly selectedConsultant = signal<Consultant | null>(null);
 
   protected get isCreateMode(): boolean {
     return this.engagement === null;
+  }
+
+  protected get warnings(): string[] {
+    if (!this.engagement) {
+      return [];
+    }
+
+    return engagementWarnings({
+      status: this.engagement.status,
+      startDate: this.engagement.startDate,
+      targetEndDate: this.engagement.targetEndDate,
+      consultantCount: this.assignments().length,
+    });
   }
 
   protected get availableConsultants(): Consultant[] {
@@ -291,11 +307,22 @@ export class EngagementDetail implements OnInit {
   protected startAddConsultant(): void {
     this.newConsultantId = null;
     this.newConsultantRole = EngagementRole.ASSOCIATE;
+    this.newConsultantStartDate = new Date().toISOString().slice(0, 10);
+    this.newConsultantEndDate = this.engagement?.targetEndDate ?? '';
     this.addingConsultant = true;
   }
 
   protected cancelAddConsultant(): void {
     this.addingConsultant = false;
+  }
+
+  protected get addConsultantInvalid(): boolean {
+    return (
+      this.newConsultantId === null ||
+      !this.newConsultantStartDate ||
+      !this.newConsultantEndDate ||
+      this.newConsultantStartDate > this.newConsultantEndDate
+    );
   }
 
   protected submitAddConsultant(): void {
@@ -308,8 +335,8 @@ export class EngagementDetail implements OnInit {
         consultantId: this.newConsultantId,
         engagementId: this.engagement.id,
         engagementRole: this.newConsultantRole,
-        assignmentStartDate: new Date().toISOString().slice(0, 10),
-        assignmentEndDate: this.engagement.targetEndDate,
+        assignmentStartDate: this.newConsultantStartDate,
+        assignmentEndDate: this.newConsultantEndDate,
       })
       .subscribe({
         next: () => {

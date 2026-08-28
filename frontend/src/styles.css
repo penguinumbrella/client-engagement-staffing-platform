@@ -6,10 +6,18 @@
 :root {
   --color-accent-blue: #4a7ba6;
   --color-accent-blue-hover: #5f92bf;
+
+  /* Uniform Kanban column background, swapped per theme so it doesn't glow against a dark canvas. */
+  --kanban-column-bg: #f0e6d8;
+}
+
+.app-dark {
+  --kanban-column-bg: #2b2318;
 }
 
 body {
-  font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Lexend', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 300;
   background: var(--p-surface-950, #12100c);
   color: var(--p-surface-50, #efe9df);
 }
@@ -60,3 +68,69 @@ body {
 .modal-backdrop-out { animation: modal-backdrop-out 120ms ease-in; }
 .modal-panel-in { animation: modal-panel-in 150ms ease-out; }
 .modal-panel-out { animation: modal-panel-out 120ms ease-in; }
+
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-fade-in { animation: page-fade-in 200ms ease-out; }
+
+/* Seamless honeycomb tessellation, tiled behind the auth pages. Three hex outlines per tile — one
+   full hexagon plus two half-hexagons straddling the left/right tile edges — so adjacent tile
+   copies reconstruct complete hexagons at the seams with no visible break. */
+.honeycomb-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='60' viewBox='0 0 34.64 60'%3E%3Cpath d='M17.32,0 L34.64,10 L34.64,30 L17.32,40 L0,30 L0,10 Z' fill='none' stroke='rgba(245,185,66,0.12)' stroke-width='1.5'/%3E%3Cpath d='M0,30 L17.32,40 L17.32,60 L0,70 L-17.32,60 L-17.32,40 Z' fill='none' stroke='rgba(245,185,66,0.12)' stroke-width='1.5'/%3E%3Cpath d='M34.64,30 L51.96,40 L51.96,60 L34.64,70 L17.32,60 L17.32,40 Z' fill='none' stroke='rgba(245,185,66,0.12)' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/*
+ * Global scrollbar styling: thin, minimal, and invisible until the element
+ * is actively being scrolled. `.is-scrolling` is toggled by a document-level
+ * scroll listener in app.ts and removed after a short idle timeout.
+ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--p-surface-500, #6b6558);
+  border-radius: 9999px;
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+}
+
+.is-scrolling {
+  scrollbar-color: var(--p-surface-500, #6b6558) transparent;
+  transition: scrollbar-color 300ms ease-out;
+}
+
+.is-scrolling::-webkit-scrollbar-thumb {
+  opacity: 1;
+  transition: opacity 150ms ease-in;
+}
+
+/* Opt out of the auto-hide behavior above — this scrollbar stays visible whenever there's overflow to scroll. */
+.scrollbar-always-visible {
+  scrollbar-color: var(--p-surface-500, #6b6558) transparent;
+}
+
+.scrollbar-always-visible::-webkit-scrollbar-thumb {
+  opacity: 1;
+}

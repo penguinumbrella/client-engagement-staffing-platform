@@ -27,7 +27,6 @@ export class ClientTable {
   clients = input<Client[]>([]);
 
   select = output<Client>();
-  delete = output<number>();
 
   readonly tabs = TABS;
   readonly activeFilter = signal<StatusFilter>('ALL');

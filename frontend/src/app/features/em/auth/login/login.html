@@ -1,76 +1,37 @@
-<div class="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-[var(--p-surface-950)] font-sans">
+<div class="honeycomb-bg min-h-screen flex items-center justify-center p-4 sm:p-8 bg-[var(--p-surface-950)]">
 
-  <div class="w-full max-w-[1120px] min-h-[660px] grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] overflow-hidden rounded-3xl bg-[var(--p-surface-800)] shadow-2xl shadow-black/40">
+  <div class="w-full max-w-[1120px] grid grid-cols-1 lg:grid-cols-[480px_1fr] gap-8">
 
     <!-- LEFT SIDE -->
-    <section class="relative hidden lg:flex items-center overflow-hidden p-16 text-[var(--p-surface-50)] bg-gradient-to-br from-[#3a2708] via-[#573b0d] to-[#7a5212]">
+    <section class="relative hidden lg:flex items-center justify-center overflow-hidden rounded-3xl p-16 text-[var(--p-surface-50)] bg-gradient-to-br from-[#3a2708] via-[#573b0d] to-[#7a5212] shadow-2xl shadow-black/40">
 
       <div class="absolute w-[430px] h-[430px] -top-44 -right-36 rounded-full bg-white/10"></div>
       <div class="absolute w-[540px] h-[270px] -bottom-44 -left-24 rounded-full bg-white/10 -rotate-10"></div>
       <div class="absolute w-24 h-24 top-32 left-20 rounded-full border-8 border-white/25"></div>
 
-      <div class="relative z-10 max-w-[470px]">
-
-        <div class="w-14 h-14 flex items-center justify-center mb-9 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-sm text-2xl">
-          <i class="pi pi-briefcase"></i>
-        </div>
-
-        <h1 class="m-0 text-4xl lg:text-5xl leading-tight tracking-tight font-bold">
-          Client Engagement
-          <span class="block text-[#f9d24f]">& Staffing Platform</span>
-        </h1>
-
-        <p class="max-w-[420px] my-6 text-white/80 leading-relaxed">
-          Manage clients, engagements, consultant staffing,
-          and assignments from one centralized platform.
-        </p>
-
-        <div class="flex flex-col gap-4">
-
-          <div class="flex items-center gap-3 text-white/90 text-sm">
-            <span class="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10">
-              <i class="pi pi-building"></i>
-            </span>
-            <span>Client Management</span>
-          </div>
-
-          <div class="flex items-center gap-3 text-white/90 text-sm">
-            <span class="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10">
-              <i class="pi pi-users"></i>
-            </span>
-            <span>Consultant Staffing</span>
-          </div>
-
-          <div class="flex items-center gap-3 text-white/90 text-sm">
-            <span class="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10">
-              <i class="pi pi-briefcase"></i>
-            </span>
-            <span>Engagement Tracking</span>
-          </div>
-
-        </div>
-
+      <div class="relative z-10 flex aspect-square w-full max-w-56 items-center justify-center rounded-[2.5rem] border border-white/20 bg-white/10 backdrop-blur-sm text-7xl">
+        <i class="pi pi-briefcase"></i>
       </div>
 
     </section>
 
 
     <!-- RIGHT SIDE -->
-    <section class="flex items-center justify-center p-8 sm:p-16 bg-[var(--p-surface-800)]">
+    <section class="flex items-center justify-start p-6 sm:p-10 lg:p-12">
 
-      <div class="w-full max-w-[390px]">
+      <div class="w-full max-w-[360px]">
 
-        <div class="mb-10">
+        <div class="mb-6">
 
-          <p class="m-0 mb-2.5 text-xs font-bold tracking-[1.8px] text-[var(--color-accent-blue)]">
+          <p class="m-0 mb-1.5 text-[11px] font-bold tracking-[1.8px] text-[var(--color-accent-blue)]">
             WELCOME BACK
           </p>
 
-          <h2 class="m-0 text-3xl leading-tight tracking-tight font-bold text-[var(--p-surface-50)]">
+          <h2 class="m-0 text-xl leading-tight tracking-tight font-bold text-[var(--p-surface-50)]">
             Sign in to your account
           </h2>
 
-          <p class="mt-3 text-[var(--p-surface-300)]">
+          <p class="mt-1.5 text-sm text-[var(--p-surface-300)]">
             Enter your credentials to continue.
           </p>
 
@@ -78,20 +39,20 @@
 
 
         <form
-          class="flex flex-col gap-6"
+          class="flex flex-col gap-3.5"
           [formGroup]="loginForm"
           (ngSubmit)="login()"
         >
 
           <!-- EMAIL -->
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-1">
 
             <label for="email" class="text-sm font-semibold text-[var(--p-surface-200)]">
               Email address
             </label>
 
             <div
-              class="h-[52px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 loginForm.controls.email.touched &&
                 loginForm.controls.email.invalid
@@ -134,14 +95,14 @@
 
 
           <!-- PASSWORD -->
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-1">
 
             <label for="password" class="text-sm font-semibold text-[var(--p-surface-200)]">
               Password
             </label>
 
             <div
-              class="h-[52px] flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 loginForm.controls.password.touched &&
                 loginForm.controls.password.invalid
@@ -176,7 +137,7 @@
 
           <!-- SUBMIT -->
           <button
-            class="w-full h-[52px] flex items-center justify-center gap-2.5 mt-1 rounded-2xl bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-400)] text-[#1a1611] font-bold text-[0.95rem] shadow-lg shadow-[var(--p-primary-400)]/25 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            class="w-full h-11 flex items-center justify-center gap-2.5 mt-0.5 rounded-2xl bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-400)] text-[#1a1611] font-bold text-sm shadow-lg shadow-[var(--p-primary-400)]/25 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             type="submit"
             [disabled]="loading"
           >
@@ -200,7 +161,7 @@
         </form>
 
 
-        <div class="flex items-center justify-center gap-1.5 mt-8 text-[var(--p-surface-300)] text-sm">
+        <div class="flex items-center justify-center gap-1.5 mt-5 text-[var(--p-surface-300)] text-sm">
 
           <span>
             Don't have an account?

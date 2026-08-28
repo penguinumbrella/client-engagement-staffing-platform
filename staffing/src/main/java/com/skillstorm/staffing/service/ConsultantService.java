@@ -81,6 +81,14 @@ public class ConsultantService {
                 .toList();
     }
 
+    public List<ConsultantResponse> searchConsultants(String q) {
+        return consultantRepository
+                .findByActiveTrueAndNameContainingIgnoreCaseOrActiveTrueAndTitleRoleContainingIgnoreCaseOrActiveTrueAndPrimarySkillAreaContainingIgnoreCase(q, q, q)
+                .stream()
+                .map(ConsultantResponse::from)
+                .toList();
+    }
+
     public ConsultantResponse getConsultantById(Long id) {
         return ConsultantResponse.from(
                 findActiveOrThrow(id)

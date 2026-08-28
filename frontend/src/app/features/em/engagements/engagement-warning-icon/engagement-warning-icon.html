@@ -1,0 +1,29 @@
+@if (warnings().length > 0) {
+  <div class="group/warning relative inline-flex" (click)="$event.stopPropagation()">
+    <i class="pi pi-exclamation-circle cursor-default text-sm font-bold" [class]="iconClass()"></i>
+
+    <div
+      class="pointer-events-none absolute z-50 w-60 rounded-lg bg-[var(--p-surface-900)] p-2.5 text-left text-[11px] leading-snug text-[var(--p-surface-100)] opacity-0 shadow-lg transition-opacity duration-150 group-hover/warning:pointer-events-auto group-hover/warning:opacity-100"
+      [class.bottom-full]="direction() === 'up'"
+      [class.right-0]="direction() === 'up' || direction() === 'down'"
+      [class.mb-1.5]="direction() === 'up'"
+      [class.top-full]="direction() === 'down'"
+      [class.mt-1.5]="direction() === 'down'"
+      [class.right-full]="direction() === 'left'"
+      [class.left-full]="direction() === 'right'"
+      [class.top-1/2]="direction() === 'left' || direction() === 'right'"
+      [class.-translate-y-1/2]="direction() === 'left' || direction() === 'right'"
+      [class.mr-1.5]="direction() === 'left'"
+      [class.ml-1.5]="direction() === 'right'"
+    >
+      <ul class="m-0 flex list-none flex-col gap-1.5 p-0">
+        @for (warning of warnings(); track warning) {
+          <li class="flex items-start gap-1.5">
+            <i class="pi pi-exclamation-circle mt-0.5 shrink-0 text-[10px] text-amber-500"></i>
+            <span>{{ warning }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+}

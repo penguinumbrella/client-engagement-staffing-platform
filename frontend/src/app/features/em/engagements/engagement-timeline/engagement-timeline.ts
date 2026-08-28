@@ -10,12 +10,14 @@ import { Client } from '../../../../types/client.types';
 import { Consultant } from '../../../../types/consultant.types';
 import { initialsOf, colorOf } from '../../../../shared/avatar';
 import { engagementStatusColor } from '../engagement-status-icon';
+import { engagementWarnings } from '../engagement-warnings';
+import { EngagementWarningIcon } from '../engagement-warning-icon/engagement-warning-icon';
 import { EngagementDetail } from '../engagement-detail/engagement-detail';
 import { EngagementCard, ConsultantBadge } from '../engagement-detail/engagement.model';
 
 const DAY_MS = 1000 * 60 * 60 * 24;
-const MIN_PX_PER_DAY = 1;
-const MAX_PX_PER_DAY = 48;
+const MIN_PX_PER_DAY = 3;
+const MAX_PX_PER_DAY = 24;
 const DEFAULT_PX_PER_DAY = 4;
 const ZOOM_FACTOR = 1.5;
 /** Trailing space reserved past the last date so its month-marker/today label has room to render instead of clipping against the track edge. */
@@ -52,7 +54,7 @@ const DEFAULT_HIDDEN_STATUSES = new Set<EngagementStatus>([EngagementStatus.COMP
 
 @Component({
   selector: 'app-engagement-timeline',
-  imports: [EngagementDetail],
+  imports: [EngagementDetail, EngagementWarningIcon],
   templateUrl: './engagement-timeline.html',
   styleUrl: './engagement-timeline.css',
 })
@@ -268,6 +270,15 @@ export class EngagementTimeline {
 
   protected consultantRows(engagementId: number): ConsultantTimelineRow[] {
     return this.consultantRowsByEngagement().get(engagementId) ?? [];
+  }
+
+  protected rowWarnings(engagement: Engagement): string[] {
+    return engagementWarnings({
+      status: engagement.status,
+      startDate: engagement.startDate,
+      targetEndDate: engagement.targetEndDate,
+      consultantCount: this.consultantRows(engagement.id).length,
+    });
   }
 
   protected isExpanded(engagementId: number): boolean {

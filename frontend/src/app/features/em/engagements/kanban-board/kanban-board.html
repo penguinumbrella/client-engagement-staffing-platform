@@ -1,17 +1,217 @@
-<div class="flex items-start gap-4 p-4">
-  @for (column of columns(); track column.status) {
-    <app-kanban-column
-      [column]="column"
-      [connectedTo]="connectedLists"
-      [class.border-l]="column.status === cancelledStatus"
-      [class.border-[var(--p-surface-600)]]="column.status === cancelledStatus"
-      [class.pl-4]="column.status === cancelledStatus"
-      (dropped)="drop($event)"
-      (select)="selectEngagement($event)"
-      (add)="startCreate($event)"
-    />
-  }
+<div class="flex h-full flex-col gap-3" animate.enter="page-fade-in">
+  <div class="flex items-center justify-between gap-2 px-4">
+    <h1 class="m-0 text-lg font-semibold text-[var(--p-surface-50)]">Engagements</h1>
+
+    <div class="flex items-center gap-2">
+    <button
+      type="button"
+      class="flex items-center gap-1.5 rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+      (click)="filtersModalOpen.set(true)"
+    >
+      <i class="pi pi-filter text-[11px]"></i>
+      Filters
+      @if (activeFilterCount() > 0) {
+        <span class="rounded-full bg-amber-500 px-1.5 text-[10px] font-semibold text-white">{{ activeFilterCount() }}</span>
+      }
+    </button>
+
+    <div class="flex items-center gap-1.5 rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)]">
+      <i class="pi pi-sort-alt text-[11px]"></i>
+      <select
+        class="bg-transparent outline-none"
+        [value]="sortBy()"
+        (change)="setSortBy($any($event.target).value)"
+      >
+        <option value="targetEndDate">Target End Date</option>
+        <option value="startDate">Start Date</option>
+        <option value="name">Engagement Name</option>
+        <option value="client">Client</option>
+        <option value="staffing">Staffing Count</option>
+        <option value="warnings">Has Warnings First</option>
+        <option value="updatedAt">Recently Updated</option>
+      </select>
+    </div>
+
+    <button
+      type="button"
+      class="flex items-center gap-1.5 rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+      (click)="downloadCsv()"
+    >
+      <i class="pi pi-download text-[11px]"></i>
+      Download CSV
+    </button>
+    </div>
+  </div>
+
+  <div class="flex min-w-0 flex-1 items-start gap-4 overflow-x-auto px-4 pb-4">
+    @for (column of columns(); track column.status) {
+      <app-kanban-column
+        [column]="column"
+        [connectedTo]="connectedLists"
+        [class.border-l]="column.status === cancelledStatus"
+        [class.border-[var(--p-surface-600)]]="column.status === cancelledStatus"
+        [class.pl-4]="column.status === cancelledStatus"
+        (dropped)="drop($event)"
+        (select)="selectEngagement($event)"
+        (add)="startCreate($event)"
+      />
+    }
+  </div>
 </div>
+
+@if (filtersModalOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+    animate.enter="modal-backdrop-in"
+    animate.leave="modal-backdrop-out"
+    (click)="filtersModalOpen.set(false)"
+  >
+    <div
+      class="flex max-h-[85vh] w-165 max-w-[90vw] flex-col gap-4 overflow-y-auto rounded-xl bg-[var(--p-surface-800)] p-4 shadow-lg"
+      animate.enter="modal-panel-in"
+      animate.leave="modal-panel-out"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between">
+        <h3 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Filters</h3>
+        <div class="flex items-center gap-1">
+          @if (activeFilterCount() > 0) {
+            <button
+              type="button"
+              (click)="resetAllFilters()"
+              class="rounded-lg px-2 py-1 text-xs font-medium text-amber-500 hover:bg-amber-500/10"
+            >
+              Reset all
+            </button>
+          }
+          <button
+            type="button"
+            (click)="filtersModalOpen.set(false)"
+            class="rounded-lg px-2 py-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+      <div class="flex flex-col gap-4">
+      <div>
+      <div class="mb-1.5 flex items-center justify-between">
+        <h3 class="m-0 text-[10px] font-semibold tracking-wide text-[var(--p-surface-400)] uppercase">Client</h3>
+        <div class="flex gap-1.5 text-[10px] text-[var(--p-surface-400)]">
+          <button type="button" class="hover:text-[var(--p-surface-100)]" (click)="showAllClients()">All</button>
+          <button type="button" class="hover:text-[var(--p-surface-100)]" (click)="hideAllClients()">None</button>
+        </div>
+      </div>
+      <div class="flex max-h-40 flex-col gap-0.5 overflow-y-auto">
+        @for (client of clients(); track client.id) {
+          <label class="flex items-center gap-2 rounded-lg px-1 py-1 text-xs text-[var(--p-surface-200)] hover:bg-[var(--p-surface-700)]">
+            <input
+              type="checkbox"
+              class="accent-amber-500"
+              [checked]="!isClientHidden(client.id!)"
+              (change)="toggleClientFilter(client.id!)"
+            />
+            <span class="truncate">{{ client.companyName }}</span>
+          </label>
+        } @empty {
+          <p class="m-0 px-1 py-2 text-xs text-[var(--p-surface-400)]">No companies loaded.</p>
+        }
+      </div>
+    </div>
+
+    <div>
+      <h3 class="m-0 mb-1.5 text-[10px] font-semibold tracking-wide text-[var(--p-surface-400)] uppercase">Type</h3>
+      <div class="flex flex-wrap gap-1">
+        @for (type of engagementTypes; track type) {
+          <button
+            type="button"
+            class="rounded-full border px-2 py-0.5 text-[11px] font-medium transition"
+            [class.border-transparent]="!isTypeHidden(type)"
+            [class.bg-[var(--p-surface-700)]]="!isTypeHidden(type)"
+            [class.text-[var(--p-surface-200)]]="!isTypeHidden(type)"
+            [class.border-[var(--p-surface-600)]]="isTypeHidden(type)"
+            [class.text-[var(--p-surface-400)]]="isTypeHidden(type)"
+            (click)="toggleTypeFilter(type)"
+          >
+            {{ type }}
+          </button>
+        }
+      </div>
+    </div>
+
+      </div>
+
+      <div class="flex flex-col gap-4">
+    <div>
+      <h3 class="m-0 mb-1.5 text-[10px] font-semibold tracking-wide text-[var(--p-surface-400)] uppercase">Staffing</h3>
+      <select
+        class="w-full rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)]"
+        [value]="staffingFilter()"
+        (change)="setStaffingFilter($any($event.target).value)"
+      >
+        <option value="all">All staffing</option>
+        <option value="staffed">Staffed</option>
+        <option value="unstaffed">Unstaffed</option>
+      </select>
+    </div>
+
+    <div>
+      <h3 class="m-0 mb-1.5 text-[10px] font-semibold tracking-wide text-[var(--p-surface-400)] uppercase">Consultant</h3>
+      <select
+        class="w-full rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)]"
+        [value]="consultantFilter() ?? ''"
+        (change)="setConsultantFilter($any($event.target).value)"
+      >
+        <option value="">All consultants</option>
+        @for (consultant of consultantOptions(); track consultant.id) {
+          <option [value]="consultant.id">{{ consultant.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <div class="mb-1.5 flex items-center justify-between">
+        <h3 class="m-0 text-[10px] font-semibold tracking-wide text-[var(--p-surface-400)] uppercase">Date Range</h3>
+        @if (dateRangeStart() || dateRangeEnd()) {
+          <button type="button" class="text-[10px] text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)]" (click)="resetDateRange()">Reset</button>
+        }
+      </div>
+      <div class="flex flex-col gap-1">
+        <input
+          type="date"
+          class="w-full rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs text-[var(--p-surface-300)]"
+          [value]="dateRangeStart()"
+          (input)="dateRangeStart.set($any($event.target).value)"
+        />
+        <input
+          type="date"
+          class="w-full rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs text-[var(--p-surface-300)]"
+          [value]="dateRangeEnd()"
+          (input)="dateRangeEnd.set($any($event.target).value)"
+        />
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-medium transition"
+      [class.bg-amber-500]="onlyWithWarnings()"
+      [class.text-white]="onlyWithWarnings()"
+      [class.border-transparent]="onlyWithWarnings()"
+      [class.border-[var(--p-surface-600)]]="!onlyWithWarnings()"
+      [class.text-[var(--p-surface-300)]]="!onlyWithWarnings()"
+      (click)="onlyWithWarnings.set(!onlyWithWarnings())"
+    >
+      <i class="pi pi-exclamation-circle text-[11px]"></i>
+      Has warnings
+    </button>
+      </div>
+      </div>
+    </div>
+  </div>
+}
 
 @if (selected(); as engagement) {
   <app-engagement-detail

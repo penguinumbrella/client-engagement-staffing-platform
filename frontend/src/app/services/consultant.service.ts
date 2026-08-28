@@ -1,4 +1,4 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -26,5 +26,10 @@ export class ConsultantService {
 
   create(request: CreateConsultantRequest): Observable<Consultant> {
     return this.http.post<Consultant>(this.baseUrl, request);
+  }
+
+  search(q: string): Observable<Consultant[]> {
+    const params = new HttpParams().set('q', q);
+    return this.http.get<Consultant[]>(`${this.baseUrl}/search`, { params });
   }
 }

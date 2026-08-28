@@ -32,8 +32,8 @@
           <a
             [routerLink]="item.path"
             [title]="item.label"
-            routerLinkActive="bg-[#3d3226] text-[#e8dab8]"
-            class="flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)] hover:text-[#e8dab8]"
+            routerLinkActive="!bg-[#3d3226] !text-[#fdf6e8] font-semibold"
+            class="flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)] hover:text-[var(--p-surface-50)]"
             [class.justify-center]="!sidebarOpen()"
           >
             <i class="pi {{ item.icon }} shrink-0 text-sm"></i>
@@ -81,23 +81,104 @@
     </aside>
 
     <div class="flex flex-1 flex-col overflow-hidden">
-      <header class="m-3 flex h-14 shrink-0 items-center justify-between gap-3 rounded-4xl bg-[var(--p-surface-800)]/60 px-4 backdrop-blur-sm">
-        <div class="flex items-center gap-3">
-          <span class="text-sm font-semibold text-[var(--p-surface-100)]">Client and Staffing Engagement Platform</span>
+      <header class="relative z-50 m-3 flex h-14 shrink-0 items-center justify-between gap-3 rounded-4xl bg-[var(--p-surface-800)]/60 px-4 backdrop-blur-sm">
+        <div class="relative flex flex-1 items-center gap-3">
+          <div class="relative w-full max-w-sm">
+            <i class="pi pi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--p-surface-400)]"></i>
+            <input
+              type="text"
+              [placeholder]="currentUser()?.role === 'CONSULTANT' ? 'Filter my engagements...' : 'Search clients, engagements, consultants...'"
+              class="w-full rounded-full border-none bg-[var(--p-surface-700)] py-2 pl-8 pr-3 text-sm text-[var(--p-surface-100)] placeholder:text-[var(--p-surface-400)] focus:outline-none focus:ring-1 focus:ring-amber-500"
+              [value]="searchQuery()"
+              (input)="onSearchInput($any($event.target).value)"
+              (focus)="onSearchFocus()"
+              (blur)="closeSearch()"
+            />
+
+            @if (searchOpen()) {
+              <div
+                class="absolute left-0 top-full z-50 mt-2 max-h-96 w-full overflow-y-auto rounded-xl bg-[var(--p-surface-800)] shadow-lg"
+                (mousedown)="$event.preventDefault()"
+              >
+                @if (searchLoading()) {
+                  <div class="flex items-center gap-2 px-4 py-3 text-sm text-[var(--p-surface-400)]">
+                    <i class="pi pi-spin pi-spinner"></i>
+                    Searching...
+                  </div>
+                } @else if (!hasAnySearchResults()) {
+                  <div class="px-4 py-3 text-sm text-[var(--p-surface-400)]">
+                    No results for "{{ searchQuery() }}"
+                  </div>
+                } @else {
+                  @if (searchResults().clients.length > 0) {
+                    <div class="px-4 pb-1 pt-3 text-xs font-semibold uppercase text-[var(--p-surface-400)]">Clients</div>
+                    @for (result of searchResults().clients; track result.id) {
+                      <button
+                        type="button"
+                        class="flex w-full flex-col items-start px-4 py-2 text-left hover:bg-[var(--p-surface-700)]"
+                        (click)="selectSearchResult(result)"
+                      >
+                        <span class="text-sm text-[var(--p-surface-100)]">{{ result.title }}</span>
+                        <span class="text-xs text-[var(--p-surface-400)]">{{ result.subtitle }}</span>
+                      </button>
+                    }
+                  }
+
+                  @if (searchResults().engagements.length > 0) {
+                    <div class="px-4 pb-1 pt-3 text-xs font-semibold uppercase text-[var(--p-surface-400)]">Engagements</div>
+                    @for (result of searchResults().engagements; track result.id) {
+                      <button
+                        type="button"
+                        class="flex w-full flex-col items-start px-4 py-2 text-left hover:bg-[var(--p-surface-700)]"
+                        (click)="selectSearchResult(result)"
+                      >
+                        <span class="text-sm text-[var(--p-surface-100)]">{{ result.title }}</span>
+                        <span class="text-xs text-[var(--p-surface-400)]">{{ result.subtitle }}</span>
+                      </button>
+                    }
+                  }
+
+                  @if (searchResults().consultants.length > 0) {
+                    <div class="px-4 pb-1 pt-3 text-xs font-semibold uppercase text-[var(--p-surface-400)]">Consultants</div>
+                    @for (result of searchResults().consultants; track result.id) {
+                      <button
+                        type="button"
+                        class="flex w-full flex-col items-start px-4 py-2 text-left hover:bg-[var(--p-surface-700)]"
+                        (click)="selectSearchResult(result)"
+                      >
+                        <span class="text-sm text-[var(--p-surface-100)]">{{ result.title }}</span>
+                        <span class="text-xs text-[var(--p-surface-400)]">{{ result.subtitle }}</span>
+                      </button>
+                    }
+                  }
+                }
+              </div>
+            }
+          </div>
         </div>
 
         <div class="flex items-center gap-1">
-          <button
-            type="button"
-            class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
-            title="Notifications"
-            (click)="toggleNotifications()"
-          >
-            <i class="pi pi-bell"></i>
-            @if (unreadNotificationCount() > 0) {
-              <span class="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-red-500"></span>
+          <div class="relative">
+            <button
+              type="button"
+              class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+              title="Notifications"
+              (click)="toggleNotifications()"
+            >
+              <i class="pi pi-bell"></i>
+              @if (unreadNotificationCount() > 0) {
+                <span class="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-red-500"></span>
+              }
+            </button>
+
+            @if (notificationsOpen() && currentUser(); as user) {
+              <app-notifications-modal
+                [recipientId]="user.id"
+                (close)="toggleNotifications()"
+                (unreadCountChange)="unreadNotificationCount.set($event)"
+              />
             }
-          </button>
+          </div>
 
           <button
             type="button"
@@ -110,15 +191,7 @@
         </div>
       </header>
 
-      @if (notificationsOpen() && currentUser(); as user) {
-        <app-notifications-modal
-          [recipientId]="user.id"
-          (close)="toggleNotifications()"
-          (unreadCountChange)="unreadNotificationCount.set($event)"
-        />
-      }
-
-      <main class="flex-1 overflow-y-auto px-3 pb-3">
+      <main #mainContent class="flex-1 overflow-y-auto px-3 pb-3">
         <router-outlet />
       </main>
     </div>

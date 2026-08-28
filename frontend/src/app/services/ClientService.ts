@@ -25,6 +25,11 @@ export class ClientService {
     return this.http.get<Client>(`${this.baseUrl}/${id}`);
   }
 
+  search(q: string): Observable<Client[]> {
+    const params = new HttpParams().set('q', q);
+    return this.http.get<Client[]>(`${this.baseUrl}/search`, { params });
+  }
+
   createClient(client: Client): Observable<Client> {
     return this.http.post<Client>(this.baseUrl, client);
   }

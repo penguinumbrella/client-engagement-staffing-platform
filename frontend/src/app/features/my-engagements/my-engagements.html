@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-4xl p-6">
+<div class="mx-auto max-w-4xl p-6" animate.enter="page-fade-in">
   <div class="mb-6 flex items-center justify-between gap-4">
     <h2 class="m-0 text-lg font-semibold text-[var(--p-surface-100)]">My Engagements</h2>
   </div>
@@ -6,7 +6,9 @@
   @if (loading()) {
     <p class="text-sm text-[var(--p-surface-300)]">Loading engagements…</p>
   } @else if (rows().length === 0) {
-    <p class="text-sm text-[var(--p-surface-300)]">No engagements assigned to you.</p>
+    <p class="text-sm text-[var(--p-surface-300)]">
+      {{ hasAssignments() ? 'No engagements match your search.' : 'No engagements assigned to you.' }}
+    </p>
   } @else {
     <ul class="flex flex-col gap-2">
       @for (row of rows(); track row.id) {
@@ -40,7 +42,7 @@
                 class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
                 [class]="statusClasses(row.status)"
               >
-                <i class="pi {{ statusIcon(row.status) }} {{ statusIconColor(row.status) }} text-[11px]"></i>
+                <i class="pi {{ statusIcon(row.status) }} text-[11px]" [style.color]="statusIconColor(row.status)"></i>
                 {{ row.status }}
               </span>
 
