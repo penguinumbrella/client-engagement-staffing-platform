@@ -29,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -58,6 +59,7 @@ class EngagementControllerTest {
         Jwt jwt = mock(Jwt.class);
         lenient().when(jwt.getTokenValue()).thenReturn("test-token");
         lenient().when(jwt.getClaimAsStringList("roles")).thenReturn(List.of("ENGAGEMENT_MANAGER"));
+        lenient().when(jwt.getSubject()).thenReturn("11111111-1111-1111-1111-111111111111");
 
         EngagementController controller = new EngagementController(engagementService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
@@ -92,7 +94,7 @@ class EngagementControllerTest {
         request.setStartDate(LocalDate.of(2026, 1, 1));
         request.setTargetEndDate(LocalDate.of(2026, 6, 1));
 
-        when(engagementService.createEngagement(any(CreateEngagementRequest.class), any(String.class))).thenReturn(sampleResponse(1L));
+        when(engagementService.createEngagement(any(CreateEngagementRequest.class), any(String.class), any(UUID.class))).thenReturn(sampleResponse(1L));
 
         mockMvc.perform(post("/api/engagements")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -154,7 +156,7 @@ class EngagementControllerTest {
         UpdateEngagementRequest request = new UpdateEngagementRequest();
         request.setEngagementName("Renamed");
 
-        when(engagementService.updateEngagement(eq(1L), any(UpdateEngagementRequest.class), any(String.class)))
+        when(engagementService.updateEngagement(eq(1L), any(UpdateEngagementRequest.class), any(String.class), any(UUID.class)))
                 .thenReturn(sampleResponse(1L));
 
         mockMvc.perform(put("/api/engagements/1")
@@ -169,7 +171,7 @@ class EngagementControllerTest {
         UpdateEngagementRequest request = new UpdateEngagementRequest();
         request.setStatus(EngagementStatus.CANCELLED);
 
-        when(engagementService.updateEngagement(eq(1L), any(UpdateEngagementRequest.class), any(String.class)))
+        when(engagementService.updateEngagement(eq(1L), any(UpdateEngagementRequest.class), any(String.class), any(UUID.class)))
                 .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Use the cancel endpoint"));
 
         mockMvc.perform(put("/api/engagements/1")
@@ -184,13 +186,13 @@ class EngagementControllerTest {
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(""));
 
-        verify(engagementService).deleteEngagement(eq(1L), any(String.class));
+        verify(engagementService).deleteEngagement(eq(1L), any(String.class), any(UUID.class));
     }
 
     @Test
     void cancel_returnsCancelledEngagement() throws Exception {
         EngagementResponse cancelled = sampleResponse(1L);
-        when(engagementService.cancelEngagement(eq(1L), any(String.class))).thenReturn(cancelled);
+        when(engagementService.cancelEngagement(eq(1L), any(String.class), any(UUID.class))).thenReturn(cancelled);
 
         mockMvc.perform(post("/api/engagements/1/cancel"))
                 .andExpect(status().isOk());
@@ -198,7 +200,7 @@ class EngagementControllerTest {
 
     @Test
     void cancel_returns409WhenAlreadyTerminal() throws Exception {
-        when(engagementService.cancelEngagement(eq(1L), any(String.class)))
+        when(engagementService.cancelEngagement(eq(1L), any(String.class), any(UUID.class)))
                 .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Only active engagements can be cancelled"));
 
         mockMvc.perform(post("/api/engagements/1/cancel"))

@@ -128,3 +128,8 @@ resilience4j:
                 base-config: default
             auth:
                 base-config: default
+
+gateway:
+    stale-cache:
+        ttl: 24h
+        max-entries: 500

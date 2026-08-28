@@ -42,7 +42,7 @@ public class EngagementClient {
         if (instance == null) {
             throw new ResponseStatusException(
                     HttpStatus.SERVICE_UNAVAILABLE,
-                    "Engagement service is not available"
+                    "The engagement service is currently unavailable. Please try again later."
             );
         }
 
@@ -73,7 +73,7 @@ public class EngagementClient {
         log.warn("Engagement service call failed or circuit is open: {}", ex.getMessage());
         throw new ResponseStatusException(
                 HttpStatus.SERVICE_UNAVAILABLE,
-                "Unable to reach engagement service: " + ex.getMessage()
+                "The engagement service is currently unavailable. Please try again later."
         );
     }
 }

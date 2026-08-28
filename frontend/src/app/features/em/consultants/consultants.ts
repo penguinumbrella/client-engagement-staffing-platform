@@ -59,10 +59,13 @@ export class Consultants implements OnInit {
     this.error.set(null);
 
     this.consultantService
-      .getAll()
+      .getAllResponse()
       .pipe(
-        switchMap((consultants) => {
-          if (consultants.length === 0) return of([]);
+        switchMap((response) => {
+          const consultants = response.body ?? [];
+          const stale = response.headers.get('X-Cache-Status') === 'stale';
+
+          if (consultants.length === 0) return of({ rows: [] as ConsultantRow[], stale });
 
           const withCounts = consultants.map((consultant) =>
             this.assignmentService.getByConsultant(consultant.id).pipe(
@@ -71,13 +74,20 @@ export class Consultants implements OnInit {
             ),
           );
 
-          return forkJoin(withCounts);
+          return forkJoin(withCounts).pipe(map((rows) => ({ rows, stale })));
         }),
       )
       .subscribe({
-        next: (rows) => {
+        next: ({ rows, stale }) => {
           this.consultants.set(rows);
           this.loading.set(false);
+          if (stale) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Service Unavailable',
+              detail: 'The staffing service is currently unavailable. Please try again later.',
+            });
+          }
         },
         error: (err) => {
           if (err.status === 503) {

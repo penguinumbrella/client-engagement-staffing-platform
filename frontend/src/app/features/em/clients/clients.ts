@@ -118,10 +118,17 @@ export class Clients implements OnInit {
 
   private loadClients(): void {
     this.loading.set(true);
-    this.clientService.getAllClients(0, 100).subscribe({
-      next: (page) => {
-        this.clients.set(page.content);
+    this.clientService.getAllClientsResponse(0, 100).subscribe({
+      next: (response) => {
+        this.clients.set(response.body!.content);
         this.loading.set(false);
+        if (response.headers.get('X-Cache-Status') === 'stale') {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: 'The client service is currently unavailable. Please try again later.',
+          });
+        }
       },
       error: (err) => {
         this.error.set(

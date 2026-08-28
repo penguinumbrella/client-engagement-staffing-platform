@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Consultant, CreateConsultantRequest } from '../types/consultant.types';
 
@@ -16,7 +17,11 @@ export class ConsultantService {
   constructor(private readonly http: HttpClient) {}
 
   getAll(): Observable<Consultant[]> {
-    return this.http.get<Consultant[]>(this.baseUrl);
+    return this.getAllResponse().pipe(map((response) => response.body!));
+  }
+
+  getAllResponse(): Observable<HttpResponse<Consultant[]>> {
+    return this.http.get<Consultant[]>(this.baseUrl, { observe: 'response' });
   }
 
   create(request: CreateConsultantRequest): Observable<Consultant> {

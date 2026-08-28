@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MessageService } from 'primeng/api';
 import { KanbanColumn } from '../kanban-column/kanban-column';
@@ -45,20 +46,28 @@ export class KanbanBoard {
   protected readonly cancelledStatus = EngagementStatus.CANCELLED;
 
   constructor() {
-    this.consultantService.getAll().subscribe({
-      next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
+    this.consultantService.getAllResponse().subscribe({
+      next: (response) => {
+        this.consultantsById.set(new Map((response.body ?? []).map((c) => [c.id, c])));
+        this.notifyIfStale(response, 'staffing');
+      },
       error: (err) => this.notifyError('Failed to load consultants.', err, 'staffing'),
     });
 
-    this.clientService.getAllClients(0, 100).subscribe({
-      next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
+    this.clientService.getAllClientsResponse(0, 100).subscribe({
+      next: (response) => {
+        this.clientsById.set(new Map((response.body?.content ?? []).map((c) => [c.id!, c])));
+        this.notifyIfStale(response, 'client');
+      },
       error: (err) => this.notifyError('Failed to load clients.', err, 'client'),
     });
 
-    this.engagementService.getAll().subscribe({
-      next: (engagements) => {
+    this.engagementService.getAllResponse().subscribe({
+      next: (response) => {
+        const engagements = response.body ?? [];
         this.engagements.set(engagements);
         engagements.forEach((e) => this.refreshConsultants(e.id));
+        this.notifyIfStale(response, 'engagement');
       },
       error: (err) => this.notifyError('Failed to load engagements.', err, 'engagement'),
     });
@@ -280,11 +289,6 @@ export class KanbanBoard {
     });
   }
 
-  /**
-   * `service` names which downstream service the failed call was ultimately
-   * headed to, so a 503 (the whole service down, per the gateway's circuit
-   * breaker) can say so specifically instead of a generic message.
-   */
   private notifyError(detail: string, err: any, service?: string): void {
     const unavailable = err?.status === 503;
     this.messageService.add({
@@ -295,6 +299,18 @@ export class KanbanBoard {
         : detail,
     });
     console.error(detail, err);
+  }
+
+  private notifyIfStale(response: HttpResponse<unknown>, service: string): void {
+    if (response.headers.get('X-Cache-Status') !== 'stale') {
+      return;
+    }
+
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Service Unavailable',
+      detail: `The ${service} service is currently unavailable. Please try again later.`,
+    });
   }
 
   private notifyUpdateError(field: string, engagementId: number, err: any): void {

@@ -237,14 +237,16 @@ class ClientServiceTest {
     }
 
     @Test
-    void deleteClient_engagementServiceUnavailable_returnsSameStatus() {
+    void deleteClient_engagementServiceUnavailable_propagatesReasonInsteadOfSwallowingIt() {
         when(clientRepo.findById(1L)).thenReturn(Optional.of(activeClient));
         when(engagementClient.hasActiveEngagements(1L, "test-token"))
-                .thenThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Engagement service is not available"));
+                .thenThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Unable to reach engagement service: connection refused"));
 
-        ResponseEntity<Void> result = clientService.deleteClient(1L, "test-token", ACTOR_ID);
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> clientService.deleteClient(1L, "test-token", ACTOR_ID));
 
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, result.getStatusCode());
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ex.getStatusCode());
+        assertEquals("Unable to reach engagement service: connection refused", ex.getReason());
         verify(clientRepo, never()).save(any(Client.class));
         verify(notificationEventPublisher, never()).publish(any(NotificationEvent.class));
     }
