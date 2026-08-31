@@ -114,6 +114,14 @@ export class App {
 
           path: '/admin'
 
+        },
+
+        {
+
+          label: 'Notification Logs',
+
+          path: '/admin/notifications'
+
         }
 
       ];

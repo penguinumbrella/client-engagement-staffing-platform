@@ -1,0 +1,127 @@
+<div class="notification-logs">
+
+  <h1>Notification Logs</h1>
+
+  @if (loading()) {
+
+    <p>
+      Loading notification logs...
+    </p>
+
+  } @else if (errorMessage()) {
+
+    <p class="error">
+      {{ errorMessage() }}
+    </p>
+
+  } @else {
+
+    <section class="logs">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>Type</th>
+
+            <th>Title</th>
+
+            <th>Message</th>
+
+            <th>Source Service</th>
+
+            <th>Source ID</th>
+
+            <th>Recipient ID</th>
+
+            <th>Status</th>
+
+            <th>Created</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          @for (
+            log of notificationLogs();
+            track log.id
+          ) {
+
+            <tr>
+
+              <td>
+                {{ log.type }}
+              </td>
+
+              <td>
+                {{ log.title }}
+              </td>
+
+              <td>
+                {{ log.message }}
+              </td>
+
+              <td>
+                {{ log.sourceService ?? '-' }}
+              </td>
+
+              <td>
+                {{ log.sourceId ?? '-' }}
+              </td>
+
+              <td>
+                {{ log.recipientId }}
+              </td>
+
+              <td>
+
+                @if (!log.active) {
+
+                  Deleted
+
+                } @else if (log.read) {
+
+                  Read
+
+                } @else {
+
+                  Unread
+
+                }
+
+              </td>
+
+              <td>
+                {{
+                  log.createdAt
+                    | date:'short'
+                }}
+              </td>
+
+            </tr>
+
+          } @empty {
+
+            <tr>
+
+              <td colspan="8">
+                No notification logs found.
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </section>
+
+  }
+
+</div>

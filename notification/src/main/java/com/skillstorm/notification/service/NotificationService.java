@@ -92,4 +92,13 @@ public class NotificationService {
                 .filter(Notification::isActive)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification " + id + " not found"));
     }
+
+    public List<NotificationResponse> getAdminNotificationLogs() {
+
+        return notificationRepository
+                .findTop100ByOrderByCreatedAtDesc()
+                .stream()
+                .map(NotificationResponse::from)
+                .toList();
+    }
 }

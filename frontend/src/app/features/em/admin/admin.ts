@@ -1,10 +1,13 @@
 import { inject, Injectable } from '@angular/core';
+
 import { HttpClient } from '@angular/common/http';
+
 import { Observable } from 'rxjs';
 
 import {
   LoginAttempt,
-  LoginMetrics
+  LoginMetrics,
+  NotificationLog
 } from '../../../types';
 
 @Injectable({
@@ -14,18 +17,34 @@ export class Admin {
 
   private readonly http = inject(HttpClient);
 
-  private readonly baseUrl =
+  private readonly authAdminBaseUrl =
     'http://localhost:8125/auth/api/admin';
 
+  private readonly notificationAdminBaseUrl =
+    'http://localhost:8125/notification/api/admin';
+
   getLoginAttempts(): Observable<LoginAttempt[]> {
+
     return this.http.get<LoginAttempt[]>(
-      `${this.baseUrl}/login-attempts`
+      `${this.authAdminBaseUrl}/login-attempts`
     );
+
   }
 
   getLoginMetrics(): Observable<LoginMetrics> {
+
     return this.http.get<LoginMetrics>(
-      `${this.baseUrl}/login-metrics`
+      `${this.authAdminBaseUrl}/login-metrics`
     );
+
   }
+
+  getNotificationLogs(): Observable<NotificationLog[]> {
+
+    return this.http.get<NotificationLog[]>(
+      `${this.notificationAdminBaseUrl}/notifications`
+    );
+
+  }
+
 }
