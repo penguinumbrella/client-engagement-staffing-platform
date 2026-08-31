@@ -43,7 +43,7 @@ export class Auth {
     `${environment.apiGatewayUrl}/auth/api/users`;
 
   readonly googleLoginUrl =
-    `${environment.authServiceUrl}/oauth2/authorization/google`;
+    `${environment.apiGatewayUrl}/auth/oauth2/authorization/google`;
 
   currentUser = signal<AuthUser | null>(this.loadStoredUser());
 
