@@ -4,3 +4,4 @@ public enum UserRole {
     CONSULTANT,
     ENGAGEMENT_MANAGER
 }
+

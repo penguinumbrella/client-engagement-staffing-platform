@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.skillstorm.auth_service.Dtos.AuthResponse;
+import com.skillstorm.auth_service.Dtos.CompleteProfileRequest;
 import com.skillstorm.auth_service.Dtos.CreateUserRequest;
 import com.skillstorm.auth_service.Dtos.CreateUserResponse;
 import com.skillstorm.auth_service.Dtos.LoginRequest;
@@ -94,6 +95,33 @@ public class AuthService {
                         "User could not be found after authentication."));
 
         return createAuthResponse(user);
+    }
+
+    @Transactional
+    public UserResponse completeOauthProfile(
+        UUID userId,
+        CompleteProfileRequest request,
+        String token) {
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "User not found."
+                        )
+                );
+
+        staffingClient.provisionConsultant(
+                new ProvisionConsultantRequest(
+                        user.getFirstName(),
+                        user.getLastName(),
+                        request.titleRole(),
+                        request.primarySkillArea()
+                ),
+                token
+        );
+
+        return toUserResponse(user);
     }
 
     @Transactional(readOnly = true)

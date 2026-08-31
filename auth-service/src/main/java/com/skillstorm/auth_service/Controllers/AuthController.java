@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.skillstorm.auth_service.Dtos.AuthResponse;
+import com.skillstorm.auth_service.Dtos.CompleteProfileRequest;
 import com.skillstorm.auth_service.Dtos.CreateUserRequest;
 import com.skillstorm.auth_service.Dtos.LoginRequest;
 import com.skillstorm.auth_service.Dtos.RegisterRequest;
@@ -50,6 +51,23 @@ public class AuthController {
 
         AuthResponse response =
                 authService.login(request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/oauth/complete-profile")
+    public ResponseEntity<UserResponse> completeOauthProfile(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody CompleteProfileRequest request) {
+
+        UUID userId =
+                UUID.fromString(jwt.getSubject());
+
+        UserResponse response =
+                authService.completeOauthProfile(
+                        userId,
+                        request,
+                        jwt.getTokenValue());
 
         return ResponseEntity.ok(response);
     }

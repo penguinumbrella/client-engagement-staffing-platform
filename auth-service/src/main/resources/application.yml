@@ -25,6 +25,15 @@ spring:
   config:
     import: optional:file:.env[.properties]
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope: openid, email, profile
+
 server:
   port: ${PORT:8084}
 
@@ -43,6 +52,9 @@ app:
 
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:4200}
+
+  oauth2:
+    frontend-redirect-uri: ${OAUTH2_FRONTEND_REDIRECT_URI:http://localhost:4200/auth/callback}
 eureka:
   client:
     service-url:

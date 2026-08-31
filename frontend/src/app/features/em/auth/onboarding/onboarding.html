@@ -1,0 +1,156 @@
+<div class="relative h-screen flex items-center justify-center overflow-hidden bg-[#f5f0e4] p-4">
+
+  <!-- BRAND -->
+  <div class="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-2">
+
+    <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 shrink-0 text-[#f5a623]">
+      <path d="M12 2 L21 7 V17 L12 22 L3 17 V7 Z" />
+    </svg>
+
+    <div class="flex flex-col leading-none">
+
+      <span class="text-base font-bold tracking-tight text-[#2a2115]">
+        Beehive
+      </span>
+
+      <span class="text-[11px] text-[#7a6f5d]">
+        Where every consultant finds their hive.
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <div class="auth-fade-in w-full max-w-[420px] rounded-3xl bg-white p-8 sm:p-10 shadow-xl shadow-black/5 border border-black/5">
+
+      <div class="w-full">
+
+        <div class="mb-6">
+
+          <h2 class="m-0 text-xl leading-tight tracking-tight font-bold text-[#2a2115]">
+            Finish setting up your account
+          </h2>
+
+          <p class="mt-1.5 text-sm text-[#7a6f5d]">
+            Just a couple more details before you get started.
+          </p>
+
+        </div>
+
+
+        <form
+          class="flex flex-col gap-3.5"
+          [formGroup]="onboardingForm"
+          (ngSubmit)="complete()"
+        >
+
+          <!-- TITLE / ROLE -->
+          <div class="flex flex-col gap-1">
+
+            <label for="titleRole" class="text-sm font-semibold text-[#3a3226]">
+              Title
+            </label>
+
+            <div
+              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[#e2dccb] bg-[#faf7f0] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              [class.border-red-500]="
+                onboardingForm.controls.titleRole.touched &&
+                onboardingForm.controls.titleRole.invalid
+              "
+            >
+              <i class="pi pi-id-card ml-4 text-[15px] text-[#a89f8c]"></i>
+
+              <input
+                id="titleRole"
+                type="text"
+                formControlName="titleRole"
+                placeholder="Associate"
+                class="w-full h-full px-4 border-none outline-none bg-transparent text-[#2a2115] font-[inherit] text-[0.95rem] placeholder:text-[#a89f8c]"
+              >
+            </div>
+
+            @if (
+              onboardingForm.controls.titleRole.touched &&
+              onboardingForm.controls.titleRole.hasError('required')
+            ) {
+              <small class="text-red-400 text-xs">
+                Title is required.
+              </small>
+            }
+
+          </div>
+
+
+          <!-- SKILL AREA -->
+          <div class="flex flex-col gap-1">
+
+            <label for="primarySkillArea" class="text-sm font-semibold text-[#3a3226]">
+              Primary Skill Area
+            </label>
+
+            <div
+              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[#e2dccb] bg-[#faf7f0] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              [class.border-red-500]="
+                onboardingForm.controls.primarySkillArea.touched &&
+                onboardingForm.controls.primarySkillArea.invalid
+              "
+            >
+              <i class="pi pi-chart-bar ml-4 text-[15px] text-[#a89f8c]"></i>
+
+              <select
+                id="primarySkillArea"
+                formControlName="primarySkillArea"
+                class="w-full h-full px-4 border-none outline-none bg-transparent text-[#2a2115] font-[inherit] text-[0.95rem] cursor-pointer"
+              >
+                <option value="" class="bg-white">Select skill area</option>
+                <option value="Audit" class="bg-white">Audit</option>
+                <option value="Tax" class="bg-white">Tax</option>
+                <option value="Risk" class="bg-white">Risk</option>
+                <option value="Technology" class="bg-white">Technology</option>
+                <option value="Strategy" class="bg-white">Strategy</option>
+              </select>
+            </div>
+
+            @if (
+              onboardingForm.controls.primarySkillArea.touched &&
+              onboardingForm.controls.primarySkillArea.hasError('required')
+            ) {
+              <small class="text-red-400 text-xs">
+                Primary skill area is required.
+              </small>
+            }
+
+          </div>
+
+
+          <!-- SUBMIT -->
+          <button
+            class="w-full h-11 flex items-center justify-center gap-2.5 mt-0.5 rounded-2xl bg-[#f5a623] text-[#2a2115] font-bold text-sm shadow-lg shadow-[#f5a623]/30 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            type="submit"
+            [disabled]="loading"
+          >
+
+            @if (loading) {
+
+              <i class="pi pi-spin pi-spinner"></i>
+
+              Saving...
+
+            } @else {
+
+              Continue
+
+              <i class="pi pi-arrow-right"></i>
+
+            }
+
+          </button>
+
+        </form>
+
+      </div>
+
+  </div>
+
+</div>
