@@ -2,7 +2,7 @@ name: Deploy Auth Service
 
 on:
   push:
-    branches: [aws-preauth, main]
+    branches: [aws-preauth, main, aws-postauth]
     paths:
       - 'auth-service/**'
 
@@ -19,21 +19,6 @@ jobs:
       run:
         working-directory: auth-service
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: auth_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,12 +30,12 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Write JWT private key
+        run: |
+          mkdir -p src/main/resources/keys
+          printf '%s' "${{ secrets.AUTH_JWT_PRIVATE_KEY }}" > src/main/resources/keys/private.pem
+
       - name: Run tests
-        continue-on-error: true # TODO: re-enable enforcement once tests are stable
-        env:
-          AUTH_DB_URL: jdbc:postgresql://localhost:5432/auth_test
-          DB_USERNAME: postgres
-          DB_PASSWORD: postgres
         run: mvn -B test
 
       - name: Build JAR
