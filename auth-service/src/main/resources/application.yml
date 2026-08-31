@@ -33,11 +33,10 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID:}
             client-secret: ${GOOGLE_CLIENT_SECRET:}
             scope: openid, email, profile
-            redirect-uri: "{baseUrl}/auth/login/oauth2/code/google"
+            redirect-uri: ${GOOGLE_OAUTH_REDIRECT_URI:http://localhost:8125/auth/login/oauth2/code/google}
 
 server:
   port: ${PORT:8084}
-  forward-headers-strategy: framework
 
 management:
   endpoints:
