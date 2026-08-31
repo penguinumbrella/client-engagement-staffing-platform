@@ -1,37 +1,38 @@
-<div class="honeycomb-bg min-h-screen flex items-center justify-center p-4 sm:p-8 bg-[var(--p-surface-950)]">
+<div class="relative h-screen flex items-center justify-center overflow-hidden bg-[#f5f0e4] p-4">
 
-  <div class="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-[480px_1fr] gap-8">
+  <!-- BRAND -->
+  <div class="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-2">
 
-    <!-- LEFT SIDE -->
-    <section class="relative hidden lg:flex items-center justify-center overflow-hidden rounded-3xl p-16 text-[var(--p-surface-50)] bg-gradient-to-br from-[#3a2708] via-[#573b0d] to-[#7a5212] shadow-2xl shadow-black/40">
+    <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 shrink-0 text-[#f5a623]">
+      <path d="M12 2 L21 7 V17 L12 22 L3 17 V7 Z" />
+    </svg>
 
-      <div class="absolute w-[430px] h-[430px] -top-44 -right-36 rounded-full bg-white/10"></div>
-      <div class="absolute w-[540px] h-[270px] -bottom-44 -left-24 rounded-full bg-white/10 -rotate-10"></div>
-      <div class="absolute w-24 h-24 top-32 left-20 rounded-full border-8 border-white/25"></div>
+    <div class="flex flex-col leading-none">
 
-      <div class="relative z-10 flex aspect-square w-full max-w-56 items-center justify-center rounded-[2.5rem] border border-white/20 bg-white/10 backdrop-blur-sm text-7xl">
-        <i class="pi pi-briefcase"></i>
-      </div>
+      <span class="text-base font-bold tracking-tight text-[#2a2115]">
+        Beehive
+      </span>
 
-    </section>
+      <span class="text-[11px] text-[#7a6f5d]">
+        Where every consultant finds their hive.
+      </span>
+
+    </div>
+
+  </div>
 
 
-    <!-- RIGHT SIDE -->
-    <section class="flex items-center justify-start p-6 sm:p-10 lg:p-12">
+  <div class="auth-fade-in w-full max-w-[520px] rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-black/5 border border-black/5">
 
-      <div class="w-full max-w-[520px]">
+      <div class="w-full">
 
-        <div class="mb-4">
+        <div class="mb-2.5">
 
-          <p class="m-0 mb-1.5 text-[11px] font-bold tracking-[1.8px] text-[var(--color-accent-blue)]">
-            GET STARTED
-          </p>
-
-          <h2 class="m-0 text-xl leading-tight tracking-tight font-bold text-[var(--p-surface-50)]">
+          <h2 class="m-0 text-xl leading-tight tracking-tight font-bold text-[#2a2115]">
             Create your account
           </h2>
 
-          <p class="mt-1.5 text-sm text-[var(--p-surface-300)]">
+          <p class="mt-1 text-sm text-[#7a6f5d]">
             Enter your information to join the platform.
           </p>
 
@@ -39,28 +40,28 @@
 
 
         <form
-          class="flex flex-col gap-3"
+          class="flex flex-col gap-2"
           [formGroup]="registerForm"
           (ngSubmit)="register()"
         >
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
             <!-- FIRST NAME -->
             <div class="flex flex-col gap-1">
 
-              <label for="firstName" class="text-sm font-semibold text-[var(--p-surface-200)]">
+              <label for="firstName" class="text-sm font-semibold text-[#3a3226]">
                 First Name
               </label>
 
               <div
-                class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                class="h-9 flex items-center rounded-2xl border-[1.5px] border-[#e2dccb] bg-[#faf7f0] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
                 [class.border-red-500]="
                   registerForm.controls.firstName.touched &&
                   registerForm.controls.firstName.invalid
                 "
               >
-                <i class="pi pi-user ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
+                <i class="pi pi-user ml-4 text-[15px] text-[#a89f8c]"></i>
 
                 <input
                   id="firstName"
@@ -68,7 +69,7 @@
                   formControlName="firstName"
                   placeholder="John"
                   autocomplete="given-name"
-                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
+                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[#2a2115] font-[inherit] text-[0.92rem] placeholder:text-[#a89f8c]"
                 >
               </div>
 
@@ -87,18 +88,18 @@
             <!-- LAST NAME -->
             <div class="flex flex-col gap-1">
 
-              <label for="lastName" class="text-sm font-semibold text-[var(--p-surface-200)]">
+              <label for="lastName" class="text-sm font-semibold text-[#3a3226]">
                 Last Name
               </label>
 
               <div
-                class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                class="h-9 flex items-center rounded-2xl border-[1.5px] border-[#e2dccb] bg-[#faf7f0] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
                 [class.border-red-500]="
                   registerForm.controls.lastName.touched &&
                   registerForm.controls.lastName.invalid
                 "
               >
-                <i class="pi pi-user ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
+                <i class="pi pi-user ml-4 text-[15px] text-[#a89f8c]"></i>
 
                 <input
                   id="lastName"
@@ -106,7 +107,7 @@
                   formControlName="lastName"
                   placeholder="Doe"
                   autocomplete="family-name"
-                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
+                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[#2a2115] font-[inherit] text-[0.92rem] placeholder:text-[#a89f8c]"
                 >
               </div>
 
@@ -127,18 +128,18 @@
           <!-- EMAIL -->
           <div class="flex flex-col gap-1">
 
-            <label for="email" class="text-sm font-semibold text-[var(--p-surface-200)]">
+            <label for="email" class="text-sm font-semibold text-[#3a3226]">
               Email address
             </label>
 
             <div
-              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-9 flex items-center rounded-2xl border-[1.5px] border-[#e2dccb] bg-[#faf7f0] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 registerForm.controls.email.touched &&
                 registerForm.controls.email.invalid
               "
             >
-              <i class="pi pi-envelope ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
+              <i class="pi pi-envelope ml-4 text-[15px] text-[#a89f8c]"></i>
 
               <input
                 id="email"
@@ -146,7 +147,7 @@
                 formControlName="email"
                 placeholder="you@company.com"
                 autocomplete="email"
-                class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
+                class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[#2a2115] font-[inherit] text-[0.92rem] placeholder:text-[#a89f8c]"
               >
             </div>
 
@@ -162,30 +163,30 @@
           </div>
 
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
             <!-- TITLE / ROLE -->
             <div class="flex flex-col gap-1">
 
-              <label for="titleRole" class="text-sm font-semibold text-[var(--p-surface-200)]">
+              <label for="titleRole" class="text-sm font-semibold text-[#3a3226]">
                 Title
               </label>
 
               <div
-                class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                class="h-9 flex items-center rounded-2xl border-[1.5px] border-[#e2dccb] bg-[#faf7f0] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
                 [class.border-red-500]="
                   registerForm.controls.titleRole.touched &&
                   registerForm.controls.titleRole.invalid
                 "
               >
-                <i class="pi pi-id-card ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
+                <i class="pi pi-id-card ml-4 text-[15px] text-[#a89f8c]"></i>
 
                 <input
                   id="titleRole"
                   type="text"
                   formControlName="titleRole"
                   placeholder="Associate"
-                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
+                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[#2a2115] font-[inherit] text-[0.92rem] placeholder:text-[#a89f8c]"
                 >
               </div>
 
@@ -204,30 +205,30 @@
             <!-- SKILL AREA -->
             <div class="flex flex-col gap-1">
 
-              <label for="primarySkillArea" class="text-sm font-semibold text-[var(--p-surface-200)]">
+              <label for="primarySkillArea" class="text-sm font-semibold text-[#3a3226]">
                 Primary Skill Area
               </label>
 
               <div
-                class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+                class="h-9 flex items-center rounded-2xl border-[1.5px] border-[#e2dccb] bg-[#faf7f0] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
                 [class.border-red-500]="
                   registerForm.controls.primarySkillArea.touched &&
                   registerForm.controls.primarySkillArea.invalid
                 "
               >
-                <i class="pi pi-chart-bar ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
+                <i class="pi pi-chart-bar ml-4 text-[15px] text-[#a89f8c]"></i>
 
                 <select
                   id="primarySkillArea"
                   formControlName="primarySkillArea"
-                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] cursor-pointer"
+                  class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[#2a2115] font-[inherit] text-[0.92rem] cursor-pointer"
                 >
-                  <option value="" class="bg-[var(--p-surface-800)]">Select skill area</option>
-                  <option value="Audit" class="bg-[var(--p-surface-800)]">Audit</option>
-                  <option value="Tax" class="bg-[var(--p-surface-800)]">Tax</option>
-                  <option value="Risk" class="bg-[var(--p-surface-800)]">Risk</option>
-                  <option value="Technology" class="bg-[var(--p-surface-800)]">Technology</option>
-                  <option value="Strategy" class="bg-[var(--p-surface-800)]">Strategy</option>
+                  <option value="" class="bg-white">Select skill area</option>
+                  <option value="Audit" class="bg-white">Audit</option>
+                  <option value="Tax" class="bg-white">Tax</option>
+                  <option value="Risk" class="bg-white">Risk</option>
+                  <option value="Technology" class="bg-white">Technology</option>
+                  <option value="Strategy" class="bg-white">Strategy</option>
                 </select>
               </div>
 
@@ -248,18 +249,18 @@
           <!-- PASSWORD -->
           <div class="flex flex-col gap-1">
 
-            <label for="password" class="text-sm font-semibold text-[var(--p-surface-200)]">
+            <label for="password" class="text-sm font-semibold text-[#3a3226]">
               Password
             </label>
 
             <div
-              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-9 flex items-center rounded-2xl border-[1.5px] border-[#e2dccb] bg-[#faf7f0] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 registerForm.controls.password.touched &&
                 registerForm.controls.password.invalid
               "
             >
-              <i class="pi pi-lock ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
+              <i class="pi pi-lock ml-4 text-[15px] text-[#a89f8c]"></i>
 
               <input
                 id="password"
@@ -267,7 +268,7 @@
                 formControlName="password"
                 placeholder="Create a password"
                 autocomplete="new-password"
-                class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
+                class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[#2a2115] font-[inherit] text-[0.92rem] placeholder:text-[#a89f8c]"
               >
             </div>
 
@@ -304,12 +305,12 @@
           <!-- CONFIRM PASSWORD -->
           <div class="flex flex-col gap-1">
 
-            <label for="confirmPassword" class="text-sm font-semibold text-[var(--p-surface-200)]">
+            <label for="confirmPassword" class="text-sm font-semibold text-[#3a3226]">
               Confirm Password
             </label>
 
             <div
-              class="h-11 flex items-center rounded-2xl border-[1.5px] border-[var(--p-surface-600)] bg-[var(--p-surface-900)] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
+              class="h-9 flex items-center rounded-2xl border-[1.5px] border-[#e2dccb] bg-[#faf7f0] transition focus-within:border-[var(--p-primary-400)] focus-within:ring-4 focus-within:ring-[var(--p-primary-400)]/10"
               [class.border-red-500]="
                 registerForm.controls.confirmPassword.touched &&
                 (
@@ -318,7 +319,7 @@
                 )
               "
             >
-              <i class="pi pi-lock ml-4 text-[15px] text-[var(--p-surface-400)]"></i>
+              <i class="pi pi-lock ml-4 text-[15px] text-[#a89f8c]"></i>
 
               <input
                 id="confirmPassword"
@@ -326,7 +327,7 @@
                 formControlName="confirmPassword"
                 placeholder="Confirm your password"
                 autocomplete="new-password"
-                class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[var(--p-surface-50)] font-[inherit] text-[0.92rem] placeholder:text-[var(--p-surface-400)]"
+                class="w-full h-full px-3.5 border-none outline-none bg-transparent text-[#2a2115] font-[inherit] text-[0.92rem] placeholder:text-[#a89f8c]"
               >
             </div>
 
@@ -352,7 +353,7 @@
 
 
           <button
-            class="w-full h-11 flex items-center justify-center gap-2.5 mt-0.5 rounded-2xl bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-400)] text-[#1a1611] font-bold text-sm shadow-lg shadow-[var(--p-primary-400)]/25 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            class="w-full h-10 flex items-center justify-center gap-2.5 mt-0.5 rounded-2xl bg-[#f5a623] text-[#2a2115] font-bold text-sm shadow-lg shadow-[#f5a623]/30 transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             type="submit"
             [disabled]="loading"
           >
@@ -368,21 +369,19 @@
         </form>
 
 
-        <div class="flex items-center justify-center gap-1.5 mt-4 text-[var(--p-surface-300)] text-sm">
+        <div class="flex items-center justify-center gap-1.5 mt-3 text-[#7a6f5d] text-sm">
 
           <span>
             Already have an account?
           </span>
 
-          <a routerLink="/login" class="font-semibold text-[var(--color-accent-blue)] no-underline hover:underline">
+          <a routerLink="/login" class="font-semibold text-[#c17d1a] no-underline transition-colors duration-200 hover:underline hover:text-[#a5680f]">
             Sign in
           </a>
 
         </div>
 
       </div>
-
-    </section>
 
   </div>
 

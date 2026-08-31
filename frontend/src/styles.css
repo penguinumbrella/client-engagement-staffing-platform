@@ -84,6 +84,21 @@ body {
   background-repeat: repeat;
 }
 
+/* Entrance transition for the auth form card on login/register. */
+@keyframes auth-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.auth-fade-in {
+  animation: auth-fade-in 0.4s ease-out;
+}
+
 /*
  * Global scrollbar styling: thin, minimal, and invisible until the element
  * is actively being scrolled. `.is-scrolling` is toggled by a document-level

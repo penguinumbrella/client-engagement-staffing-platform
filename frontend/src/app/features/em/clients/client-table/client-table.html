@@ -1,19 +1,49 @@
 <div class="w-full rounded-xl bg-[var(--p-surface-700)] p-3">
-  <div class="mb-3 flex items-center gap-1">
-    @for (tab of tabs; track tab.value) {
+  <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-1">
+      @for (tab of tabs; track tab.value) {
+        <button
+          type="button"
+          (click)="activeFilter.set(tab.value)"
+          class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
+          [class]="
+            activeFilter() === tab.value
+              ? 'bg-[var(--p-surface-800)] text-[var(--p-surface-50)] shadow-sm'
+              : 'text-[var(--p-surface-300)] hover:text-[var(--p-surface-200)]'
+          "
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <div class="flex items-center gap-2">
       <button
         type="button"
-        (click)="activeFilter.set(tab.value)"
-        class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
-        [class]="
-          activeFilter() === tab.value
-            ? 'bg-[var(--p-surface-800)] text-[var(--p-surface-50)] shadow-sm'
-            : 'text-[var(--p-surface-300)] hover:text-[var(--p-surface-200)]'
-        "
+        class="flex items-center gap-1.5 rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-800)]"
+        (click)="filtersModalOpen.set(true)"
       >
-        {{ tab.label }}
+        <i class="pi pi-filter text-[11px]"></i>
+        Filters
+        @if (activeFilterCount() > 0) {
+          <span class="rounded-full bg-amber-500 px-1.5 text-[10px] font-semibold text-white">{{ activeFilterCount() }}</span>
+        }
       </button>
-    }
+
+      <div class="flex items-center gap-1.5 rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)]">
+        <i class="pi pi-sort-alt text-[11px]"></i>
+        <select
+          class="bg-transparent outline-none"
+          [value]="sortBy()"
+          (change)="setSortBy($any($event.target).value)"
+        >
+          <option value="companyName">Company Name</option>
+          <option value="industry">Industry</option>
+          <option value="primaryContactName">Contact Name</option>
+          <option value="relationshipStatus">Status</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <div class="grid min-h-[60px] grid-cols-4 gap-3">
@@ -24,3 +54,66 @@
     }
   </div>
 </div>
+
+@if (filtersModalOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+    animate.enter="modal-backdrop-in"
+    animate.leave="modal-backdrop-out"
+    (click)="filtersModalOpen.set(false)"
+  >
+    <div
+      class="flex max-h-[85vh] w-80 max-w-[90vw] flex-col gap-4 overflow-y-auto rounded-xl bg-[var(--p-surface-800)] p-4 shadow-lg"
+      animate.enter="modal-panel-in"
+      animate.leave="modal-panel-out"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between">
+        <h3 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Filters</h3>
+        <div class="flex items-center gap-1">
+          @if (activeFilterCount() > 0) {
+            <button
+              type="button"
+              (click)="resetAllFilters()"
+              class="rounded-lg px-2 py-1 text-xs font-medium text-amber-500 hover:bg-amber-500/10"
+            >
+              Reset all
+            </button>
+          }
+          <button
+            type="button"
+            (click)="filtersModalOpen.set(false)"
+            class="rounded-lg px-2 py-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="mb-1.5 flex items-center justify-between">
+          <h3 class="m-0 text-[10px] font-semibold tracking-wide text-[var(--p-surface-400)] uppercase">Industry</h3>
+          <div class="flex gap-1.5 text-[10px] text-[var(--p-surface-400)]">
+            <button type="button" class="hover:text-[var(--p-surface-100)]" (click)="showAllIndustries()">All</button>
+            <button type="button" class="hover:text-[var(--p-surface-100)]" (click)="hideAllIndustries()">None</button>
+          </div>
+        </div>
+        <div class="flex max-h-60 flex-col gap-0.5 overflow-y-auto">
+          @for (industry of industries(); track industry) {
+            <label class="flex items-center gap-2 rounded-lg px-1 py-1 text-xs text-[var(--p-surface-200)] hover:bg-[var(--p-surface-700)]">
+              <input
+                type="checkbox"
+                class="accent-amber-500"
+                [checked]="!isIndustryHidden(industry)"
+                (change)="toggleIndustryFilter(industry)"
+              />
+              <span class="truncate">{{ industry }}</span>
+            </label>
+          } @empty {
+            <p class="m-0 px-1 py-2 text-xs text-[var(--p-surface-400)]">No industries loaded.</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
