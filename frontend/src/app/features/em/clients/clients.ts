@@ -52,8 +52,12 @@ export class Clients implements OnInit {
     this.loadClients();
   }
 
-  onDeleted(): void {
+  onDeleted(id: number): void {
     this.loadClients();
+
+    if (this.detailClient()?.id === id) {
+      this.detailVisible.set(false);
+    }
   }
 
   openDetail(client: Client): void {
@@ -95,11 +99,19 @@ export class Clients implements OnInit {
         }
       },
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Update Failed',
-          detail: err?.error?.message ?? 'Failed to update client. Please try again.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The client service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Update Failed',
+            detail: err?.error?.message ?? 'Failed to update client. Please try again.',
+          });
+        }
         console.error(`Failed to update client ${id}`, err);
       },
     });
@@ -116,14 +128,25 @@ export class Clients implements OnInit {
 
   private loadClients(): void {
     this.loading.set(true);
-    this.clientService.getAllClients(0, 100).subscribe({
-      next: (page) => {
-        this.clients.set(page.content);
+    this.clientService.getAllClientsResponse(0, 100).subscribe({
+      next: (response) => {
+        this.clients.set(response.body!.content);
         this.loading.set(false);
+        if (response.headers.get('X-Cache-Status') === 'stale') {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: 'The client service is currently unavailable. Please try again later.',
+          });
+        }
         this.openDetailFromQueryParam();
       },
-      error: () => {
-        this.error.set('Failed to load clients.');
+      error: (err) => {
+        this.error.set(
+          err.status === 503
+            ? (err?.error?.message ?? 'The client service is currently unavailable. Please try again later.')
+            : 'Failed to load clients.',
+        );
         this.loading.set(false);
       },
     });

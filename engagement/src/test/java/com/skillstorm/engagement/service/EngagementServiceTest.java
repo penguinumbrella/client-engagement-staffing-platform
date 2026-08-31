@@ -3,6 +3,7 @@ package com.skillstorm.engagement.service;
 import com.skillstorm.engagement.client.AuthClient;
 import com.skillstorm.engagement.client.ClientClient;
 import com.skillstorm.engagement.client.StaffingClient;
+import com.skillstorm.engagement.dto.AuthUserResponse;
 import com.skillstorm.engagement.dto.CreateEngagementRequest;
 import com.skillstorm.engagement.dto.EngagementResponse;
 import com.skillstorm.engagement.dto.UpdateEngagementRequest;
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -61,7 +63,14 @@ class EngagementServiceTest {
     @BeforeEach
     void setUp() {
         engagementService = new EngagementService(engagementRepository, staffingClient, clientClient, authClient, notificationEventPublisher);
-        lenient().when(authClient.getUsersByRole(any(), any())).thenReturn(List.of());
+        // Includes an EM other than ACTOR_ID so the broadcast-to-other-EMs
+        // path has someone to notify, matching what tests below expect.
+        // Not every test reaches this lookup at all; lenient avoids failing
+        // the ones that don't over an unused stub.
+        lenient().when(authClient.getUsersByRole(anyString(), anyString())).thenReturn(List.of(
+                new AuthUserResponse(ACTOR_ID, "Acting", "Manager", "acting@example.com", "ENGAGEMENT_MANAGER", true),
+                new AuthUserResponse(UUID.randomUUID(), "Other", "Manager", "other@example.com", "ENGAGEMENT_MANAGER", true)
+        ));
     }
 
     private Engagement activeEngagement(Long id, String status) {

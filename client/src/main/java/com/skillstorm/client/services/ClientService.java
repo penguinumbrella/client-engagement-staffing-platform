@@ -163,12 +163,8 @@ public class ClientService {
 
         if(current.isPresent() && current.get().isActive()) {
 
-            try {
-                if (engagementClient.hasActiveEngagements(id, token)) {
+            if (engagementClient.hasActiveEngagements(id, token)) {
                 return ResponseEntity.status(409).build();
-            }
-            } catch (ResponseStatusException ex) {
-                return ResponseEntity.status(ex.getStatusCode()).build();
             }
 
             Client temp = current.get();

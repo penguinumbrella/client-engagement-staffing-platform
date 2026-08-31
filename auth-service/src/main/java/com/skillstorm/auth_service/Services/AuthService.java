@@ -3,11 +3,12 @@ package com.skillstorm.auth_service.Services;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-
+  
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,19 +37,21 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final StaffingClient staffingClient;
+    private final LoginAttemptService loginAttemptService;
 
     public AuthService(
         UserRepository userRepository,
         PasswordEncoder passwordEncoder,
         AuthenticationManager authenticationManager,
         JwtService jwtService,
-        StaffingClient staffingClient) {
-
+        StaffingClient staffingClient,
+        LoginAttemptService loginAttemptService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.staffingClient = staffingClient;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Transactional
@@ -78,21 +81,51 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthResponse login(LoginRequest request) {
+        public AuthResponse login(LoginRequest request) {
+
         String normalizedEmail = normalizeEmail(request.email());
 
         Authentication authenticationRequest =
                 new UsernamePasswordAuthenticationToken(
                         normalizedEmail,
-                        request.password());
+                        request.password()
+                );
 
-        Authentication authenticatedUser =
-                authenticationManager.authenticate(authenticationRequest);
+        Authentication authenticatedUser;
+
+        try {
+
+                authenticatedUser =
+                        authenticationManager.authenticate(
+                                authenticationRequest
+                        );
+
+        } catch (AuthenticationException ex) {
+
+                loginAttemptService.recordAttempt(
+                        null,
+                        normalizedEmail,
+                        false,
+                        "AUTHENTICATION_FAILED"
+                );
+
+                throw ex;
+        }
 
         User user = userRepository
                 .findByEmailIgnoreCase(authenticatedUser.getName())
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "User could not be found after authentication."));
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "User could not be found after authentication."
+                        )
+                );
+
+        loginAttemptService.recordAttempt(
+                user.getId(),
+                user.getEmail(),
+                true,
+                null
+        );
 
         return createAuthResponse(user);
     }

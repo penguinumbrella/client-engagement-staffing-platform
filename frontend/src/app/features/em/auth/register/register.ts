@@ -211,8 +211,8 @@ export class Register {
 
           this.messageService.add({
             severity: 'error',
-            summary: 'Registration Failed',
-            detail: 'The staffing service is currently unavailable. Please try again.'
+            summary: 'Service Unavailable',
+            detail: error?.error?.message ?? 'The staffing service is currently unavailable. Please try again later.'
           });
 
         } else {

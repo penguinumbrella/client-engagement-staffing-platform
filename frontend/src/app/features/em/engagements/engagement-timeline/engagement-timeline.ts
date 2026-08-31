@@ -1,3 +1,4 @@
+import { HttpResponse } from '@angular/common/http';
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { Engagement, EngagementStatus, EngagementType } from '../../../../types/engagement.types';
@@ -85,23 +86,31 @@ export class EngagementTimeline {
   private readonly scrollContainer = viewChild<ElementRef<HTMLDivElement>>('scrollContainer');
 
   constructor() {
-    this.clientService.getAllClients(0, 100).subscribe({
-      next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
-      error: (err) => this.notifyError('Failed to load clients.', err),
+    this.clientService.getAllClientsResponse(0, 100).subscribe({
+      next: (response) => {
+        this.clientsById.set(new Map((response.body?.content ?? []).map((c) => [c.id!, c])));
+        this.notifyIfStale(response, 'client');
+      },
+      error: (err) => this.notifyError('Failed to load clients.', err, 'client'),
     });
 
-    this.consultantService.getAll().subscribe({
-      next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
-      error: (err) => this.notifyError('Failed to load consultants.', err),
+    this.consultantService.getAllResponse().subscribe({
+      next: (response) => {
+        this.consultantsById.set(new Map((response.body ?? []).map((c) => [c.id, c])));
+        this.notifyIfStale(response, 'staffing');
+      },
+      error: (err) => this.notifyError('Failed to load consultants.', err, 'staffing'),
     });
 
-    this.engagementService.getAll().subscribe({
-      next: (engagements) => {
+    this.engagementService.getAllResponse().subscribe({
+      next: (response) => {
+        const engagements = response.body ?? [];
         this.engagements.set(engagements);
         engagements.forEach((e) => this.loadConsultants(e.id));
+        this.notifyIfStale(response, 'engagement');
         setTimeout(() => this.jumpToToday());
       },
-      error: (err) => this.notifyError('Failed to load engagements.', err),
+      error: (err) => this.notifyError('Failed to load engagements.', err, 'engagement'),
     });
   }
 
@@ -322,7 +331,7 @@ export class EngagementTimeline {
         this.stopLoading(engagementId);
       },
       error: (err) => {
-        this.notifyError('Failed to load consultants for an engagement.', err);
+        this.notifyError('Failed to load consultants for an engagement.', err, 'staffing');
         this.stopLoading(engagementId);
       },
     });
@@ -421,6 +430,18 @@ export class EngagementTimeline {
     });
   }
 
+  private notifyIfStale(response: HttpResponse<unknown>, service: string): void {
+    if (response.headers.get('X-Cache-Status') !== 'stale') {
+      return;
+    }
+
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Service Unavailable',
+      detail: `The ${service} service is currently unavailable. Please try again later.`,
+    });
+  }
+
   private notifyUpdateError(field: string, engagementId: number, err: unknown): void {
     this.messageService.add({
       severity: 'error',
@@ -436,11 +457,19 @@ export class EngagementTimeline {
     this.loadingConsultants.set(next);
   }
 
-  private notifyError(detail: string, err: unknown): void {
+  /**
+   * `service` names which downstream service the failed call was ultimately
+   * headed to, so a 503 (the whole service down, per the gateway's circuit
+   * breaker) can say so specifically instead of a generic message.
+   */
+  private notifyError(detail: string, err: any, service?: string): void {
+    const unavailable = err?.status === 503;
     this.messageService.add({
       severity: 'error',
-      summary: 'Error',
-      detail,
+      summary: unavailable ? 'Service Unavailable' : 'Error',
+      detail: unavailable
+        ? (err?.error?.message ?? `The ${service} service is currently unavailable. Please try again later.`)
+        : detail,
     });
     console.error(detail, err);
   }

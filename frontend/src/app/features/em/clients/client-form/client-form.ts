@@ -123,6 +123,12 @@ export class ClientForm {
             summary: 'Cannot Delete',
             detail: 'This client has active engagements. Complete or cancel them first, then delete the client.',
           });
+        } else if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The client service is currently unavailable. Please try again later.',
+          });
         } else {
           this.messageService.add({
             severity: 'error',
@@ -160,6 +166,12 @@ export class ClientForm {
             severity: 'warn',
             summary: 'Duplicate Client',
             detail: err?.error?.message ?? 'A client with this name already exists.',
+          });
+        } else if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The client service is currently unavailable. Please try again later.',
           });
         } else {
           this.messageService.add({

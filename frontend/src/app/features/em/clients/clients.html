@@ -23,7 +23,7 @@
     [client]="selectedClient()"
     [(visible)]="formVisible"
     (saved)="onSaved()"
-    (deleted)="onDeleted()"
+    (deleted)="onDeleted($event)"
   />
 
   @if (detailClient(); as client) {

@@ -15,6 +15,20 @@
   --kanban-column-bg: #2b2318;
 }
 
+/* Native <select> dropdown lists follow the OS/browser light theme by default
+   regardless of our own dark styling. color-scheme nudges the browser toward
+   dark UI chrome, but Chrome still renders <option> backgrounds white unless
+   they're colored explicitly, so set those directly too. */
+.app-dark select {
+  color-scheme: dark;
+}
+
+.app-dark select option,
+.app-dark select optgroup {
+  background-color: var(--p-surface-800, #2a2620);
+  color: var(--p-surface-100, #dcd6c9);
+}
+
 body {
   font-family: 'Lexend', ui-sans-serif, system-ui, sans-serif;
   font-weight: 300;

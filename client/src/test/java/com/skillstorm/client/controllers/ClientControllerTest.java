@@ -218,10 +218,12 @@ class ClientControllerTest {
     }
 
     @Test
-    void deleteClient_engagementServiceUnavailable_returnsServiceUnavailable() throws Exception {
-        when(clientService.deleteClient(eq(1L), any(String.class), any(UUID.class))).thenReturn(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+    void deleteClient_engagementServiceUnavailable_returnsServiceUnavailableWithReason() throws Exception {
+        when(clientService.deleteClient(eq(1L), any(String.class), any(UUID.class)))
+                .thenThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Unable to reach engagement service: connection refused"));
 
         mockMvc.perform(delete("/clients/1").with(AS_ENGAGEMENT_MANAGER))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.message").value("Unable to reach engagement service: connection refused"));
     }
 }

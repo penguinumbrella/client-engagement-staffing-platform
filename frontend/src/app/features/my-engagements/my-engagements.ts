@@ -45,12 +45,12 @@ export class MyEngagements {
   constructor() {
     this.consultantService.getAll().subscribe({
       next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
-      error: (err) => this.notifyError('Failed to load consultants.', err),
+      error: (err) => this.notifyError('Failed to load consultants.', err, 'staffing'),
     });
 
     this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
-      error: (err) => this.notifyError('Failed to load clients.', err),
+      error: (err) => this.notifyError('Failed to load clients.', err, 'client'),
     });
 
     // effect(() => {
@@ -135,7 +135,7 @@ export class MyEngagements {
 
         error: err => {
 
-          this.notifyError('Failed to load your engagements.', err);
+          this.notifyError('Failed to load your engagements.', err, 'staffing');
 
           this.loading.set(false);
         }
@@ -174,7 +174,7 @@ export class MyEngagements {
         next.set(engagementId, engagement);
         this.engagementsById.set(next);
       },
-      error: (err) => this.notifyError('Failed to load an engagement.', err),
+      error: (err) => this.notifyError('Failed to load an engagement.', err, 'engagement'),
     });
   }
 
@@ -194,15 +194,23 @@ export class MyEngagements {
         next.set(engagementId, badges);
         this.teammatesByEngagement.set(next);
       },
-      error: (err) => this.notifyError('Failed to load teammates.', err),
+      error: (err) => this.notifyError('Failed to load teammates.', err, 'staffing'),
     });
   }
 
-  private notifyError(detail: string, err: unknown): void {
+  /**
+   * `service` names which downstream service the failed call was ultimately
+   * headed to, so a 503 (the whole service down, per the gateway's circuit
+   * breaker) can say so specifically instead of a generic message.
+   */
+  private notifyError(detail: string, err: any, service?: string): void {
+    const unavailable = err?.status === 503;
     this.messageService.add({
       severity: 'error',
-      summary: 'Error',
-      detail,
+      summary: unavailable ? 'Service Unavailable' : 'Error',
+      detail: unavailable
+        ? (err?.error?.message ?? `The ${service} service is currently unavailable. Please try again later.`)
+        : detail,
     });
     console.error(detail, err);
   }

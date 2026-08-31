@@ -10,5 +10,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     List<Notification> findByActiveTrue();
 
+    List<Notification> findTop100ByOrderByCreatedAtDesc();
     List<Notification> findByRecipientIdAndActiveTrue(UUID recipientId);
 }

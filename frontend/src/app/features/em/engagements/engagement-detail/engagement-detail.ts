@@ -159,11 +159,19 @@ export class EngagementDetail implements OnInit {
       },
       error: (err) => {
         this.historyLoading.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to check assignment history. Please try again.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The staffing service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to check assignment history. Please try again.',
+          });
+        }
         console.error('Failed to load assignment history', err);
       },
     });
@@ -188,11 +196,19 @@ export class EngagementDetail implements OnInit {
       },
       error: (err) => {
         this.deleting.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Delete Failed',
-          detail: err?.error?.message ?? 'Failed to delete engagement. Please try again.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Delete Failed',
+            detail: err?.error?.message ?? 'Failed to delete engagement. Please try again.',
+          });
+        }
         console.error(err);
       },
     });
@@ -233,11 +249,19 @@ export class EngagementDetail implements OnInit {
       },
       error: (err) => {
         this.cancelling.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Cancel Failed',
-          detail: err?.error?.message ?? 'Failed to cancel engagement. Please try again.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Cancel Failed',
+            detail: err?.error?.message ?? 'Failed to cancel engagement. Please try again.',
+          });
+        }
         console.error(err);
       },
     });
@@ -321,11 +345,19 @@ export class EngagementDetail implements OnInit {
           this.assigned.emit();
         },
         error: (err) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Assign Failed',
-            detail: err?.error?.message ?? 'Failed to assign consultant. Please try again.',
-          });
+          if (err.status === 503) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Service Unavailable',
+              detail: err?.error?.message ?? 'The staffing service is currently unavailable. Please try again later.',
+            });
+          } else {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Assign Failed',
+              detail: err?.error?.message ?? 'Failed to assign consultant. Please try again.',
+            });
+          }
           console.error('Failed to assign consultant', err);
         },
       });
@@ -366,11 +398,19 @@ export class EngagementDetail implements OnInit {
       },
       error: (err) => {
         this.unstaffing.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Unstaff Failed',
-          detail: err?.error?.message ?? 'Failed to unstaff consultant. Please try again.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The staffing service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Unstaff Failed',
+            detail: err?.error?.message ?? 'Failed to unstaff consultant. Please try again.',
+          });
+        }
         console.error(err);
       },
     });
@@ -397,11 +437,19 @@ export class EngagementDetail implements OnInit {
         this.expandedRoles.set(new Set(assignments.map((a) => a.engagementRole)));
       },
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load staffing for this engagement.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The staffing service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load staffing for this engagement.',
+          });
+        }
         console.error(`Failed to load assignments for engagement ${engagementId}`, err);
       },
     });
@@ -409,11 +457,19 @@ export class EngagementDetail implements OnInit {
     this.consultantService.getAll().subscribe({
       next: (consultants) => this.allConsultants.set(consultants),
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load consultants.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The staffing service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load consultants.',
+          });
+        }
         console.error('Failed to load consultants', err);
       },
     });

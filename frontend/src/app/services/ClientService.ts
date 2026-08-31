@@ -1,6 +1,7 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { Client } from '../types/client.types';
@@ -12,8 +13,12 @@ export class ClientService {
   private readonly baseUrl = `${environment.apiGatewayUrl}/client/clients`;
 
   getAllClients(page = 0, size = 100): Observable<Page<Client>> {
+    return this.getAllClientsResponse(page, size).pipe(map((response) => response.body!));
+  }
+
+  getAllClientsResponse(page = 0, size = 100): Observable<HttpResponse<Page<Client>>> {
     const params = new HttpParams().set('page', page).set('size', size);
-    return this.http.get<Page<Client>>(this.baseUrl, { params });
+    return this.http.get<Page<Client>>(this.baseUrl, { params, observe: 'response' });
   }
 
   getClientById(id: number): Observable<Client> {

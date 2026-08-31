@@ -10,6 +10,9 @@ import { Onboarding } from './features/em/auth/onboarding/onboarding';
 import { MyEngagements } from './features/my-engagements/my-engagements';
 import { managerGuard } from './features/guard/manager.guard';
 import { authGuard } from './features/guard/auth.guard';
+import { adminGuard } from './features/guard/admin.guard';
+import {AdminDashboard} from './features/em/admin/admin-dashboard/admin-dashboard';
+import { NotificationLogs } from './features/em/admin/notification-logs/notification-logs';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full'},
@@ -23,4 +26,6 @@ export const routes: Routes = [
   { path: 'auth/callback', component: Callback},
   { path: 'onboarding', component: Onboarding, canActivate: [authGuard]},
   { path: 'my-engagements', component: MyEngagements, canActivate: [authGuard]}
+  { path: 'admin', component: AdminDashboard, canActivate: [authGuard, adminGuard]},
+  { path: 'admin/notifications', component: NotificationLogs, canActivate: [authGuard,adminGuard]}
 ];

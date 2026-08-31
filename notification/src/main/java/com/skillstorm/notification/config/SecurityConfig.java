@@ -27,6 +27,11 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health/**")
                     .permitAll()
 
+                .requestMatchers(
+                    "/api/admin/notifications/**"
+                )
+                .hasRole("ADMIN")
+
                 .requestMatchers("/api/notifications/**")
                     .authenticated()
 

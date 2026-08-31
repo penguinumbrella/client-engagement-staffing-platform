@@ -1,0 +1,52 @@
+import { inject, Injectable } from '@angular/core';
+
+import { HttpClient } from '@angular/common/http';
+
+import { Observable } from 'rxjs';
+
+import { environment } from '../../../../environments/environment';
+
+import {
+  LoginAttempt,
+  LoginMetrics,
+  Notification
+} from '../../../types';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class Admin {
+
+  private readonly http = inject(HttpClient);
+
+  private readonly authAdminBaseUrl =
+    `${environment.apiGatewayUrl}/auth/api/admin`;
+
+  private readonly notificationAdminBaseUrl =
+    `${environment.apiGatewayUrl}/notification/api/admin`;
+
+  getLoginAttempts(): Observable<LoginAttempt[]> {
+
+    return this.http.get<LoginAttempt[]>(
+      `${this.authAdminBaseUrl}/login-attempts`
+    );
+
+  }
+
+  getLoginMetrics(): Observable<LoginMetrics> {
+
+    return this.http.get<LoginMetrics>(
+      `${this.authAdminBaseUrl}/login-metrics`
+    );
+
+  }
+
+  getNotificationLogs(): Observable<Notification[]> {
+
+    return this.http.get<Notification[]>(
+      `${this.notificationAdminBaseUrl}/notifications`
+    );
+
+  }
+
+}

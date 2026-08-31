@@ -44,6 +44,16 @@
 			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
 		</dependency>
 
+		<!-- Stale-response cache, served by the circuit breaker fallback when a route is down -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
+
 		<!-- Actuator -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

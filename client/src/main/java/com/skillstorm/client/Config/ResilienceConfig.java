@@ -30,7 +30,7 @@ public class ResilienceConfig {
                         .permittedNumberOfCallsInHalfOpenState(3)
                         .build())
                 .timeLimiterConfig(TimeLimiterConfig.custom()
-                        .timeoutDuration(Duration.ofSeconds(3))
+                        .timeoutDuration(Duration.ofSeconds(4))
                         .build())
                 .build());
     }
