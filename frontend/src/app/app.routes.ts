@@ -25,7 +25,7 @@ export const routes: Routes = [
   { path: 'register',component: Register},
   { path: 'auth/callback', component: Callback},
   { path: 'onboarding', component: Onboarding, canActivate: [authGuard]},
-  { path: 'my-engagements', component: MyEngagements, canActivate: [authGuard]}
+  { path: 'my-engagements', component: MyEngagements, canActivate: [authGuard]},
   { path: 'admin', component: AdminDashboard, canActivate: [authGuard, adminGuard]},
   { path: 'admin/notifications', component: NotificationLogs, canActivate: [authGuard,adminGuard]}
 ];
