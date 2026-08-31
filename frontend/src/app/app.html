@@ -3,47 +3,60 @@
 @if (authPage()) {
   <router-outlet />
 } @else {
-  <div class="flex h-screen flex-col bg-[var(--p-surface-800)]">
-    <header class="flex h-14 shrink-0 items-center gap-3 border-b border-[var(--p-surface-600)] bg-[var(--p-surface-800)] px-4">
+  <div
+    class="flex h-screen"
+    style="background-color: var(--p-surface-900)"
+  >
+    <aside
+      class="my-3 ml-3 mr-3 flex flex-col overflow-hidden rounded-2xl bg-[var(--p-surface-800)]/60 backdrop-blur-sm transition-all duration-200"
+      [class.w-56]="sidebarOpen()"
+      [class.w-16]="!sidebarOpen()"
+    >
       <button
         type="button"
-        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
-        title="Toggle navigation"
+        class="flex items-center gap-2 whitespace-nowrap px-3 py-3 hover:bg-[var(--p-surface-700)]"
+        [class.justify-center]="!sidebarOpen()"
+        [title]="sidebarOpen() ? 'Collapse to icons' : 'Expand sidebar'"
         (click)="toggleSidebar()"
       >
-        ☰
+        <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 shrink-0 text-amber-500">
+          <path d="M12 2 L21 7 V17 L12 22 L3 17 V7 Z" />
+        </svg>
+        @if (sidebarOpen()) {
+          <span class="truncate text-base font-semibold text-[var(--p-surface-100)]">Beehive</span>
+        }
       </button>
 
-      <span class="text-sm font-semibold text-[var(--p-surface-100)]">Client and Staffing Engagement Platform</span>
-    </header>
+      <nav class="flex flex-1 flex-col gap-1 p-3">
+        @for (item of navItems(); track item.path) {
+          <a
+            [routerLink]="item.path"
+            [title]="item.label"
+            routerLinkActive="!bg-[#3d3226] !text-[#fdf6e8] font-semibold"
+            class="flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)] hover:text-[var(--p-surface-50)]"
+            [class.justify-center]="!sidebarOpen()"
+          >
+            <i class="pi {{ item.icon }} shrink-0 text-sm"></i>
+            @if (sidebarOpen()) {
+              <span>{{ item.label }}</span>
+            }
+          </a>
+        }
+      </nav>
 
-    <div class="flex flex-1 overflow-hidden">
-      <aside
-        class="flex flex-col overflow-hidden border-r border-[var(--p-surface-600)] bg-[var(--p-surface-800)] transition-[width] duration-150"
-        [class.w-56]="sidebarOpen()"
-        [class.w-0]="!sidebarOpen()"
-      >
-        <nav class="flex flex-1 flex-col gap-1 p-3">
-          @for (item of navItems(); track item.path) {
-            <a
-              [routerLink]="item.path"
-              routerLinkActive="bg-indigo-50 text-indigo-700"
-              class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
-            >
-              {{ item.label }}
-            </a>
-          }
-        </nav>
+      <!-- TODO: replace with the signed-in user once AuthService is wired up on the frontend. -->
+      @if (currentUser(); as user) {
+        <div
+          class="flex items-center gap-2 whitespace-nowrap p-3"
+          [class.justify-center]="!sidebarOpen()"
+        >
+          <span
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#5c4a35] text-xs font-bold text-white"
+          >
+            {{ getUserInitials() }}
+          </span>
 
-        <!-- TODO: replace with the signed-in user once AuthService is wired up on the frontend. -->
-        @if (currentUser(); as user) {
-          <div class="flex items-center gap-2 whitespace-nowrap border-t border-[var(--p-surface-600)] p-3">
-            <span
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white"
-            >
-              {{ getUserInitials() }}
-            </span>
-
+          @if (sidebarOpen()) {
             <div class="flex min-w-0 flex-1 flex-col">
               <span class="truncate text-sm font-medium text-[var(--p-surface-100)]">
                 {{ user.firstName }} {{ user.lastName }}
@@ -56,17 +69,129 @@
 
             <button
               type="button"
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--p-surface-300)] hover:bg-red-50 hover:text-red-600"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-red-50 hover:text-red-600"
               title="Logout"
               (click)="logout()"
             >
               <i class="pi pi-sign-out"></i>
             </button>
-          </div>
-        }
-      </aside>
+          }
+        </div>
+      }
+    </aside>
 
-      <main class="flex-1 overflow-y-auto">
+    <div class="flex flex-1 flex-col overflow-hidden">
+      <header class="relative z-50 m-3 flex h-14 shrink-0 items-center justify-between gap-3 rounded-4xl bg-[var(--p-surface-800)]/60 px-4 backdrop-blur-sm">
+        <div class="relative flex flex-1 items-center gap-3">
+          <div class="relative w-full max-w-sm">
+            <i class="pi pi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--p-surface-400)]"></i>
+            <input
+              type="text"
+              [placeholder]="currentUser()?.role === 'CONSULTANT' ? 'Filter my engagements...' : 'Search clients, engagements, consultants...'"
+              class="w-full rounded-full border-none bg-[var(--p-surface-700)] py-2 pl-8 pr-3 text-sm text-[var(--p-surface-100)] placeholder:text-[var(--p-surface-400)] focus:outline-none focus:ring-1 focus:ring-amber-500"
+              [value]="searchQuery()"
+              (input)="onSearchInput($any($event.target).value)"
+              (focus)="onSearchFocus()"
+              (blur)="closeSearch()"
+            />
+
+            @if (searchOpen()) {
+              <div
+                class="absolute left-0 top-full z-50 mt-2 max-h-96 w-full overflow-y-auto rounded-xl bg-[var(--p-surface-800)] shadow-lg"
+                (mousedown)="$event.preventDefault()"
+              >
+                @if (searchLoading()) {
+                  <div class="flex items-center gap-2 px-4 py-3 text-sm text-[var(--p-surface-400)]">
+                    <i class="pi pi-spin pi-spinner"></i>
+                    Searching...
+                  </div>
+                } @else if (!hasAnySearchResults()) {
+                  <div class="px-4 py-3 text-sm text-[var(--p-surface-400)]">
+                    No results for "{{ searchQuery() }}"
+                  </div>
+                } @else {
+                  @if (searchResults().clients.length > 0) {
+                    <div class="px-4 pb-1 pt-3 text-xs font-semibold uppercase text-[var(--p-surface-400)]">Clients</div>
+                    @for (result of searchResults().clients; track result.id) {
+                      <button
+                        type="button"
+                        class="flex w-full flex-col items-start px-4 py-2 text-left hover:bg-[var(--p-surface-700)]"
+                        (click)="selectSearchResult(result)"
+                      >
+                        <span class="text-sm text-[var(--p-surface-100)]">{{ result.title }}</span>
+                        <span class="text-xs text-[var(--p-surface-400)]">{{ result.subtitle }}</span>
+                      </button>
+                    }
+                  }
+
+                  @if (searchResults().engagements.length > 0) {
+                    <div class="px-4 pb-1 pt-3 text-xs font-semibold uppercase text-[var(--p-surface-400)]">Engagements</div>
+                    @for (result of searchResults().engagements; track result.id) {
+                      <button
+                        type="button"
+                        class="flex w-full flex-col items-start px-4 py-2 text-left hover:bg-[var(--p-surface-700)]"
+                        (click)="selectSearchResult(result)"
+                      >
+                        <span class="text-sm text-[var(--p-surface-100)]">{{ result.title }}</span>
+                        <span class="text-xs text-[var(--p-surface-400)]">{{ result.subtitle }}</span>
+                      </button>
+                    }
+                  }
+
+                  @if (searchResults().consultants.length > 0) {
+                    <div class="px-4 pb-1 pt-3 text-xs font-semibold uppercase text-[var(--p-surface-400)]">Consultants</div>
+                    @for (result of searchResults().consultants; track result.id) {
+                      <button
+                        type="button"
+                        class="flex w-full flex-col items-start px-4 py-2 text-left hover:bg-[var(--p-surface-700)]"
+                        (click)="selectSearchResult(result)"
+                      >
+                        <span class="text-sm text-[var(--p-surface-100)]">{{ result.title }}</span>
+                        <span class="text-xs text-[var(--p-surface-400)]">{{ result.subtitle }}</span>
+                      </button>
+                    }
+                  }
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <div class="relative">
+            <button
+              type="button"
+              class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+              title="Notifications"
+              (click)="toggleNotifications()"
+            >
+              <i class="pi pi-bell"></i>
+              @if (unreadNotificationCount() > 0) {
+                <span class="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-red-500"></span>
+              }
+            </button>
+
+            @if (notificationsOpen() && currentUser(); as user) {
+              <app-notifications-modal
+                [recipientId]="user.id"
+                (close)="toggleNotifications()"
+                (unreadCountChange)="unreadNotificationCount.set($event)"
+              />
+            }
+          </div>
+
+          <button
+            type="button"
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+            [title]="darkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+            (click)="toggleDarkMode()"
+          >
+            <i class="pi" [class.pi-sun]="darkMode()" [class.pi-moon]="!darkMode()"></i>
+          </button>
+        </div>
+      </header>
+
+      <main #mainContent class="flex-1 overflow-y-auto px-3 pb-3">
         <router-outlet />
       </main>
     </div>

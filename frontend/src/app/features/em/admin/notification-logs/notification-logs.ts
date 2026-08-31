@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 import { Admin } from '../admin';
 
 import {
-  NotificationLog
+  Notification
 } from '../../../../types';
 
 @Component({
@@ -31,7 +31,7 @@ export class NotificationLogs implements OnInit {
   private readonly admin = inject(Admin);
 
   protected readonly notificationLogs =
-    signal<NotificationLog[]>([]);
+    signal<Notification[]>([]);
 
   protected readonly loading =
     signal(true);

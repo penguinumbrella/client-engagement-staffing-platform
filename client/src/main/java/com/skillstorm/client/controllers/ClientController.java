@@ -1,5 +1,7 @@
 package com.skillstorm.client.controllers;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +22,8 @@ import com.skillstorm.client.dtos.ClientResponse;
 import com.skillstorm.client.services.ClientService;
 
 import jakarta.validation.Valid;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/clients")
@@ -42,12 +46,22 @@ public class ClientController {
         return clientService.getClientById(id);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ClientResponse>> searchClients(@RequestParam String q) {
+        return clientService.searchClients(q);
+    }
+
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @PostMapping
     public ResponseEntity<ClientResponse> createClient(
-            @Valid @RequestBody ClientRequest dto) {
+            @Valid @RequestBody ClientRequest dto,
+            @AuthenticationPrincipal Jwt jwt) {
 
-        return clientService.createClient(dto);
+        return clientService.createClient(
+                dto,
+                jwt.getTokenValue(),
+                UUID.fromString(jwt.getSubject())
+        );
     }
 
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
@@ -62,7 +76,11 @@ public class ClientController {
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClient(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
-        return clientService.deleteClient(id, jwt.getTokenValue());
+        return clientService.deleteClient(
+                id,
+                jwt.getTokenValue(),
+                UUID.fromString(jwt.getSubject())
+        );
     }
 
 }

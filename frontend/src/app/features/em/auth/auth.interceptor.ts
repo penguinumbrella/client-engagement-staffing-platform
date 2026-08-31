@@ -12,7 +12,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const isApiRequest =
     req.url.startsWith(environment.apiGatewayUrl);
 
-  if (!token || !isApiRequest) {
+  const isPublicAuthEndpoint =
+    req.url.endsWith('/api/auth/login') ||
+    req.url.endsWith('/api/auth/register');
+
+  if (!token || !isApiRequest || isPublicAuthEndpoint) {
     return next(req);
   }
 

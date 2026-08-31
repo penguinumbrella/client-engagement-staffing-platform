@@ -1,4 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MessageService } from 'primeng/api';
 import { KanbanColumn } from '../kanban-column/kanban-column';
@@ -12,6 +14,10 @@ import { ConsultantService } from '../../../../services/consultant.service';
 import { AssignmentService } from '../../../../services/assignment.service';
 import { ClientService } from '../../../../services/ClientService';
 import { initialsOf, colorOf } from '../../../../shared/avatar';
+import { engagementWarnings } from '../engagement-warnings';
+
+type StaffingFilter = 'all' | 'staffed' | 'unstaffed';
+type SortBy = 'targetEndDate' | 'startDate' | 'name' | 'client' | 'staffing' | 'warnings' | 'updatedAt';
 
 const COLUMN_STATUSES = [
   EngagementStatus.PLANNED,
@@ -33,50 +39,270 @@ export class KanbanBoard {
   private readonly assignmentService = inject(AssignmentService);
   private readonly clientService = inject(ClientService);
   private readonly messageService = inject(MessageService);
+  private readonly route = inject(ActivatedRoute);
 
   private readonly engagements = signal<Engagement[]>([]);
   private readonly consultantsById = signal<Map<number, Consultant>>(new Map());
   private readonly consultantsByEngagement = signal<Map<number, ConsultantBadge[]>>(new Map());
+  private readonly consultantIdsByEngagement = signal<Map<number, Set<number>>>(new Map());
   private readonly clientsById = signal<Map<number, Client>>(new Map());
 
   protected readonly selected = signal<EngagementCard | null>(null);
   protected readonly creatingStatus = signal<EngagementStatus | null>(null);
   protected readonly connectedLists = COLUMN_STATUSES;
   protected readonly cancelledStatus = EngagementStatus.CANCELLED;
+  protected readonly engagementTypes = Object.values(EngagementType);
+
+  // --- Filters (client-side only; applied before grouping into columns) ---
+  protected readonly hiddenClientIds = signal<Set<number>>(new Set());
+  protected readonly hiddenTypes = signal<Set<EngagementType>>(new Set());
+  protected readonly onlyWithWarnings = signal(false);
+  protected readonly staffingFilter = signal<StaffingFilter>('all');
+  protected readonly consultantFilter = signal<number | null>(null);
+  protected readonly dateRangeStart = signal('');
+  protected readonly dateRangeEnd = signal('');
+  protected readonly filtersModalOpen = signal(false);
+
+  // --- Sorting (client-side only; applied within each column after filtering) ---
+  protected readonly sortBy = signal<SortBy>('targetEndDate');
+
+  protected setSortBy(value: string): void {
+    this.sortBy.set(value as SortBy);
+  }
+
+  protected readonly consultantOptions = computed<Consultant[]>(() =>
+    Array.from(this.consultantsById().values()).sort((a, b) => a.name.localeCompare(b.name)),
+  );
+
+  protected readonly activeFilterCount = computed<number>(() => {
+    let count = this.hiddenClientIds().size + this.hiddenTypes().size;
+    if (this.onlyWithWarnings()) count++;
+    if (this.staffingFilter() !== 'all') count++;
+    if (this.consultantFilter() !== null) count++;
+    if (this.dateRangeStart()) count++;
+    if (this.dateRangeEnd()) count++;
+    return count;
+  });
+
+  private readonly pendingOpenId = signal<number | null>(null);
 
   constructor() {
-    this.consultantService.getAll().subscribe({
-      next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
-      error: (err) => this.notifyError('Failed to load consultants.', err),
+    // Re-run whenever the search bar navigates here with a new ?openId=,
+    // even if we're already sitting on this route (component isn't re-created).
+    this.route.queryParamMap.subscribe((params) => {
+      this.pendingOpenId.set(Number(params.get('openId')) || null);
     });
 
-    this.clientService.getAllClients(0, 100).subscribe({
-      next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
-      error: (err) => this.notifyError('Failed to load clients.', err),
+    effect(() => {
+      const openId = this.pendingOpenId();
+      if (!openId) return;
+
+      const card = this.columns()
+        .flatMap((column) => column.engagements)
+        .find((c) => c.id === openId);
+
+      if (card) {
+        this.selected.set(card);
+        this.pendingOpenId.set(null);
+      }
     });
 
-    this.engagementService.getAll().subscribe({
-      next: (engagements) => {
+    this.consultantService.getAllResponse().subscribe({
+      next: (response) => {
+        this.consultantsById.set(new Map((response.body ?? []).map((c) => [c.id, c])));
+        this.notifyIfStale(response, 'staffing');
+      },
+      error: (err) => this.notifyError('Failed to load consultants.', err, 'staffing'),
+    });
+
+    this.clientService.getAllClientsResponse(0, 100).subscribe({
+      next: (response) => {
+        this.clientsById.set(new Map((response.body?.content ?? []).map((c) => [c.id!, c])));
+        this.notifyIfStale(response, 'client');
+      },
+      error: (err) => this.notifyError('Failed to load clients.', err, 'client'),
+    });
+
+    this.engagementService.getAllResponse().subscribe({
+      next: (response) => {
+        const engagements = response.body ?? [];
         this.engagements.set(engagements);
         engagements.forEach((e) => this.refreshConsultants(e.id));
+        this.notifyIfStale(response, 'engagement');
       },
-      error: (err) => this.notifyError('Failed to load engagements.', err),
+      error: (err) => this.notifyError('Failed to load engagements.', err, 'engagement'),
     });
   }
 
   protected readonly clients = computed<Client[]>(() => Array.from(this.clientsById().values()));
 
-  protected readonly columns = computed<EngagementColumn[]>(() => {
+  private readonly filteredCards = computed<EngagementCard[]>(() => {
     const badgesByEngagement = this.consultantsByEngagement();
     const clientsById = this.clientsById();
-    const cards = this.engagements().map((engagement) => this.toCard(engagement, badgesByEngagement, clientsById));
+    const consultantIdsByEngagement = this.consultantIdsByEngagement();
+
+    const hiddenClientIds = this.hiddenClientIds();
+    const hiddenTypes = this.hiddenTypes();
+    const onlyWithWarnings = this.onlyWithWarnings();
+    const staffingFilter = this.staffingFilter();
+    const consultantFilter = this.consultantFilter();
+    const rangeStart = this.dateRangeStart();
+    const rangeEnd = this.dateRangeEnd();
+
+    return this.engagements()
+      .map((engagement) => this.toCard(engagement, badgesByEngagement, clientsById))
+      .filter((card) => {
+        if (hiddenClientIds.has(card.clientId)) return false;
+        if (hiddenTypes.has(card.engagementType)) return false;
+
+        if (staffingFilter === 'staffed' && card.consultants.length === 0) return false;
+        if (staffingFilter === 'unstaffed' && card.consultants.length > 0) return false;
+
+        if (consultantFilter !== null && !consultantIdsByEngagement.get(card.id)?.has(consultantFilter)) return false;
+
+        if (onlyWithWarnings) {
+          const warnings = engagementWarnings({
+            status: card.status,
+            startDate: card.startDate,
+            targetEndDate: card.targetEndDate,
+            consultantCount: card.consultants.length,
+          });
+          if (warnings.length === 0) return false;
+        }
+
+        if (rangeStart && card.targetEndDate < rangeStart) return false;
+        if (rangeEnd && card.startDate > rangeEnd) return false;
+
+        return true;
+      });
+  });
+
+  protected readonly columns = computed<EngagementColumn[]>(() => {
+    const cards = this.filteredCards();
+    const sortBy = this.sortBy();
 
     return COLUMN_STATUSES.map((status) => ({
       status,
       title: status,
-      engagements: cards.filter((card) => card.status === status),
+      engagements: cards.filter((card) => card.status === status).sort((a, b) => this.compareCards(a, b, sortBy)),
     }));
   });
+
+  protected downloadCsv(): void {
+    const header = ['Engagement Name', 'Client', 'Status', 'Type', 'Start Date', 'Target End Date', 'Consultants', 'Has Warnings'];
+
+    const rows = this.columns()
+      .flatMap((column) => column.engagements)
+      .map((card) => [
+        card.engagementName,
+        card.client.companyName,
+        card.status,
+        card.engagementType,
+        card.startDate,
+        card.targetEndDate,
+        String(card.consultants.length),
+        this.hasWarnings(card) ? 'Yes' : 'No',
+      ]);
+
+    const escapeCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const csv = [header, ...rows].map((row) => row.map(escapeCell).join(',')).join('\r\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `engagements-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private hasWarnings(card: EngagementCard): boolean {
+    return (
+      engagementWarnings({
+        status: card.status,
+        startDate: card.startDate,
+        targetEndDate: card.targetEndDate,
+        consultantCount: card.consultants.length,
+      }).length > 0
+    );
+  }
+
+  private compareCards(a: EngagementCard, b: EngagementCard, sortBy: SortBy): number {
+    switch (sortBy) {
+      case 'targetEndDate':
+        return a.targetEndDate.localeCompare(b.targetEndDate);
+      case 'startDate':
+        return a.startDate.localeCompare(b.startDate);
+      case 'name':
+        return a.engagementName.localeCompare(b.engagementName);
+      case 'client':
+        return a.client.companyName.localeCompare(b.client.companyName);
+      case 'staffing':
+        return a.consultants.length - b.consultants.length;
+      case 'warnings':
+        return Number(this.hasWarnings(b)) - Number(this.hasWarnings(a));
+      case 'updatedAt':
+        return b.updatedAt.localeCompare(a.updatedAt);
+    }
+  }
+
+  protected toggleClientFilter(clientId: number): void {
+    const next = new Set(this.hiddenClientIds());
+    if (next.has(clientId)) {
+      next.delete(clientId);
+    } else {
+      next.add(clientId);
+    }
+    this.hiddenClientIds.set(next);
+  }
+
+  protected isClientHidden(clientId: number): boolean {
+    return this.hiddenClientIds().has(clientId);
+  }
+
+  protected showAllClients(): void {
+    this.hiddenClientIds.set(new Set());
+  }
+
+  protected hideAllClients(): void {
+    this.hiddenClientIds.set(new Set(this.clients().map((c) => c.id!)));
+  }
+
+  protected toggleTypeFilter(type: EngagementType): void {
+    const next = new Set(this.hiddenTypes());
+    if (next.has(type)) {
+      next.delete(type);
+    } else {
+      next.add(type);
+    }
+    this.hiddenTypes.set(next);
+  }
+
+  protected isTypeHidden(type: EngagementType): boolean {
+    return this.hiddenTypes().has(type);
+  }
+
+  protected setStaffingFilter(value: StaffingFilter): void {
+    this.staffingFilter.set(value);
+  }
+
+  protected setConsultantFilter(value: string): void {
+    this.consultantFilter.set(value ? Number(value) : null);
+  }
+
+  protected resetDateRange(): void {
+    this.dateRangeStart.set('');
+    this.dateRangeEnd.set('');
+  }
+
+  protected resetAllFilters(): void {
+    this.hiddenClientIds.set(new Set());
+    this.hiddenTypes.set(new Set());
+    this.onlyWithWarnings.set(false);
+    this.staffingFilter.set('all');
+    this.consultantFilter.set(null);
+    this.resetDateRange();
+  }
 
   private toCard(
     engagement: Engagement,
@@ -112,8 +338,12 @@ export class KanbanBoard {
         const next = new Map(this.consultantsByEngagement());
         next.set(engagementId, badges);
         this.consultantsByEngagement.set(next);
+
+        const nextIds = new Map(this.consultantIdsByEngagement());
+        nextIds.set(engagementId, new Set(assignments.map((a) => a.consultantId)));
+        this.consultantIdsByEngagement.set(nextIds);
       },
-      error: (err) => this.notifyError('Failed to load consultants for an engagement.', err),
+      error: (err) => this.notifyError('Failed to load consultants for an engagement.', err, 'staffing'),
     });
   }
 
@@ -124,6 +354,14 @@ export class KanbanBoard {
     if (engagement.status === destinationStatus) {
       return;
     }
+
+    const previousStatus = engagement.status;
+
+    // Move the card immediately so the board reflects the drop right away
+    // instead of waiting on the round trip; rolled back below on failure.
+    this.engagements.set(
+      this.engagements().map((e) => (e.id === engagement.id ? { ...e, status: destinationStatus } : e)),
+    );
 
     const request$ =
       destinationStatus === EngagementStatus.CANCELLED
@@ -137,11 +375,23 @@ export class KanbanBoard {
         );
       },
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Move Failed',
-          detail: err?.error?.message ?? 'Failed to update the engagement status. Please try again.',
-        });
+        this.engagements.set(
+          this.engagements().map((e) => (e.id === engagement.id ? { ...e, status: previousStatus } : e)),
+        );
+
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Move Failed',
+            detail: err?.error?.message ?? 'Failed to update the engagement status. Please try again.',
+          });
+        }
         console.error(err);
       },
     });
@@ -184,11 +434,19 @@ export class KanbanBoard {
         this.creatingStatus.set(null);
       },
       error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Create Failed',
-          detail: err?.error?.message ?? 'Failed to create engagement. Please try again.',
-        });
+        if (err.status === 503) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Service Unavailable',
+            detail: err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Create Failed',
+            detail: err?.error?.message ?? 'Failed to create engagement. Please try again.',
+          });
+        }
         console.error(err);
       },
     });
@@ -264,20 +522,38 @@ export class KanbanBoard {
     });
   }
 
-  private notifyError(detail: string, err: unknown): void {
+  private notifyError(detail: string, err: any, service?: string): void {
+    const unavailable = err?.status === 503;
     this.messageService.add({
       severity: 'error',
-      summary: 'Error',
-      detail,
+      summary: unavailable ? 'Service Unavailable' : 'Error',
+      detail: unavailable
+        ? (err?.error?.message ?? `The ${service} service is currently unavailable. Please try again later.`)
+        : detail,
     });
     console.error(detail, err);
   }
 
-  private notifyUpdateError(field: string, engagementId: number, err: unknown): void {
+  private notifyIfStale(response: HttpResponse<unknown>, service: string): void {
+    if (response.headers.get('X-Cache-Status') !== 'stale') {
+      return;
+    }
+
     this.messageService.add({
       severity: 'error',
-      summary: 'Update Failed',
-      detail: (err as { error?: { message?: string } })?.error?.message ?? `Failed to update the engagement ${field}. Please try again.`,
+      summary: 'Service Unavailable',
+      detail: `The ${service} service is currently unavailable. Please try again later.`,
+    });
+  }
+
+  private notifyUpdateError(field: string, engagementId: number, err: any): void {
+    const unavailable = err?.status === 503;
+    this.messageService.add({
+      severity: 'error',
+      summary: unavailable ? 'Service Unavailable' : 'Update Failed',
+      detail: unavailable
+        ? (err?.error?.message ?? 'The engagement service is currently unavailable. Please try again later.')
+        : (err?.error?.message ?? `Failed to update the engagement ${field}. Please try again.`),
     });
     console.error(`Failed to update engagement ${engagementId} ${field}`, err);
   }

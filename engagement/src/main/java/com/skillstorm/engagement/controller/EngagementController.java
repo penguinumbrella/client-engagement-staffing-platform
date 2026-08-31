@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/engagements")
@@ -59,7 +61,8 @@ public class EngagementController {
                         engagementService
                                 .createEngagement(
                                         request,
-                                        jwt.getTokenValue()
+                                        jwt.getTokenValue(),
+                                        UUID.fromString(jwt.getSubject())
                                 )
                 );
     }
@@ -120,6 +123,23 @@ public class EngagementController {
 
 
     /*
+     * MANAGER:
+     * searches all engagements.
+     *
+     * CONSULTANT:
+     * searches only engagements they are staffed on.
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<EngagementResponse>> search(@RequestParam String q, @AuthenticationPrincipal Jwt jwt) {
+        if (isEngagementManager(jwt)) {
+            return ResponseEntity.ok(engagementService.searchEngagements(q));
+        }
+
+        return ResponseEntity.ok(engagementService.searchEngagementsForCurrentConsultant(q, jwt.getTokenValue()));
+    }
+
+
+    /*
      * ENGAGEMENT MANAGER
      */
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
@@ -152,7 +172,8 @@ public class EngagementController {
                         .updateEngagement(
                                 id,
                                 request,
-                                jwt.getTokenValue()
+                                jwt.getTokenValue(),
+                                UUID.fromString(jwt.getSubject())
                         )
         );
     }
@@ -170,7 +191,8 @@ public class EngagementController {
 
         engagementService.deleteEngagement(
                 id,
-                jwt.getTokenValue()
+                jwt.getTokenValue(),
+                UUID.fromString(jwt.getSubject())
         );
 
         return ResponseEntity
@@ -200,7 +222,8 @@ public class EngagementController {
                 engagementService
                         .cancelEngagement(
                                 id,
-                                jwt.getTokenValue()
+                                jwt.getTokenValue(),
+                                UUID.fromString(jwt.getSubject())
                         )
         );
     }

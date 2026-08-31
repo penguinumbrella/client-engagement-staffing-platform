@@ -30,6 +30,34 @@ const HoneyHive = definePreset(Aura, {
       950: '#3a2708',
     },
     colorScheme: {
+      light: {
+        surface: {
+          0: '#ffffff',
+          50: '#2e2820',
+          100: '#453c2c',
+          200: '#665a44',
+          300: '#8a7c62',
+          400: '#ab9c80',
+          500: '#c7b99e',
+          600: '#ded4c0',
+          700: '#eee8dc',
+          800: '#f7f4ee',
+          900: '#fbf9f5',
+          950: '#fefdfb',
+        },
+        primary: {
+          color: '#c8871a',
+          contrastColor: '#ffffff',
+          hoverColor: '#a06b16',
+          activeColor: '#7a5212',
+        },
+        highlight: {
+          background: 'rgba(200, 135, 26, 0.1)',
+          focusBackground: 'rgba(200, 135, 26, 0.18)',
+          color: '#7a5212',
+          focusColor: '#7a5212',
+        },
+      },
       dark: {
         surface: {
           0: '#ffffff',
@@ -58,6 +86,17 @@ const HoneyHive = definePreset(Aura, {
           focusColor: '#f5b942',
         },
       },
+    },
+    text: {
+      color: 'light-dark({surface.50}, {surface.0})',
+    },
+  },
+  components: {
+    toast: {
+      info: { detailColor: '{text.color}' },
+      success: { detailColor: '{text.color}' },
+      warn: { detailColor: '{text.color}' },
+      error: { detailColor: '{text.color}' },
     },
   },
 });

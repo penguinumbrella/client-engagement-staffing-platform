@@ -32,6 +32,7 @@ spring:
             value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
             properties:
                 spring.json.add.type.headers: false
+                max.block.ms: 2000
 
     security:
         oauth2:

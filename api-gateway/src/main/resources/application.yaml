@@ -23,30 +23,50 @@ spring:
                               - Path=/client/**
                           filters:
                               - StripPrefix=1
+                              - name: CircuitBreaker
+                                args:
+                                    id: client
+                                    fallbackUri: forward:/fallback/client
                         - id: engagement
                           uri: lb://engagement
                           predicates:
                               - Path=/engagement/**
                           filters:
                               - StripPrefix=1
+                              - name: CircuitBreaker
+                                args:
+                                    id: engagement
+                                    fallbackUri: forward:/fallback/engagement
                         - id: staffing
                           uri: lb://staffing
                           predicates:
                               - Path=/staffing/**
                           filters:
                               - StripPrefix=1
+                              - name: CircuitBreaker
+                                args:
+                                    id: staffing
+                                    fallbackUri: forward:/fallback/staffing
                         - id: notification
                           uri: lb://notification
                           predicates:
                               - Path=/notification/**
                           filters:
-                                - StripPrefix=1
+                               - StripPrefix=1
+                               - name: CircuitBreaker
+                                 args:
+                                    id: notification
+                                    fallbackUri: forward:/fallback/notification
                         - id: auth
                           uri: lb://auth-service
                           predicates:
                             - Path=/auth/**
                           filters:
                               - StripPrefix=1
+                              - name: CircuitBreaker
+                                args:
+                                    id: auth
+                                    fallbackUri: forward:/fallback/auth
 
 server:
     port: 8125
@@ -69,7 +89,48 @@ eureka:
         service-url:
             defaultZone: http://localhost:8761/eureka/
             #http://client-platform-Eureka-env.us-east-1.elasticbeanstalk.com:8761/eureka #http://10.0.0.10:8761/eureka/
-    # instance:
+    instance:
+        prefer-ip-address: true
     #     hostname: 10.0.0.10
-    #     prefer-ip-address: true
     #     instance-id: ${spring.application.name}:${random.uuid}
+
+resilience4j:
+    circuitbreaker:
+        configs:
+            default:
+                sliding-window-size: 10
+                minimum-number-of-calls: 5
+                failure-rate-threshold: 50
+                wait-duration-in-open-state: 15s
+                permitted-number-of-calls-in-half-open-state: 3
+        instances:
+            client:
+                base-config: default
+            engagement:
+                base-config: default
+            staffing:
+                base-config: default
+            notification:
+                base-config: default
+            auth:
+                base-config: default
+    timelimiter:
+        configs:
+            default:
+                timeout-duration: 15s
+        instances:
+            client:
+                base-config: default
+            engagement:
+                base-config: default
+            staffing:
+                base-config: default
+            notification:
+                base-config: default
+            auth:
+                base-config: default
+
+gateway:
+    stale-cache:
+        ttl: 24h
+        max-entries: 500

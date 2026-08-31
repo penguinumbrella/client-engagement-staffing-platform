@@ -1,26 +1,116 @@
-<div class="flex h-[70vh] flex-col overflow-hidden rounded-md bg-[var(--p-surface-800)] shadow-sm">
-  <div class="flex items-center justify-end gap-1 border-b border-[var(--p-surface-600)] px-3 py-2">
-    <button
-      class="flex h-6 w-6 items-center justify-center rounded text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
-      title="Zoom out"
-      (click)="zoomOut()"
-    >
-      <i class="pi pi-minus text-[10px]"></i>
-    </button>
-    <button
-      class="flex h-6 w-6 items-center justify-center rounded text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
-      title="Zoom in"
-      (click)="zoomIn()"
-    >
-      <i class="pi pi-plus text-[10px]"></i>
-    </button>
+<div class="flex h-full flex-col overflow-hidden rounded-2xl bg-[var(--p-surface-800)]">
+  <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--p-surface-600)] px-3 py-2">
+    <div class="flex flex-wrap items-center gap-1">
+      @for (status of allStatuses; track status) {
+        <button
+          type="button"
+          class="rounded-full border px-2 py-0.5 text-[11px] font-medium transition"
+          [class.border-[var(--p-surface-600)]]="isStatusHidden(status)"
+          [class.text-[var(--p-surface-400)]]="isStatusHidden(status)"
+          [class.border-transparent]="!isStatusHidden(status)"
+          [style.backgroundColor]="isStatusHidden(status) ? 'transparent' : statusBarColor(status)"
+          [style.color]="isStatusHidden(status) ? '' : 'white'"
+          (click)="toggleStatusFilter(status)"
+        >
+          {{ status }}
+        </button>
+      }
+    </div>
+
+    <div class="flex items-center gap-1">
+      <div class="relative">
+        <button
+          type="button"
+          class="flex items-center gap-1 rounded-lg border border-[var(--p-surface-600)] px-2 py-0.5 text-[11px] font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+          (click)="toggleCompanyFilterOpen()"
+        >
+          <i class="pi pi-building text-[10px]"></i>
+          Companies
+          @if (hiddenClientIds().size > 0) {
+            <span class="rounded-full bg-teal-600 px-1.5 text-[9px] font-semibold text-white">{{ clientOptions().length - hiddenClientIds().size }}</span>
+          }
+          <i class="pi pi-chevron-down text-[8px]"></i>
+        </button>
+
+        @if (companyFilterOpen()) {
+          <div class="absolute top-full right-0 z-40 mt-1 w-56 rounded-lg border border-[var(--p-surface-600)] bg-[var(--p-surface-800)] p-2 shadow-lg" animate.enter="modal-panel-in" animate.leave="modal-panel-out">
+            <div class="mb-1 flex items-center justify-between px-1 text-[10px] text-[var(--p-surface-400)]">
+              <button type="button" class="hover:text-[var(--p-surface-100)]" (click)="showAllClients()">All</button>
+              <button type="button" class="hover:text-[var(--p-surface-100)]" (click)="hideAllClients()">None</button>
+            </div>
+            <div class="flex max-h-56 flex-col gap-0.5 overflow-y-auto">
+              @for (client of clientOptions(); track client.id) {
+                <label class="flex items-center gap-2 rounded-lg px-1 py-1 text-xs text-[var(--p-surface-200)] hover:bg-[var(--p-surface-700)]">
+                  <input
+                    type="checkbox"
+                    class="accent-amber-500"
+                    [checked]="!isClientHidden(client.id!)"
+                    (change)="toggleClientFilter(client.id!)"
+                  />
+                  <span class="truncate">{{ client.companyName }}</span>
+                </label>
+              } @empty {
+                <p class="m-0 px-1 py-2 text-xs text-[var(--p-surface-400)]">No companies loaded.</p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="ml-1 flex items-center overflow-hidden rounded-lg border border-[var(--p-surface-600)]">
+        <button
+          type="button"
+          class="px-2 py-0.5 text-[11px] font-medium"
+          [class.bg-amber-500]="sortBy() === 'startDate'"
+          [class.text-white]="sortBy() === 'startDate'"
+          [class.text-[var(--p-surface-300)]]="sortBy() !== 'startDate'"
+          (click)="setSortBy('startDate')"
+        >
+          Date
+        </button>
+        <button
+          type="button"
+          class="px-2 py-0.5 text-[11px] font-medium"
+          [class.bg-amber-500]="sortBy() === 'company'"
+          [class.text-white]="sortBy() === 'company'"
+          [class.text-[var(--p-surface-300)]]="sortBy() !== 'company'"
+          (click)="setSortBy('company')"
+        >
+          Company
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="ml-1 rounded-lg border border-[var(--p-surface-600)] px-2 py-0.5 text-[11px] font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+        title="Jump to today"
+        (click)="jumpToToday()"
+      >
+        Today
+      </button>
+
+      <button
+        class="ml-1 flex h-6 w-6 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+        title="Zoom out"
+        (click)="zoomOut()"
+      >
+        <i class="pi pi-minus text-[10px]"></i>
+      </button>
+      <button
+        class="flex h-6 w-6 items-center justify-center rounded-lg text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+        title="Zoom in"
+        (click)="zoomIn()"
+      >
+        <i class="pi pi-plus text-[10px]"></i>
+      </button>
+    </div>
   </div>
 
-  <div class="flex-1 overflow-auto">
+  <div #scrollContainer class="scrollbar-always-visible flex-1 overflow-auto">
     <div class="relative" [style.width.px]="trackWidthPx()">
       @if (todayLinePx() !== null) {
         <div
-          class="pointer-events-none absolute top-0 bottom-0 z-10 w-px bg-red-500"
+          class="pointer-events-none absolute top-0 bottom-0 z-10 w-0.5 bg-amber-500"
           [style.left.px]="todayLinePx()!"
           title="Today"
         ></div>
@@ -33,27 +123,49 @@
               marker.label
             }}</span>
           }
+
+          @if (todayLinePx() !== null) {
+            <div
+              class="absolute inset-y-0 z-30 flex -translate-x-1/2 cursor-default flex-col items-center justify-between py-0.5"
+              [style.left.px]="todayLinePx()!"
+              title="Today"
+            >
+              <span class="text-[9px] leading-none font-semibold whitespace-nowrap text-amber-500">{{ todayLabel }}</span>
+              <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+            </div>
+          }
         </div>
       </div>
 
       @for (row of rows(); track row.engagement.id) {
         <div class="relative h-14 border-b border-[var(--p-surface-700)]">
-          <button
-            class="absolute inset-y-2 flex items-center gap-1.5 overflow-hidden rounded px-2 text-left text-white shadow-sm hover:brightness-95"
+          <div
+            class="absolute inset-y-2 flex items-center gap-1.5 rounded-full px-3 text-left text-white hover:brightness-95"
             [style.left.px]="row.leftPx"
             [style.width.px]="row.widthPx"
             [style.backgroundColor]="statusBarColor(row.engagement.status)"
-            (click)="toggleExpanded(row.engagement.id)"
           >
-            <i
-              class="pi shrink-0 text-[10px]"
-              [class.pi-chevron-right]="!isExpanded(row.engagement.id)"
-              [class.pi-chevron-down]="isExpanded(row.engagement.id)"
-            ></i>
-            <span class="min-w-0 shrink-0 whitespace-nowrap">
+            <button
+              type="button"
+              class="flex shrink-0 items-center justify-center"
+              title="Expand consultants"
+              (click)="toggleExpanded(row.engagement.id)"
+            >
+              <i
+                class="pi text-[10px]"
+                [class.pi-chevron-right]="!isExpanded(row.engagement.id)"
+                [class.pi-chevron-down]="isExpanded(row.engagement.id)"
+              ></i>
+            </button>
+            <button
+              type="button"
+              class="min-w-0 shrink-0 whitespace-nowrap text-left"
+              title="View engagement details"
+              (click)="openDetail(row.engagement)"
+            >
               <span class="block truncate text-xs font-semibold leading-tight">{{ row.engagement.engagementName }}</span>
               <span class="block truncate text-[10px] leading-tight text-white/80">{{ row.clientName }}</span>
-            </span>
+            </button>
             @if (!isExpanded(row.engagement.id) && consultantRows(row.engagement.id).length) {
               <span class="flex shrink-0 -space-x-2">
                 @for (consultant of consultantRows(row.engagement.id); track consultant.consultantName) {
@@ -67,7 +179,9 @@
                 }
               </span>
             }
-          </button>
+
+            <app-engagement-warning-icon class="ml-auto" [warnings]="rowWarnings(row.engagement)" iconClass="text-white" direction="right" />
+          </div>
         </div>
 
         @if (isExpanded(row.engagement.id)) {
@@ -79,7 +193,7 @@
             @for (consultant of consultantRows(row.engagement.id); track consultant.consultantName) {
               <div class="relative h-10 border-b border-[var(--p-surface-700)] bg-[var(--p-surface-800)]/60">
                 <div
-                  class="absolute inset-y-1.5 flex items-center gap-1.5 overflow-hidden rounded px-2 text-left text-white shadow-sm"
+                  class="absolute inset-y-1.5 flex items-center gap-1.5 overflow-hidden rounded-full px-3 text-left text-white"
                   [style.left.px]="consultant.leftPx"
                   [style.width.px]="consultant.widthPx"
                   [style.backgroundColor]="consultant.color"
@@ -106,3 +220,18 @@
     </div>
   </div>
 </div>
+
+@if (selected(); as engagement) {
+  <app-engagement-detail
+    [engagement]="engagement"
+    (close)="closeDetail()"
+    (updateSummary)="updateSummary(engagement.id, $event)"
+    (updateName)="updateName(engagement.id, $event)"
+    (updateDates)="updateDates(engagement.id, $event)"
+    (updateType)="updateType(engagement.id, $event)"
+    (updateStatus)="updateStatus(engagement.id, $event)"
+    (assigned)="loadConsultants(engagement.id)"
+    (delete)="onEngagementDeleted(engagement.id)"
+    (cancelled)="onEngagementCancelled($event)"
+  />
+}

@@ -6,6 +6,7 @@ import { AssignmentService } from '../../services/assignment.service';
 import { EngagementService } from '../../services/engagement.service';
 import { ConsultantService } from '../../services/consultant.service';
 import { ClientService } from '../../services/ClientService';
+import { HeaderSearchService } from '../../services/header-search.service';
 import { Engagement, EngagementStatus } from '../../types/engagement.types';
 import { Consultant } from '../../types/consultant.types';
 import { Assignment } from '../../types/assignment.types';
@@ -28,6 +29,7 @@ export class MyEngagements {
   private readonly consultantService = inject(ConsultantService);
   private readonly clientService = inject(ClientService);
   private readonly messageService = inject(MessageService);
+  private readonly headerSearchService = inject(HeaderSearchService);
 
   private readonly consultantsById = signal<Map<number, Consultant>>(new Map());
   private readonly clientsById = signal<Map<number, Client>>(new Map());
@@ -38,15 +40,17 @@ export class MyEngagements {
   protected readonly expandedIds = signal<Set<number>>(new Set());
   protected readonly loading = signal(false);
 
+  protected readonly hasAssignments = computed(() => this.myAssignments().length > 0);
+
   constructor() {
     this.consultantService.getAll().subscribe({
       next: (consultants) => this.consultantsById.set(new Map(consultants.map((c) => [c.id, c]))),
-      error: (err) => this.notifyError('Failed to load consultants.', err),
+      error: (err) => this.notifyError('Failed to load consultants.', err, 'staffing'),
     });
 
     this.clientService.getAllClients(0, 100).subscribe({
       next: (page) => this.clientsById.set(new Map(page.content.map((c) => [c.id!, c]))),
-      error: (err) => this.notifyError('Failed to load clients.', err),
+      error: (err) => this.notifyError('Failed to load clients.', err, 'client'),
     });
 
     // effect(() => {
@@ -63,7 +67,7 @@ export class MyEngagements {
     const teammatesByEngagement = this.teammatesByEngagement();
     const clientsById = this.clientsById();
 
-    return this.myAssignments()
+    const allRows = this.myAssignments()
       .map((assignment): MyEngagementRow | null => {
         const engagement = engagementsById.get(assignment.engagementId);
         if (!engagement) {
@@ -84,6 +88,18 @@ export class MyEngagements {
         return { ...engagement, myRole: assignment.engagementRole, teammates, client };
       })
       .filter((row): row is MyEngagementRow => row !== null);
+
+    const query = this.headerSearchService.query().toLowerCase();
+    if (!query) {
+      return allRows;
+    }
+
+    return allRows.filter(
+      (row) =>
+        row.engagementName.toLowerCase().includes(query) ||
+        (row.summary?.toLowerCase().includes(query) ?? false) ||
+        row.client.companyName.toLowerCase().includes(query),
+    );
   });
 
   private load(): void {
@@ -119,7 +135,7 @@ export class MyEngagements {
 
         error: err => {
 
-          this.notifyError('Failed to load your engagements.', err);
+          this.notifyError('Failed to load your engagements.', err, 'staffing');
 
           this.loading.set(false);
         }
@@ -158,7 +174,7 @@ export class MyEngagements {
         next.set(engagementId, engagement);
         this.engagementsById.set(next);
       },
-      error: (err) => this.notifyError('Failed to load an engagement.', err),
+      error: (err) => this.notifyError('Failed to load an engagement.', err, 'engagement'),
     });
   }
 
@@ -178,15 +194,23 @@ export class MyEngagements {
         next.set(engagementId, badges);
         this.teammatesByEngagement.set(next);
       },
-      error: (err) => this.notifyError('Failed to load teammates.', err),
+      error: (err) => this.notifyError('Failed to load teammates.', err, 'staffing'),
     });
   }
 
-  private notifyError(detail: string, err: unknown): void {
+  /**
+   * `service` names which downstream service the failed call was ultimately
+   * headed to, so a 503 (the whole service down, per the gateway's circuit
+   * breaker) can say so specifically instead of a generic message.
+   */
+  private notifyError(detail: string, err: any, service?: string): void {
+    const unavailable = err?.status === 503;
     this.messageService.add({
       severity: 'error',
-      summary: 'Error',
-      detail,
+      summary: unavailable ? 'Service Unavailable' : 'Error',
+      detail: unavailable
+        ? (err?.error?.message ?? `The ${service} service is currently unavailable. Please try again later.`)
+        : detail,
     });
     console.error(detail, err);
   }

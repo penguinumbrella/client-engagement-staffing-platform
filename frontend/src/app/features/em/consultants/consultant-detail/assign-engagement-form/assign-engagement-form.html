@@ -1,9 +1,11 @@
 @if (visible()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+  <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" animate.enter="modal-backdrop-in" animate.leave="modal-backdrop-out">
     <form
       [formGroup]="form"
       (ngSubmit)="onSubmit()"
-      class="flex w-full max-w-sm flex-col gap-3 rounded-md bg-[var(--p-surface-800)] p-4 shadow-lg"
+      class="flex w-full max-w-sm flex-col gap-3 rounded-lg bg-[var(--p-surface-800)] p-4 shadow-lg"
+      animate.enter="modal-panel-in"
+      animate.leave="modal-panel-out"
     >
       <h2 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Assign Engagement</h2>
 
@@ -11,7 +13,7 @@
         Engagement
         <select
           formControlName="engagementId"
-          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
         >
           <option [ngValue]="null" disabled>Select an engagement</option>
           @for (engagement of availableEngagements(); track engagement.id) {
@@ -30,7 +32,7 @@
         Role
         <select
           formControlName="engagementRole"
-          class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+          class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
         >
           @for (role of engagementRoles; track role) {
             <option [value]="role">{{ role }}</option>
@@ -44,7 +46,7 @@
           <input
             type="date"
             formControlName="assignmentStartDate"
-            class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+            class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
           />
           @if (form.get('assignmentStartDate')?.invalid && form.get('assignmentStartDate')?.touched) {
             <small class="p-error">Start date is required</small>
@@ -56,7 +58,7 @@
           <input
             type="date"
             formControlName="assignmentEndDate"
-            class="rounded border border-[var(--p-surface-500)] px-2 py-1 text-sm"
+            class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
           />
           @if (form.get('assignmentEndDate')?.invalid && form.get('assignmentEndDate')?.touched) {
             <small class="p-error">End date is required</small>
@@ -68,14 +70,14 @@
         <button
           type="button"
           (click)="onCancel()"
-          class="rounded px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+          class="rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
         >
           Cancel
         </button>
         <button
           type="submit"
           [disabled]="submitting()"
-          class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-50"
         >
           {{ submitting() ? 'Assigning…' : 'Assign' }}
         </button>

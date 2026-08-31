@@ -37,6 +37,7 @@ import com.skillstorm.client.services.ClientService;
 import com.skillstorm.client.validation.UniqueCompanyNameValidator;
 
 import java.util.List;
+import java.util.UUID;
 
 @WebMvcTest(ClientController.class)
 @Import({UniqueCompanyNameValidator.class, SecurityConfig.class})
@@ -62,8 +63,11 @@ class ClientControllerTest {
     // Any authenticated consultant/EM can read; only EMs can write/delete.
     private static final JwtRequestPostProcessor AS_CONSULTANT =
             jwt().authorities(new SimpleGrantedAuthority("ROLE_CONSULTANT"));
+    // Controller methods that mutate now parse jwt.getSubject() as a UUID (the acting EM's id
+    // for the notification broadcast), so the default "user" test subject won't do.
     private static final JwtRequestPostProcessor AS_ENGAGEMENT_MANAGER =
-            jwt().authorities(new SimpleGrantedAuthority("ROLE_ENGAGEMENT_MANAGER"));
+            jwt().jwt(builder -> builder.subject(UUID.randomUUID().toString()))
+                    .authorities(new SimpleGrantedAuthority("ROLE_ENGAGEMENT_MANAGER"));
 
     @BeforeEach
     void setUp() {
@@ -106,7 +110,7 @@ class ClientControllerTest {
 
     @Test
     void createClient_valid_returnsCreated() throws Exception {
-        when(clientService.createClient(any(ClientRequest.class))).thenReturn(ResponseEntity.status(HttpStatus.CREATED).body(clientResponse));
+        when(clientService.createClient(any(ClientRequest.class), any(String.class), any(UUID.class))).thenReturn(ResponseEntity.status(HttpStatus.CREATED).body(clientResponse));
 
         mockMvc.perform(post("/clients")
                         .with(AS_ENGAGEMENT_MANAGER)
@@ -140,7 +144,7 @@ class ClientControllerTest {
 
     @Test
     void createClient_conflictFromService_returnsConflict() throws Exception {
-        when(clientService.createClient(any(ClientRequest.class)))
+        when(clientService.createClient(any(ClientRequest.class), any(String.class), any(UUID.class)))
                 .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "A client named 'Acme Corp' already exists."));
 
         mockMvc.perform(post("/clients")
@@ -191,7 +195,7 @@ class ClientControllerTest {
 
     @Test
     void deleteClient_success_returnsNoContent() throws Exception {
-        when(clientService.deleteClient(eq(1L), any(String.class))).thenReturn(ResponseEntity.noContent().build());
+        when(clientService.deleteClient(eq(1L), any(String.class), any(UUID.class))).thenReturn(ResponseEntity.noContent().build());
 
         mockMvc.perform(delete("/clients/1").with(AS_ENGAGEMENT_MANAGER))
                 .andExpect(status().isNoContent());
@@ -199,7 +203,7 @@ class ClientControllerTest {
 
     @Test
     void deleteClient_notFound_returnsNotFound() throws Exception {
-        when(clientService.deleteClient(eq(99L), any(String.class))).thenReturn(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        when(clientService.deleteClient(eq(99L), any(String.class), any(UUID.class))).thenReturn(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
         mockMvc.perform(delete("/clients/99").with(AS_ENGAGEMENT_MANAGER))
                 .andExpect(status().isNotFound());
@@ -207,17 +211,19 @@ class ClientControllerTest {
 
     @Test
     void deleteClient_hasActiveEngagements_returnsConflict() throws Exception {
-        when(clientService.deleteClient(eq(1L), any(String.class))).thenReturn(ResponseEntity.status(HttpStatus.CONFLICT).build());
+        when(clientService.deleteClient(eq(1L), any(String.class), any(UUID.class))).thenReturn(ResponseEntity.status(HttpStatus.CONFLICT).build());
 
         mockMvc.perform(delete("/clients/1").with(AS_ENGAGEMENT_MANAGER))
                 .andExpect(status().isConflict());
     }
 
     @Test
-    void deleteClient_engagementServiceUnavailable_returnsServiceUnavailable() throws Exception {
-        when(clientService.deleteClient(eq(1L), any(String.class))).thenReturn(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+    void deleteClient_engagementServiceUnavailable_returnsServiceUnavailableWithReason() throws Exception {
+        when(clientService.deleteClient(eq(1L), any(String.class), any(UUID.class)))
+                .thenThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Unable to reach engagement service: connection refused"));
 
         mockMvc.perform(delete("/clients/1").with(AS_ENGAGEMENT_MANAGER))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.message").value("Unable to reach engagement service: connection refused"));
     }
 }

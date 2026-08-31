@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 import {
   LoginAttempt,
   LoginMetrics,
-  NotificationLog
+  Notification
 } from '../../../types';
 
 @Injectable({
@@ -39,9 +39,9 @@ export class Admin {
 
   }
 
-  getNotificationLogs(): Observable<NotificationLog[]> {
+  getNotificationLogs(): Observable<Notification[]> {
 
-    return this.http.get<NotificationLog[]>(
+    return this.http.get<Notification[]>(
       `${this.notificationAdminBaseUrl}/notifications`
     );
 

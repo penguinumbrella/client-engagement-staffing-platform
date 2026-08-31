@@ -4,11 +4,13 @@ import com.skillstorm.staffing.model.Assignment;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public class AssignmentResponse {
 
     private final Long id;
     private final Long consultantId;
+    private final UUID consultantUserId;
     private final String consultantName;
     private final Long engagementId;
     private final String engagementRole;
@@ -20,12 +22,13 @@ public class AssignmentResponse {
     private final OffsetDateTime createdAt;
     private final OffsetDateTime updatedAt;
 
-    public AssignmentResponse(Long id, Long consultantId, String consultantName, Long engagementId,
+    public AssignmentResponse(Long id, Long consultantId, UUID consultantUserId, String consultantName, Long engagementId,
                                String engagementRole, LocalDate assignmentStartDate, LocalDate assignmentEndDate,
                                String status, boolean statusOverridden, boolean active,
                                OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         this.id = id;
         this.consultantId = consultantId;
+        this.consultantUserId = consultantUserId;
         this.consultantName = consultantName;
         this.engagementId = engagementId;
         this.engagementRole = engagementRole;
@@ -38,10 +41,11 @@ public class AssignmentResponse {
         this.updatedAt = updatedAt;
     }
 
-    public static AssignmentResponse from(Assignment assignment, String consultantName) {
+    public static AssignmentResponse from(Assignment assignment, String consultantName, UUID consultantUserId) {
         return new AssignmentResponse(
                 assignment.getId(),
                 assignment.getConsultantId(),
+                consultantUserId,
                 consultantName,
                 assignment.getEngagementId(),
                 assignment.getEngagementRole(),
@@ -61,6 +65,10 @@ public class AssignmentResponse {
 
     public Long getConsultantId() {
         return consultantId;
+    }
+
+    public UUID getConsultantUserId() {
+        return consultantUserId;
     }
 
     public String getConsultantName() {

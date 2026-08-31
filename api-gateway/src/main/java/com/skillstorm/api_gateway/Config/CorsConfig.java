@@ -42,6 +42,13 @@ public class CorsConfig {
                 )
         );
 
+        configuration.setExposedHeaders(
+                List.of(
+                        "X-Cache-Status",
+                        "X-Cache-Date"
+                )
+        );
+
         configuration.setAllowCredentials(true);
 
         configuration.setMaxAge(3600L);

@@ -3,6 +3,7 @@ package com.skillstorm.auth_service.Controllers;
 import com.skillstorm.auth_service.Dtos.CreateUserRequest;
 import com.skillstorm.auth_service.Dtos.CreateUserResponse;
 import com.skillstorm.auth_service.Dtos.UserResponse;
+import com.skillstorm.auth_service.Enums.UserRole;
 import com.skillstorm.auth_service.Services.AuthService;
 
 import jakarta.validation.Valid;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -35,6 +38,19 @@ public class UserController {
 
         return ResponseEntity.ok(
                 authService.getUserByEmail(email)
+        );
+    }
+
+    /*
+     * Internal endpoint: called by other services (engagement, staffing)
+     * to build the engagement-manager notification broadcast list.
+     */
+    @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getUsersByRole(@RequestParam UserRole role) {
+
+        return ResponseEntity.ok(
+                authService.getUsersByRole(role)
         );
     }
 

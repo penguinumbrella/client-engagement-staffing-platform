@@ -10,6 +10,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "notifications")
@@ -20,7 +21,7 @@ public class Notification {
     private Long id;
 
     @Column(name = "recipient_id", nullable = false)
-    private Long recipientId;
+    private UUID recipientId;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -52,7 +53,7 @@ public class Notification {
     protected Notification() {
     }
 
-    public Notification(Long recipientId, String title, String message, String type,
+    public Notification(UUID recipientId, String title, String message, String type,
                         String sourceService, Long sourceId) {
         this.recipientId = recipientId;
         this.title = title;
@@ -78,7 +79,7 @@ public class Notification {
         return id;
     }
 
-    public Long getRecipientId() {
+    public UUID getRecipientId() {
         return recipientId;
     }
 

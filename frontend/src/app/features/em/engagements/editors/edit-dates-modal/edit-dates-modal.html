@@ -1,11 +1,21 @@
-<div class="fixed inset-0 z-10 flex items-center justify-center bg-black/40" (click)="cancel.emit()">
-  <div class="flex w-72 flex-col gap-3 rounded-lg bg-[var(--p-surface-800)] p-5 shadow-lg" (click)="$event.stopPropagation()">
+<div
+  class="fixed inset-0 z-60 flex items-center justify-center bg-black/40"
+  animate.enter="modal-backdrop-in"
+  animate.leave="modal-backdrop-out"
+  (click)="cancel.emit()"
+>
+  <div
+    class="flex w-72 flex-col gap-3 rounded-xl bg-[var(--p-surface-800)] p-5 shadow-lg"
+    animate.enter="modal-panel-in"
+    animate.leave="modal-panel-out"
+    (click)="$event.stopPropagation()"
+  >
     <h4 class="m-0 text-sm font-semibold text-[var(--p-surface-100)]">Edit Dates</h4>
 
     <label class="flex flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
       Start Date
       <input
-        class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+        class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
         type="date"
         name="startDateDraft"
         [(ngModel)]="startDateDraft"
@@ -15,7 +25,7 @@
     <label class="flex flex-col gap-1 text-xs font-medium text-[var(--p-surface-300)]">
       Target End Date
       <input
-        class="rounded-md border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
+        class="rounded-lg border border-[var(--p-surface-600)] px-2 py-1.5 text-sm text-[var(--p-surface-100)]"
         type="date"
         name="targetEndDateDraft"
         [(ngModel)]="targetEndDateDraft"
@@ -23,12 +33,12 @@
     </label>
 
     <div class="mt-1 flex justify-end gap-2">
-      <button type="button" class="rounded-md px-3 py-1.5 text-sm text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]" (click)="cancel.emit()">
+      <button type="button" class="rounded-lg px-3 py-1.5 text-sm text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]" (click)="cancel.emit()">
         Cancel
       </button>
       <button
         type="button"
-        class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+        class="rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
         [disabled]="startDateDraft > targetEndDateDraft"
         (click)="submit()"
       >

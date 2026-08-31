@@ -10,4 +10,7 @@ public interface EngagementRepository extends JpaRepository<Engagement, Long> {
     List<Engagement> findByActiveTrue();
 
     List<Engagement> findByClientIdAndActiveTrue(Long clientId);
+
+    List<Engagement> findByActiveTrueAndEngagementNameContainingIgnoreCaseOrActiveTrueAndSummaryContainingIgnoreCase(
+            String engagementName, String summary);
 }
