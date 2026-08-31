@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
 import { KanbanBoard } from './kanban-board';
@@ -10,7 +11,7 @@ describe('KanbanBoard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [KanbanBoard],
-      providers: [MessageService],
+      providers: [MessageService, provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(KanbanBoard);

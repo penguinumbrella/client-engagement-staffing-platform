@@ -122,6 +122,8 @@ class ConsultantServiceTest {
         ).thenReturn(
                 new AuthUserResponse(
                         UUID.randomUUID(),
+                        "Jane",
+                        "Doe",
                         "jane.doe@example.com",
                         "CONSULTANT",
                         true

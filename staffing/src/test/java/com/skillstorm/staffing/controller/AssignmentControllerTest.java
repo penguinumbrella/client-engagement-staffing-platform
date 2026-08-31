@@ -73,12 +73,12 @@ class AssignmentControllerTest {
         public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                 NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
             return new Jwt("token", Instant.now(), Instant.now().plusSeconds(3600),
-                    Map.of("alg", "none"), Map.of("sub", "test-user"));
+                    Map.of("alg", "none"), Map.of("sub", "123e4567-e89b-12d3-a456-426614174000"));
         }
     }
 
     private AssignmentResponse sampleResponse(Long id) {
-        return new AssignmentResponse(id, 1L, "Jane Doe", 10L, EngagementRole.ASSOCIATE.getLabel(),
+        return new AssignmentResponse(id, 1L, java.util.UUID.randomUUID(), "Jane Doe", 10L, EngagementRole.ASSOCIATE.getLabel(),
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 6, 1), AssignmentStatus.ACTIVE.getLabel(), false, true,
                 OffsetDateTime.now(), OffsetDateTime.now());
     }
@@ -92,7 +92,7 @@ class AssignmentControllerTest {
         request.setAssignmentStartDate(LocalDate.of(2026, 1, 1));
         request.setAssignmentEndDate(LocalDate.of(2026, 6, 1));
 
-        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class), eq("token"))).thenReturn(sampleResponse(1L));
+        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class), eq("token"), any(java.util.UUID.class))).thenReturn(sampleResponse(1L));
 
         mockMvc.perform(post("/api/assignments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -118,7 +118,7 @@ class AssignmentControllerTest {
         request.setAssignmentStartDate(LocalDate.of(2026, 1, 1));
         request.setAssignmentEndDate(LocalDate.of(2026, 6, 1));
 
-        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class), eq("token")))
+        when(assignmentService.assignConsultant(any(CreateAssignmentRequest.class), eq("token"), any(java.util.UUID.class)))
                 .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Consultant 1 is already staffed on engagement 10"));
 
         mockMvc.perform(post("/api/assignments")
@@ -159,7 +159,7 @@ class AssignmentControllerTest {
         mockMvc.perform(delete("/api/assignments/1"))
                 .andExpect(status().isNoContent());
 
-        verify(assignmentService).removeAssignment(1L);
+        verify(assignmentService).removeAssignment(eq(1L), eq("token"), any(java.util.UUID.class));
     }
 
     @Test
@@ -167,7 +167,7 @@ class AssignmentControllerTest {
         UpdateAssignmentStatusRequest request = new UpdateAssignmentStatusRequest();
         request.setStatus(AssignmentStatus.COMPLETED);
 
-        when(assignmentService.updateStatus(eq(1L), any(UpdateAssignmentStatusRequest.class)))
+        when(assignmentService.updateStatus(eq(1L), any(UpdateAssignmentStatusRequest.class), eq("token"), any(java.util.UUID.class)))
                 .thenReturn(sampleResponse(1L));
 
         mockMvc.perform(patch("/api/assignments/1/status")
