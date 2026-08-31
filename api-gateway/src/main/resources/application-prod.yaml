@@ -42,6 +42,16 @@ spring:
                                 args:
                                     id: staffing
                                     fallbackUri: forward:/fallback/staffing
+                        - id: notification
+                          uri: lb://notification
+                          predicates:
+                              - Path=/notification/**
+                          filters:
+                              - StripPrefix=1
+                              - name: CircuitBreaker
+                                args:
+                                    id: notification
+                                    fallbackUri: forward:/fallback/notification
                         - id: auth
                           uri: lb://auth-service
                           predicates:
@@ -90,6 +100,8 @@ resilience4j:
                 base-config: default
             staffing:
                 base-config: default
+            notification:
+                base-config: default
             auth:
                 base-config: default
     timelimiter:
@@ -102,6 +114,8 @@ resilience4j:
             engagement:
                 base-config: default
             staffing:
+                base-config: default
+            notification:
                 base-config: default
             auth:
                 base-config: default
