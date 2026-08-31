@@ -37,6 +37,7 @@ spring:
 
 server:
   port: ${PORT:8084}
+  forward-headers-strategy: framework
 
 management:
   endpoints:
