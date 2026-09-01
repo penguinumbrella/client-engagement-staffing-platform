@@ -3,7 +3,7 @@ package com.skillstorm.auth_service.Services;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-
+  
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.skillstorm.auth_service.Dtos.AuthResponse;
+import com.skillstorm.auth_service.Dtos.CompleteProfileRequest;
 import com.skillstorm.auth_service.Dtos.CreateUserRequest;
 import com.skillstorm.auth_service.Dtos.CreateUserResponse;
 import com.skillstorm.auth_service.Dtos.LoginRequest;
@@ -32,7 +33,7 @@ import com.skillstorm.auth_service.clients.StaffingClient;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder; 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final StaffingClient staffingClient;
@@ -127,6 +128,33 @@ public class AuthService {
         );
 
         return createAuthResponse(user);
+    }
+
+    @Transactional
+    public UserResponse completeOauthProfile(
+        UUID userId,
+        CompleteProfileRequest request,
+        String token) {
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "User not found."
+                        )
+                );
+
+        staffingClient.provisionConsultant(
+                new ProvisionConsultantRequest(
+                        user.getFirstName(),
+                        user.getLastName(),
+                        request.titleRole(),
+                        request.primarySkillArea()
+                ),
+                token
+        );
+
+        return toUserResponse(user);
     }
 
     @Transactional(readOnly = true)

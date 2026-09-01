@@ -105,6 +105,8 @@ class EngagementServiceTest {
     void createEngagement_savesAndReturnsResponse_withDefaultStatusWhenNull() {
         CreateEngagementRequest request = createRequest(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 6, 1), null);
         when(engagementRepository.save(any(Engagement.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(authClient.getUsersByRole(any(), any())).thenReturn(List.of(
+                new com.skillstorm.engagement.dto.AuthUserResponse(UUID.randomUUID(), "Bob", "Smith", "bob@example.com", "ENGAGEMENT_MANAGER", true)));
 
         EngagementResponse response = engagementService.createEngagement(request, TOKEN, ACTOR_ID);
 

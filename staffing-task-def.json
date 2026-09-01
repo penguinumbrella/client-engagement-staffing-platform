@@ -1,0 +1,33 @@
+{
+  "family": "staffing",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::397345411365:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "staffing",
+      "image": "397345411365.dkr.ecr.us-east-1.amazonaws.com/staffing:latest",
+      "portMappings": [{ "containerPort": 8083, "protocol": "tcp" }],
+      "essential": true,
+      "environment": [
+        { "name": "STAFFING_DB_URL", "value": "jdbc:postgresql://awseb-e-tp2mqpwaey-stack-awsebrdsdatabase-axq0ggpif2gr.c09fa9cjdd70.us-east-1.rds.amazonaws.com:5432/ebdb?stringtype=unspecified" },
+        { "name": "DB_USERNAME", "value": "postgres" },
+        { "name": "KAFKA_BOOTSTRAP_SERVERS", "value": "10.0.0.53:9092" },
+        { "name": "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", "value": "http://10.0.0.37:8761/eureka/" }
+      ],
+      "secrets": [
+        { "name": "DB_PASSWORD", "valueFrom": "arn:aws:secretsmanager:us-east-1:397345411365:secret:staffing-test/db-password-0eeeDs" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/staffing",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

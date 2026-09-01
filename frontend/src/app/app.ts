@@ -390,7 +390,9 @@ export class App {
 
     this.authPage.set(
       url.startsWith('/login') ||
-      url.startsWith('/register')
+      url.startsWith('/register') ||
+      url.startsWith('/auth/callback') ||
+      url.startsWith('/onboarding')
     );
   }
 

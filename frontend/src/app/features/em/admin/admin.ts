@@ -4,6 +4,8 @@ import { HttpClient } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
+import { environment } from '../../../../environments/environment';
+
 import {
   LoginAttempt,
   LoginMetrics,
@@ -18,10 +20,10 @@ export class Admin {
   private readonly http = inject(HttpClient);
 
   private readonly authAdminBaseUrl =
-    'http://localhost:8125/auth/api/admin';
+    `${environment.apiGatewayUrl}/auth/api/admin`;
 
   private readonly notificationAdminBaseUrl =
-    'http://localhost:8125/notification/api/admin';
+    `${environment.apiGatewayUrl}/notification/api/admin`;
 
   getLoginAttempts(): Observable<LoginAttempt[]> {
 

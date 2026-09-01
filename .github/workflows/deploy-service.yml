@@ -1,0 +1,61 @@
+name: Deploy service to ECS
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+        description: "Directory name / ECR repo name / ECS task family / ECS service name"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 397345411365.dkr.ecr.us-east-1.amazonaws.com
+  ECS_CLUSTER: test-cluster
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::397345411365:role/github-actions-ecs-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to ECR
+        run: |
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} \
+            | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+
+      - name: Build image
+        run: docker build -t ${{ inputs.service_name }} ./${{ inputs.service_name }}
+
+      - name: Tag and push image
+        run: |
+          docker tag ${{ inputs.service_name }}:latest ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:${{ github.sha }}
+          docker tag ${{ inputs.service_name }}:latest ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:latest
+          docker push ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:${{ github.sha }}
+          docker push ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:latest
+
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ inputs.service_name }}-test \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Wait for service to stabilize
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ inputs.service_name }}-test \
+            --region ${{ env.AWS_REGION }}

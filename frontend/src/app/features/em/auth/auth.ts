@@ -42,6 +42,9 @@ export class Auth {
   private readonly usersUrl =
     `${environment.apiGatewayUrl}/auth/api/users`;
 
+  readonly googleLoginUrl =
+    `${environment.apiGatewayUrl}/auth/oauth2/authorization/google`;
+
   currentUser = signal<AuthUser | null>(this.loadStoredUser());
 
   login(request: LoginRequest): Observable<AuthResponse> {
@@ -137,6 +140,15 @@ export class Auth {
   createUser(request: CreateUserRequest): Observable<CreateUserResponse> {
     return this.http.post<CreateUserResponse>(
       this.usersUrl,
+      request
+    );
+  }
+
+  completeOauthProfile(
+    request: { titleRole: string; primarySkillArea: string }
+  ): Observable<AuthUser> {
+    return this.http.post<AuthUser>(
+      `${this.baseUrl}/oauth/complete-profile`,
       request
     );
   }

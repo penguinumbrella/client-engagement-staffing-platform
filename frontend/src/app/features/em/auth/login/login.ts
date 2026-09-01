@@ -39,6 +39,8 @@ export class Login {
 
   loading = false;
 
+  readonly googleLoginUrl = this.auth.googleLoginUrl;
+
   loginForm = this.fb.nonNullable.group({
 
     email: [

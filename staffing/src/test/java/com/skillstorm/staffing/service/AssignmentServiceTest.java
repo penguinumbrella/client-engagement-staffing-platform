@@ -1,5 +1,6 @@
 package com.skillstorm.staffing.service;
 
+import com.skillstorm.staffing.client.AuthClient;
 import com.skillstorm.staffing.client.EngagementClient;
 import com.skillstorm.staffing.dto.AssignmentResponse;
 import com.skillstorm.staffing.dto.CreateAssignmentRequest;
@@ -24,10 +25,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -49,13 +52,17 @@ class AssignmentServiceTest {
     private EngagementClient engagementClient;
 
     @Mock
+    private AuthClient authClient;
+
+    @Mock
     private NotificationEventPublisher notificationEventPublisher;
 
     private AssignmentService assignmentService;
 
     @BeforeEach
     void setUp() {
-        assignmentService = new AssignmentService(assignmentRepository, consultantRepository, consultantService, engagementClient, notificationEventPublisher);
+        assignmentService = new AssignmentService(assignmentRepository, consultantRepository, consultantService, engagementClient, authClient, notificationEventPublisher);
+        lenient().when(authClient.getUsersByRole(any(), any())).thenReturn(List.of());
     }
 
     private Consultant consultant(Long id) {
@@ -158,7 +165,7 @@ class AssignmentServiceTest {
         when(assignmentRepository.findByConsultantIdAndEngagementId(1L, 10L)).thenReturn(Optional.empty());
         when(assignmentRepository.save(any(Assignment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, null),"test");
+        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, null),"test", UUID.randomUUID());
 
         assertThat(response.getStatus()).isEqualTo(AssignmentStatus.ACTIVE.getLabel());
         assertThat(response.getConsultantName()).isEqualTo("Jane Doe");
@@ -172,7 +179,7 @@ class AssignmentServiceTest {
         when(assignmentRepository.findByConsultantIdAndEngagementId(1L, 10L)).thenReturn(Optional.empty());
         when(assignmentRepository.save(any(Assignment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, AssignmentStatus.PENDING),"test");
+        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, AssignmentStatus.PENDING),"test", UUID.randomUUID());
 
         assertThat(response.getStatus()).isEqualTo(AssignmentStatus.PENDING.getLabel());
     }
@@ -182,7 +189,7 @@ class AssignmentServiceTest {
         when(consultantService.findActiveOrThrow(1L)).thenReturn(consultant(1L));
         when(engagementClient.engagementExists(10L,"test")).thenReturn(false);
 
-        assertThatThrownBy(() -> assignmentService.assignConsultant(createRequest(1L, 10L, null),"test"))
+        assertThatThrownBy(() -> assignmentService.assignConsultant(createRequest(1L, 10L, null),"test", UUID.randomUUID()))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Engagement 10 not found");
 
@@ -197,7 +204,7 @@ class AssignmentServiceTest {
         when(assignmentRepository.findByConsultantIdAndEngagementId(1L, 10L)).thenReturn(Optional.of(inactive));
         when(assignmentRepository.save(any(Assignment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, AssignmentStatus.ACTIVE),"test");
+        AssignmentResponse response = assignmentService.assignConsultant(createRequest(1L, 10L, AssignmentStatus.ACTIVE),"test", UUID.randomUUID());
 
         assertThat(response.getId()).isEqualTo(5L);
         assertThat(response.isActive()).isTrue();
@@ -211,7 +218,7 @@ class AssignmentServiceTest {
         Assignment active = assignment(5L, 1L, 10L, AssignmentStatus.ACTIVE.getLabel(), true);
         when(assignmentRepository.findByConsultantIdAndEngagementId(1L, 10L)).thenReturn(Optional.of(active));
 
-        assertThatThrownBy(() -> assignmentService.assignConsultant(createRequest(1L, 10L, null),"test"))
+        assertThatThrownBy(() -> assignmentService.assignConsultant(createRequest(1L, 10L, null),"test", UUID.randomUUID()))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("already staffed");
 
@@ -310,7 +317,7 @@ class AssignmentServiceTest {
         when(assignmentRepository.findById(5L)).thenReturn(Optional.of(existing));
         when(assignmentRepository.save(any(Assignment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assignmentService.removeAssignment(5L);
+        assignmentService.removeAssignment(5L, "test", UUID.randomUUID());
 
         ArgumentCaptor<Assignment> captor = ArgumentCaptor.forClass(Assignment.class);
         verify(assignmentRepository).save(captor.capture());
@@ -322,7 +329,7 @@ class AssignmentServiceTest {
     void removeAssignment_throwsNotFoundWhenMissing() {
         when(assignmentRepository.findById(5L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> assignmentService.removeAssignment(5L))
+        assertThatThrownBy(() -> assignmentService.removeAssignment(5L, "test", UUID.randomUUID()))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
@@ -331,7 +338,7 @@ class AssignmentServiceTest {
         Assignment inactive = assignment(5L, 1L, 10L, AssignmentStatus.CANCELLED.getLabel(), false);
         when(assignmentRepository.findById(5L)).thenReturn(Optional.of(inactive));
 
-        assertThatThrownBy(() -> assignmentService.removeAssignment(5L))
+        assertThatThrownBy(() -> assignmentService.removeAssignment(5L, "test", UUID.randomUUID()))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
@@ -347,7 +354,7 @@ class AssignmentServiceTest {
         UpdateAssignmentStatusRequest request = new UpdateAssignmentStatusRequest();
         request.setStatus(AssignmentStatus.COMPLETED);
 
-        AssignmentResponse response = assignmentService.updateStatus(5L, request);
+        AssignmentResponse response = assignmentService.updateStatus(5L, request, "test", UUID.randomUUID());
 
         assertThat(response.getStatus()).isEqualTo(AssignmentStatus.COMPLETED.getLabel());
         assertThat(response.isStatusOverridden()).isTrue();
@@ -364,7 +371,7 @@ class AssignmentServiceTest {
         UpdateAssignmentStatusRequest request = new UpdateAssignmentStatusRequest();
         request.setStatus(AssignmentStatus.COMPLETED);
 
-        AssignmentResponse response = assignmentService.updateStatus(5L, request);
+        AssignmentResponse response = assignmentService.updateStatus(5L, request, "test", UUID.randomUUID());
 
         assertThat(response.getConsultantName()).isNull();
     }
@@ -373,7 +380,7 @@ class AssignmentServiceTest {
     void updateStatus_throwsNotFoundWhenAssignmentMissing() {
         when(assignmentRepository.findById(5L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> assignmentService.updateStatus(5L, new UpdateAssignmentStatusRequest()))
+        assertThatThrownBy(() -> assignmentService.updateStatus(5L, new UpdateAssignmentStatusRequest(), "test", UUID.randomUUID()))
                 .isInstanceOf(ResponseStatusException.class);
     }
 

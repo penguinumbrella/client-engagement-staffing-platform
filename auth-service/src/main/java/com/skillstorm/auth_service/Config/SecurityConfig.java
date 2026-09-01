@@ -41,7 +41,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            JwtAuthenticationConverter jwtAuthenticationConverter)
+            JwtAuthenticationConverter jwtAuthenticationConverter,
+            OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler)
             throws Exception {
 
         return http
@@ -63,12 +64,18 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/actuator/info")
                         .permitAll()
+                        .requestMatchers(
+                                "/oauth2/**",
+                                "/login/oauth2/**")
+                        .permitAll()
                         .anyRequest()
                         .authenticated())
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwt ->
                                 jwt.jwtAuthenticationConverter(
                                         jwtAuthenticationConverter)))
+                .oauth2Login(oauth2 ->
+                        oauth2.successHandler(oAuth2LoginSuccessHandler))
 
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

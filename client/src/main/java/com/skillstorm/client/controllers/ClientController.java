@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.skillstorm.client.dtos.ClientRequest;
-import com.skillstorm.client.dtos.ClientResponse;
+import com.skillstorm.client.dtos.ClientResponse; 
 import com.skillstorm.client.services.ClientService;
 
 import jakarta.validation.Valid;

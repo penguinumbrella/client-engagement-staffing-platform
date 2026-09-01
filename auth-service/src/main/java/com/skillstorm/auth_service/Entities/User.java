@@ -3,6 +3,7 @@ package com.skillstorm.auth_service.Entities;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.skillstorm.auth_service.Enums.AuthProvider;
 import com.skillstorm.auth_service.Enums.UserRole;
 
 import jakarta.persistence.Column;
@@ -33,12 +34,16 @@ public class User {
     @Column(nullable = false, length = 254)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 100)
+    @Column(name = "password_hash", length = 100)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 40)
     private UserRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false, length = 20)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
 
     @Column(nullable = false)
     private boolean enabled = true;
@@ -59,11 +64,23 @@ public class User {
             String passwordHash,
             UserRole role) {
 
+        this(firstName, lastName, email, passwordHash, role, AuthProvider.LOCAL);
+    }
+
+    public User(
+            String firstName,
+            String lastName,
+            String email,
+            String passwordHash,
+            UserRole role,
+            AuthProvider authProvider) {
+
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
+        this.authProvider = authProvider;
         this.enabled = true;
     }
 
@@ -101,6 +118,10 @@ public class User {
 
     public UserRole getRole() {
         return role;
+    }
+
+    public AuthProvider getAuthProvider() {
+        return authProvider;
     }
 
     public boolean isEnabled() {

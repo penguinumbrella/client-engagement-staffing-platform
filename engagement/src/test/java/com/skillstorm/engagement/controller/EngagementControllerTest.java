@@ -58,6 +58,7 @@ class EngagementControllerTest {
     void setUp() {
         Jwt jwt = mock(Jwt.class);
         lenient().when(jwt.getTokenValue()).thenReturn("test-token");
+        lenient().when(jwt.getSubject()).thenReturn("123e4567-e89b-12d3-a456-426614174000");
         lenient().when(jwt.getClaimAsStringList("roles")).thenReturn(List.of("ENGAGEMENT_MANAGER"));
         lenient().when(jwt.getSubject()).thenReturn("11111111-1111-1111-1111-111111111111");
 

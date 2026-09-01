@@ -1,13 +1,42 @@
 <div class="px-4 pb-4" animate.enter="page-fade-in">
   <div class="mb-4 flex items-center justify-between">
     <h1 class="m-0 text-lg font-semibold text-[var(--p-surface-50)]">Consultants</h1>
-    <button
-      type="button"
-      (click)="openCreate()"
-      class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
-    >
-      + Add User
-    </button>
+
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center gap-1.5 rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+        (click)="filtersModalOpen.set(true)"
+      >
+        <i class="pi pi-filter text-[11px]"></i>
+        Filters
+        @if (activeFilterCount() > 0) {
+          <span class="rounded-full bg-amber-500 px-1.5 text-[10px] font-semibold text-white">{{ activeFilterCount() }}</span>
+        }
+      </button>
+
+      <div class="flex items-center gap-1.5 rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)]">
+        <i class="pi pi-sort-alt text-[11px]"></i>
+        <select
+          class="bg-transparent outline-none"
+          [value]="sortBy()"
+          (change)="setSortBy($any($event.target).value)"
+        >
+          <option value="name">Name</option>
+          <option value="titleRole">Title</option>
+          <option value="primarySkillArea">Skill Area</option>
+          <option value="engagementCount">Engagement Count</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        (click)="openCreate()"
+        class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
+      >
+        + Add User
+      </button>
+    </div>
   </div>
 
   @if (loading()) {
@@ -26,7 +55,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (consultant of consultants(); track consultant.id) {
+          @for (consultant of filteredConsultants(); track consultant.id) {
             <tr class="border-t border-[var(--p-surface-600)] even:bg-amber-500/10 hover:bg-amber-500/20">
               <td class="px-3 py-2">
                 <button
@@ -60,3 +89,78 @@
   <app-consultant-detail [consultant]="selectedConsultant()" [(visible)]="detailVisible" />
   <app-consultant-form [(visible)]="createFormVisible" (saved)="onConsultantCreated()" />
 </div>
+
+@if (filtersModalOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+    animate.enter="modal-backdrop-in"
+    animate.leave="modal-backdrop-out"
+    (click)="filtersModalOpen.set(false)"
+  >
+    <div
+      class="flex max-h-[85vh] w-80 max-w-[90vw] flex-col gap-4 overflow-y-auto rounded-xl bg-[var(--p-surface-800)] p-4 shadow-lg"
+      animate.enter="modal-panel-in"
+      animate.leave="modal-panel-out"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between">
+        <h3 class="m-0 text-sm font-semibold text-[var(--p-surface-50)]">Filters</h3>
+        <div class="flex items-center gap-1">
+          @if (activeFilterCount() > 0) {
+            <button
+              type="button"
+              (click)="resetAllFilters()"
+              class="rounded-lg px-2 py-1 text-xs font-medium text-amber-500 hover:bg-amber-500/10"
+            >
+              Reset all
+            </button>
+          }
+          <button
+            type="button"
+            (click)="filtersModalOpen.set(false)"
+            class="rounded-lg px-2 py-1 text-xs font-medium text-[var(--p-surface-300)] hover:bg-[var(--p-surface-700)]"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="mb-1.5 flex items-center justify-between">
+          <h3 class="m-0 text-[10px] font-semibold tracking-wide text-[var(--p-surface-400)] uppercase">Skill Area</h3>
+          <div class="flex gap-1.5 text-[10px] text-[var(--p-surface-400)]">
+            <button type="button" class="hover:text-[var(--p-surface-100)]" (click)="showAllSkillAreas()">All</button>
+            <button type="button" class="hover:text-[var(--p-surface-100)]" (click)="hideAllSkillAreas()">None</button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          @for (skillArea of skillAreas; track skillArea) {
+            <label class="flex items-center gap-2 rounded-lg px-1 py-1 text-xs text-[var(--p-surface-200)] hover:bg-[var(--p-surface-700)]">
+              <input
+                type="checkbox"
+                class="accent-amber-500"
+                [checked]="!isSkillAreaHidden(skillArea)"
+                (change)="toggleSkillAreaFilter(skillArea)"
+              />
+              <span class="truncate">{{ skillArea }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <div>
+        <h3 class="m-0 mb-1.5 text-[10px] font-semibold tracking-wide text-[var(--p-surface-400)] uppercase">Staffing</h3>
+        <select
+          class="w-full rounded-lg border border-[var(--p-surface-600)] px-2 py-1 text-xs font-medium text-[var(--p-surface-300)]"
+          [value]="staffingFilter()"
+          (change)="setStaffingFilter($any($event.target).value)"
+        >
+          <option value="all">All staffing</option>
+          <option value="staffed">Staffed</option>
+          <option value="unstaffed">Unstaffed</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+}
