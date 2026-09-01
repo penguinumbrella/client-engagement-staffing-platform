@@ -33,7 +33,7 @@ import com.skillstorm.auth_service.clients.StaffingClient;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder; 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final StaffingClient staffingClient;
