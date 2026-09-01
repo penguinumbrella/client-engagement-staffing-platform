@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      eureka-server: ${{ steps.filter.outputs.eureka-server }}
+      api-gateway: ${{ steps.filter.outputs.api-gateway }}
+      auth-service: ${{ steps.filter.outputs.auth-service }}
+      staffing: ${{ steps.filter.outputs.staffing }}
+      engagement: ${{ steps.filter.outputs.engagement }}
+      client: ${{ steps.filter.outputs.client }}
+      notification: ${{ steps.filter.outputs.notification }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            eureka-server:
+              - 'eureka-server/**'
+            api-gateway:
+              - 'api-gateway/**'
+            auth-service:
+              - 'auth-service/**'
+            staffing:
+              - 'staffing/**'
+            engagement:
+              - 'engagement/**'
+            client:
+              - 'client/**'
+            notification:
+              - 'notification/**'
+
+  deploy-eureka-server:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.eureka-server == 'true'
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: eureka-server
+
+  deploy-api-gateway:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.api-gateway == 'true'
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: api-gateway
+
+  deploy-auth-service:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.auth-service == 'true'
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: auth-service
+
+  deploy-staffing:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.staffing == 'true'
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: staffing
+
+  deploy-engagement:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.engagement == 'true'
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: engagement
+
+  deploy-client:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.client == 'true'
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: client
+
+  deploy-notification:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.notification == 'true'
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: notification
