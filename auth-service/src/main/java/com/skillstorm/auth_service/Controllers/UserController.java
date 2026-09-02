@@ -31,7 +31,7 @@ public class UserController {
     public UserController(AuthService authService) {
         this.authService = authService;
     }
-
+ 
     @PreAuthorize("hasRole('ENGAGEMENT_MANAGER')")
     @GetMapping("/by-email")
     public ResponseEntity<UserResponse> getUserByEmail(@RequestParam String email) {
