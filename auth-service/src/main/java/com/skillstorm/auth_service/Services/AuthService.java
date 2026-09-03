@@ -27,7 +27,7 @@ import com.skillstorm.auth_service.Entities.User;
 import com.skillstorm.auth_service.Enums.UserRole; 
 import com.skillstorm.auth_service.Exceptions.DuplicateEmailException;
 import com.skillstorm.auth_service.Repositories.UserRepository;
-import com.skillstorm.auth_service.clients.StaffingClient;
+import com.skillstorm.auth_service.clients.StaffingClient; 
 
 @Service
 public class AuthService {
