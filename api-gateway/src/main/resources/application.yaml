@@ -112,8 +112,15 @@ resilience4j:
                 base-config: default
             notification:
                 base-config: default
+            # Auth logins are bursty under load; default window (10 / 50%) opens too
+            # early and then fails everything for 15s. Use a wider window and higher
+            # threshold so brief saturation does not trip a full outage.
             auth:
-                base-config: default
+                sliding-window-size: 50
+                minimum-number-of-calls: 20
+                failure-rate-threshold: 80
+                wait-duration-in-open-state: 5s
+                permitted-number-of-calls-in-half-open-state: 5
     timelimiter:
         configs:
             default:
