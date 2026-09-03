@@ -60,6 +60,8 @@ jobs:
     uses: ./.github/workflows/deploy-service.yml
     with:
       service_name: auth-service
+    secrets:
+      AUTH_JWT_PRIVATE_KEY: ${{ secrets.AUTH_JWT_PRIVATE_KEY }}
 
   deploy-staffing:
     needs: detect-changes
