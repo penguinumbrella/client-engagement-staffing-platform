@@ -30,7 +30,7 @@ import com.skillstorm.auth_service.Repositories.UserRepository;
 import com.skillstorm.auth_service.clients.StaffingClient; 
 
 @Service
-public class AuthService {
+public class AuthService { 
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder; 
