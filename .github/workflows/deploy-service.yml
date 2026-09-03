@@ -7,6 +7,9 @@ on:
         required: true
         type: string
         description: "Directory name / ECR repo name / ECS task family / ECS service name"
+    secrets:
+      AUTH_JWT_PRIVATE_KEY:
+        required: false
 
 permissions:
   id-token: write
@@ -23,6 +26,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Write JWT private key
+        if: inputs.service_name == 'auth-service'
+        run: |
+          mkdir -p auth-service/src/main/resources/keys
+          printf '%s' "${{ secrets.AUTH_JWT_PRIVATE_KEY }}" > auth-service/src/main/resources/keys/private.pem
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
