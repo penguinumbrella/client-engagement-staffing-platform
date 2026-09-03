@@ -60,9 +60,57 @@ jobs:
             --force-new-deployment \
             --region ${{ env.AWS_REGION }}
 
-      - name: Wait for service to stabilize
+      # Do not use `aws ecs wait services-stable`. That waiter also waits
+      # until the old deployment has fully drained, which is most of the
+      # delay. CI only needs the new (PRIMARY) tasks running.
+      - name: Wait for new tasks to be running
         run: |
-          aws ecs wait services-stable \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ inputs.service_name }}-test \
-            --region ${{ env.AWS_REGION }}
+          set -euo pipefail
+          SERVICE="${{ inputs.service_name }}-test"
+          CLUSTER="${{ env.ECS_CLUSTER }}"
+          REGION="${{ env.AWS_REGION }}"
+          DEADLINE=$((SECONDS + 300))
+
+          dump_failure() {
+            echo "::error::New $SERVICE tasks did not reach running in time"
+            aws ecs describe-services \
+              --cluster "$CLUSTER" --services "$SERVICE" --region "$REGION" \
+              --query 'services[0].{desired:desiredCount,running:runningCount,pending:pendingCount,taskDef:taskDefinition,deployments:deployments[*].{status:status,desired:desiredCount,running:runningCount,pending:pendingCount,failed:failedTasks}}'
+            aws ecs describe-services \
+              --cluster "$CLUSTER" --services "$SERVICE" --region "$REGION" \
+              --query 'services[0].events[:10].[createdAt,message]' --output table
+            STOPPED=$(aws ecs list-tasks \
+              --cluster "$CLUSTER" --service-name "$SERVICE" \
+              --desired-status STOPPED --region "$REGION" \
+              --query 'taskArns[:5]' --output text)
+            if [ -n "${STOPPED:-}" ] && [ "$STOPPED" != "None" ]; then
+              aws ecs describe-tasks --cluster "$CLUSTER" --tasks $STOPPED --region "$REGION" \
+                --query 'tasks[*].{stoppedReason:stoppedReason,containers:containers[*].{reason:reason,exitCode:exitCode}}'
+            fi
+          }
+
+          while (( SECONDS < DEADLINE )); do
+            SNAP=$(aws ecs describe-services \
+              --cluster "$CLUSTER" --services "$SERVICE" --region "$REGION" \
+              --query 'services[0].deployments[?status==`PRIMARY`] | [0].{running:runningCount,desired:desiredCount,pending:pendingCount,failed:failedTasks}' \
+              --output json)
+            RUNNING=$(echo "$SNAP" | jq -r '.running')
+            DESIRED=$(echo "$SNAP" | jq -r '.desired')
+            PENDING=$(echo "$SNAP" | jq -r '.pending')
+            FAILED=$(echo "$SNAP" | jq -r '.failed // 0')
+            echo "$(date -u +%H:%M:%S) primary running=$RUNNING desired=$DESIRED pending=$PENDING failed=$FAILED"
+
+            if [ "$RUNNING" = "$DESIRED" ] && [ "$PENDING" = "0" ]; then
+              echo "New tasks are running (old tasks may still be draining — that is expected)"
+              exit 0
+            fi
+            if [ "$FAILED" != "0" ] && [ "$FAILED" != "null" ]; then
+              echo "PRIMARY deployment is accumulating failed tasks"
+              dump_failure
+              exit 1
+            fi
+            sleep 10
+          done
+
+          dump_failure
+          exit 1
