@@ -37,8 +37,8 @@ public class HttpClientConfig {
     public ClientHttpRequestFactory clientHttpRequestFactory() {
 
         PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                .setMaxConnTotal(200)
-                .setMaxConnPerRoute(50)
+                .setMaxConnTotal(400)
+                .setMaxConnPerRoute(100)
                 .build();
 
         CloseableHttpClient httpClient = HttpClients.custom()
