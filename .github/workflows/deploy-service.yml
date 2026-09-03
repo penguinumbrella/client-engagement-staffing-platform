@@ -35,15 +35,22 @@ jobs:
           aws ecr get-login-password --region ${{ env.AWS_REGION }} \
             | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
 
-      - name: Build image
-        run: docker build -t ${{ inputs.service_name }} ./${{ inputs.service_name }}
+      # Buildx + registry cache (mode=max) reuses multi-stage layers from ECR
+      # (Maven base, dependency:go-offline, JRE+curl) so only changed layers
+      # rebuild — typically just mvn package + the final jar copy.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Tag and push image
-        run: |
-          docker tag ${{ inputs.service_name }}:latest ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:${{ github.sha }}
-          docker tag ${{ inputs.service_name }}:latest ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:latest
-          docker push ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:${{ github.sha }}
-          docker push ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:latest
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ inputs.service_name }}
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:latest
+          cache-from: type=registry,ref=${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:buildcache
+          cache-to: type=registry,ref=${{ env.ECR_REGISTRY }}/${{ inputs.service_name }}:buildcache,mode=max
 
       - name: Force new ECS deployment
         run: |
