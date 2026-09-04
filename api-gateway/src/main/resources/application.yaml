@@ -7,6 +7,12 @@ spring:
     output:
         ansi:
             enabled: always
+    # Boot 4 default is follow-when-possible. Gateway MVC must return
+    # auth-service's 302 to Google so the browser leaves CloudFront;
+    # otherwise Google's sign-in scripts fail CORS and Next does nothing.
+    http:
+        clients:
+            redirects: dont-follow
     security:
         oauth2:
             resourceserver:

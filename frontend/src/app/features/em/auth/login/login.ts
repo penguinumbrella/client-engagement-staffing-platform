@@ -97,20 +97,12 @@ export class Login {
             switch (user.role) {
 
               case UserRole.ADMIN:
-
-                this.router.navigate(['/admin']);
-
-                break;
-
               case UserRole.ENGAGEMENT_MANAGER:
-
-                this.router.navigate(['/em/engagements']);
-
-                break;
-
               case UserRole.CONSULTANT:
 
-                this.router.navigate(['/my-engagements']);
+                this.router.navigate([
+                  this.auth.homePathForRole(user.role)
+                ]);
 
                 break;
 

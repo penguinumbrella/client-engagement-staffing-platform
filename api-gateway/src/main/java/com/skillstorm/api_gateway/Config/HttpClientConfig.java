@@ -9,10 +9,16 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
+import org.springframework.boot.restclient.RestClientCustomizer;
+import org.springframework.cloud.gateway.server.mvc.config.GatewayMvcProperties;
+import org.springframework.cloud.gateway.server.mvc.handler.RestClientProxyExchange;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 
 /*
  * Every route proxied by the gateway (spring-cloud-gateway-server-webmvc)
@@ -56,5 +62,33 @@ public class HttpClientConfig {
                 .build();
 
         return new HttpComponentsClientHttpRequestFactory(httpClient);
+    }
+
+    /*
+     * RestClient.Builder customizers from Boot can run after the
+     * ClientHttpRequestFactory bean is defined and replace it with one that
+     * still follows redirects. Apply this factory last so ProxyExchange
+     * actually uses it.
+     */
+    @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    public RestClientCustomizer noRedirectRestClientCustomizer(
+            ClientHttpRequestFactory clientHttpRequestFactory) {
+        return builder -> builder.requestFactory(clientHttpRequestFactory);
+    }
+
+    /*
+     * Build the gateway's proxy RestClient with this factory at the last
+     * moment. Auto-config's RestClient.Builder can still carry a
+     * follow-redirects factory if customizer order is wrong.
+     */
+    @Bean
+    public RestClientProxyExchange restClientProxyExchange(
+            RestClient.Builder restClientBuilder,
+            ClientHttpRequestFactory clientHttpRequestFactory,
+            GatewayMvcProperties properties) {
+        return new RestClientProxyExchange(
+                restClientBuilder.requestFactory(clientHttpRequestFactory).build(),
+                properties);
     }
 }

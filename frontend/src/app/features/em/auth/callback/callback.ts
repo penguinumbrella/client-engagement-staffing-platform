@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
 import { Auth } from '../auth';
-import { UserRole } from '../../../../types';
 
 @Component({
   selector: 'app-auth-callback',
@@ -51,11 +50,7 @@ export class Callback implements OnInit {
           return;
         }
 
-        if (user.role === UserRole.ENGAGEMENT_MANAGER) {
-          this.router.navigate(['/em/clients']);
-        } else {
-          this.router.navigate(['/my-engagements']);
-        }
+        this.router.navigate([this.auth.homePathForRole(user.role)]);
       },
 
       error: error => {

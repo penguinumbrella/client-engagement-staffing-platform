@@ -181,7 +181,7 @@ export class Register {
 
 
         this.router.navigate([
-          '/my-engagements'
+          this.auth.homePathForRole(response.user.role)
         ]);
       },
 

@@ -62,7 +62,9 @@ export class Onboarding {
 
         this.loading = false;
 
-        this.router.navigate(['/my-engagements']);
+        this.router.navigate([
+          this.auth.homePathForRole(user.role)
+        ]);
       },
 
       error: error => {

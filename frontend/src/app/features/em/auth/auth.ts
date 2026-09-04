@@ -6,7 +6,8 @@ import {
   AuthResponse,
   LoginRequest,
   RegisterRequest,
-  AuthUser
+  AuthUser,
+  UserRole
 } from '../../../types';
 import { environment } from '../../../../environments/environment';
 
@@ -83,6 +84,19 @@ export class Auth {
 
   getUser(): AuthUser | null {
     return this.currentUser();
+  }
+
+  homePathForRole(role: UserRole | string | null | undefined): string {
+    switch (role) {
+      case UserRole.ADMIN:
+        return '/admin';
+      case UserRole.ENGAGEMENT_MANAGER:
+        return '/em/engagements';
+      case UserRole.CONSULTANT:
+        return '/my-engagements';
+      default:
+        return '/login';
+    }
   }
 
   isLoggedIn(): boolean {
