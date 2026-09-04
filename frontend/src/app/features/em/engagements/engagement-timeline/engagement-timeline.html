@@ -186,7 +186,7 @@
 
         @if (isExpanded(row.engagement.id)) {
           @if (loadingConsultants().has(row.engagement.id)) {
-            <p class="m-0 px-3 py-2 text-[11px] text-[var(--p-surface-400)]">Loading consultants…</p>
+            <app-spinny-bee size="sm" />
           } @else if (!consultantRows(row.engagement.id).length) {
             <p class="m-0 px-3 py-2 text-[11px] text-[var(--p-surface-400)]">No consultants assigned.</p>
           } @else {

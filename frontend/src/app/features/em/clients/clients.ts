@@ -7,10 +7,11 @@ import { Client, RelationshipStatus } from '../../../types/client.types';
 import { ClientDetail } from './client-detail/client-detail';
 import { ClientForm, ClientFormMode } from './client-form/client-form';
 import { ClientTable } from './client-table/client-table';
+import { SpinnyBee } from '../../../shared/spinny-bee/spinny-bee';
 
 @Component({
   selector: 'app-clients',
-  imports: [ClientTable, ClientForm, ClientDetail],
+  imports: [ClientTable, ClientForm, ClientDetail, SpinnyBee],
   templateUrl: './clients.html',
   styleUrl: './clients.css',
 })

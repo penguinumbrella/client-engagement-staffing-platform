@@ -20,6 +20,7 @@ import { Client, RelationshipStatus } from '../../../../types/client.types';
 import { Engagement } from '../../../../types/engagement.types';
 import { EngagementService } from '../../../../services/engagement.service';
 import { colorOf, initialsOf } from '../../../../shared/avatar';
+import { SpinnyBee } from '../../../../shared/spinny-bee/spinny-bee';
 
 @Component({
   selector: 'app-client-detail',
@@ -30,6 +31,7 @@ import { colorOf, initialsOf } from '../../../../shared/avatar';
     EditablePrimaryContactName,
     EditablePrimaryContactEmail,
     ClientEngagementTable,
+    SpinnyBee,
   ],
   templateUrl: './client-detail.html',
   styleUrl: './client-detail.css',

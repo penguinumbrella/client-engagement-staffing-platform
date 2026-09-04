@@ -4,7 +4,7 @@
   </div>
 
   @if (loading()) {
-    <p class="text-sm text-[var(--p-surface-300)]">Loading engagements…</p>
+    <app-spinny-bee />
   } @else if (rows().length === 0) {
     <p class="text-sm text-[var(--p-surface-300)]">
       {{ hasAssignments() ? 'No engagements match your search.' : 'No engagements assigned to you.' }}

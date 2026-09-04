@@ -15,10 +15,11 @@ import { ClientBadge, ConsultantBadge } from '../em/engagements/engagement-detai
 import { engagementStatusIcon, engagementStatusIconColor } from '../em/engagements/engagement-status-icon';
 import { initialsOf, colorOf } from '../../shared/avatar';
 import { MyEngagementRow } from './my-engagement.model';
+import { SpinnyBee } from '../../shared/spinny-bee/spinny-bee';
 
 @Component({
   selector: 'app-my-engagements',
-  imports: [FormsModule],
+  imports: [FormsModule, SpinnyBee],
   templateUrl: './my-engagements.html',
   styleUrl: './my-engagements.css',
 })

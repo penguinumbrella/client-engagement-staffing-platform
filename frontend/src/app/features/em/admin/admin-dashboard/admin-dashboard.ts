@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 
 import { Admin } from '../admin';
+import { SpinnyBee } from '../../../../shared/spinny-bee/spinny-bee';
 
 import {
   LoginAttempt,
@@ -21,7 +22,8 @@ import {
   selector: 'app-admin-dashboard',
 
   imports: [
-    CommonModule
+    CommonModule,
+    SpinnyBee
   ],
 
   templateUrl: './admin-dashboard.html',

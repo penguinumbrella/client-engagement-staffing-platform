@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NotificationService } from '../../services/notification.service';
 import { Notification } from '../../types/notification.types';
+import { SpinnyBee } from '../spinny-bee/spinny-bee';
 
 @Component({
   selector: 'app-notifications-modal',
-  imports: [],
+  imports: [SpinnyBee],
   templateUrl: './notifications-modal.html',
   styleUrl: './notifications-modal.css',
 })

@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 
 import { Admin } from '../admin';
+import { SpinnyBee } from '../../../../shared/spinny-bee/spinny-bee';
 
 import {
   Notification
@@ -18,7 +19,8 @@ import {
   selector: 'app-notification-logs',
 
   imports: [
-    CommonModule
+    CommonModule,
+    SpinnyBee
   ],
 
   templateUrl: './notification-logs.html',

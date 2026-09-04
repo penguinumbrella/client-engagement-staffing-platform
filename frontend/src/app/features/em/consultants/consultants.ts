@@ -10,6 +10,7 @@ import { colorOf, initialsOf } from '../../../shared/avatar';
 import { Consultant, SkillArea } from '../../../types/consultant.types';
 import { ConsultantDetail } from './consultant-detail/consultant-detail';
 import { ConsultantForm } from './consultant-form/consultant-form';
+import { SpinnyBee } from '../../../shared/spinny-bee/spinny-bee';
 
 export interface ConsultantRow extends Consultant {
   engagementCount: number;
@@ -20,7 +21,7 @@ type SortBy = 'name' | 'titleRole' | 'primarySkillArea' | 'engagementCount';
 
 @Component({
   selector: 'app-consultants',
-  imports: [ConsultantDetail, ConsultantForm],
+  imports: [ConsultantDetail, ConsultantForm, SpinnyBee],
   templateUrl: './consultants.html',
   styleUrl: './consultants.css',
 })

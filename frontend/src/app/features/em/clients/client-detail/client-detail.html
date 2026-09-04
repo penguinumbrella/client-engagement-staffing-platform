@@ -89,7 +89,7 @@
       <h3 class="m-0 mb-2 text-xs font-semibold tracking-wide text-[var(--p-surface-300)] uppercase">Engagements</h3>
 
       @if (loadingEngagements()) {
-        <p class="text-sm text-[var(--p-surface-300)]">Loading engagements…</p>
+        <app-spinny-bee />
       } @else {
         <app-client-engagement-table [engagements]="engagements()" />
       }

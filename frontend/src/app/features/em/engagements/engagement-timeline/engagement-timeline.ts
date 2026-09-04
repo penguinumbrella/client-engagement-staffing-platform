@@ -13,6 +13,7 @@ import { initialsOf, colorOf } from '../../../../shared/avatar';
 import { engagementStatusColor } from '../engagement-status-icon';
 import { engagementWarnings } from '../engagement-warnings';
 import { EngagementWarningIcon } from '../engagement-warning-icon/engagement-warning-icon';
+import { SpinnyBee } from '../../../../shared/spinny-bee/spinny-bee';
 import { EngagementDetail } from '../engagement-detail/engagement-detail';
 import { EngagementCard, ConsultantBadge } from '../engagement-detail/engagement.model';
 
@@ -55,7 +56,7 @@ const DEFAULT_HIDDEN_STATUSES = new Set<EngagementStatus>([EngagementStatus.COMP
 
 @Component({
   selector: 'app-engagement-timeline',
-  imports: [EngagementDetail, EngagementWarningIcon],
+  imports: [EngagementDetail, EngagementWarningIcon, SpinnyBee],
   templateUrl: './engagement-timeline.html',
   styleUrl: './engagement-timeline.css',
 })

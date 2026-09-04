@@ -11,7 +11,7 @@
   </div>
 
   @if (loading()) {
-    <p class="text-sm text-[var(--p-surface-300)]">Loading clients…</p>
+    <app-spinny-bee />
   } @else if (error()) {
     <p class="text-sm text-red-600">{{ error() }}</p>
   } @else {

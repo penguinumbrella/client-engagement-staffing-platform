@@ -21,6 +21,7 @@ import { EngagementStatus } from '../../../../types/engagement.types';
 import { AssignEngagementForm } from './assign-engagement-form/assign-engagement-form';
 import { assignmentWarnings } from './assignment-warnings';
 import { EngagementWarningIcon } from '../../engagements/engagement-warning-icon/engagement-warning-icon';
+import { SpinnyBee } from '../../../../shared/spinny-bee/spinny-bee';
 
 // NOTE: assignments previously carried their own independently-editable `status`/`statusOverridden`
 // (see Assignment type + assignment.service.updateStatus). For MVP, the badge shown here is derived
@@ -38,7 +39,7 @@ export interface AssignmentRow {
 
 @Component({
   selector: 'app-consultant-detail',
-  imports: [AssignEngagementForm, EngagementWarningIcon],
+  imports: [AssignEngagementForm, EngagementWarningIcon, SpinnyBee],
   templateUrl: './consultant-detail.html',
   styleUrl: './consultant-detail.css',
 })
