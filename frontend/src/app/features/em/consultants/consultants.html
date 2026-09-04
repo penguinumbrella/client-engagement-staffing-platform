@@ -1,5 +1,5 @@
-<div class="flex h-full min-h-full flex-col px-4 pb-4" animate.enter="page-fade-in">
-  <div class="mb-4 flex items-center justify-between">
+<div class="flex h-full min-h-0 flex-col overflow-hidden px-4 pb-4" animate.enter="page-fade-in">
+  <div class="mb-4 flex shrink-0 items-center justify-between">
     <h1 class="m-0 text-lg font-semibold text-[var(--p-surface-50)]">Consultants</h1>
 
     <div class="flex items-center gap-2">
@@ -44,9 +44,10 @@
   } @else if (error()) {
     <p class="text-sm text-red-600">{{ error() }}</p>
   } @else {
-    <div class="w-full overflow-hidden rounded-xl border border-[var(--p-surface-600)]">
-      <table class="w-full border-collapse text-left text-sm">
-        <thead class="bg-[var(--p-surface-700)]">
+    <div class="flex min-h-0 flex-1 flex-col">
+      <div class="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[var(--p-surface-600)]">
+        <table class="w-full border-collapse text-left text-sm">
+          <thead class="sticky top-0 z-10 bg-[var(--p-surface-700)]">
           <tr>
             <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Name</th>
             <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Title</th>
@@ -85,7 +86,7 @@
       </table>
     </div>
 
-    <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--p-surface-300)]">
+    <div class="mt-3 flex shrink-0 flex-wrap items-center justify-between gap-2 text-xs text-[var(--p-surface-300)]">
       <span>
         Showing {{ pageStart() }}–{{ pageEnd() }} of {{ totalElements() }}
       </span>
@@ -126,6 +127,7 @@
           Next
         </button>
       </div>
+    </div>
     </div>
   }
 
