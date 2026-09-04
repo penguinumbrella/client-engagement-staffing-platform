@@ -18,11 +18,16 @@
       </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto">
+    <div
+      class="flex-1 overflow-y-auto"
+      [class.flex]="loading || notifications.length === 0"
+      [class.items-center]="loading || notifications.length === 0"
+      [class.justify-center]="loading || notifications.length === 0"
+    >
       @if (loading) {
         <app-spinny-bee />
       } @else if (notifications.length === 0) {
-        <div class="flex h-full items-center justify-center text-sm text-[var(--p-surface-400)]">
+        <div class="text-sm text-[var(--p-surface-400)]">
           You're all caught up.
         </div>
       } @else {
