@@ -30,12 +30,18 @@ class OauthAuthorizationProxyFilterTest {
 
     private OauthAuthorizationProxyFilter filter;
     private HttpServer server;
+    private String capturedForwardedHost;
+    private String capturedForwardedProto;
+    private String capturedForwardedPrefix;
 
     @BeforeEach
     void setUp() throws Exception {
         filter = new OauthAuthorizationProxyFilter(loadBalancer);
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/oauth2/authorization/google", exchange -> {
+            capturedForwardedHost = exchange.getRequestHeaders().getFirst("X-Forwarded-Host");
+            capturedForwardedProto = exchange.getRequestHeaders().getFirst("X-Forwarded-Proto");
+            capturedForwardedPrefix = exchange.getRequestHeaders().getFirst("X-Forwarded-Prefix");
             exchange.getResponseHeaders().add("Location", "https://accounts.google.com/o/oauth2/v2/auth?client_id=test");
             exchange.getResponseHeaders().add("Set-Cookie", "oauth_state=abc; Path=/; HttpOnly");
             exchange.sendResponseHeaders(302, -1);
@@ -70,6 +76,8 @@ class OauthAuthorizationProxyFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest(
                 "GET",
                 "/auth/oauth2/authorization/google");
+        request.addHeader("Host", "du83k7mttey3e.cloudfront.net");
+        request.setSecure(true);
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
@@ -81,6 +89,9 @@ class OauthAuthorizationProxyFilterTest {
         assertThat(response.getHeader("Set-Cookie")).contains("oauth_state=abc");
         assertThat(new String(response.getContentAsByteArray(), StandardCharsets.UTF_8))
                 .doesNotContain("followed");
+        assertThat(capturedForwardedHost).isEqualTo("du83k7mttey3e.cloudfront.net");
+        assertThat(capturedForwardedProto).isEqualTo("https");
+        assertThat(capturedForwardedPrefix).isEqualTo("/auth");
     }
 
     @Test

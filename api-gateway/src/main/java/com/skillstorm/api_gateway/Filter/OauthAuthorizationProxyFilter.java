@@ -92,6 +92,7 @@ public class OauthAuthorizationProxyFilter extends OncePerRequestFilter {
         connection.setRequestMethod(request.getMethod());
 
         copyRequestHeaders(request, connection);
+        applyForwardedHeaders(request, connection);
 
         int status = connection.getResponseCode();
         response.setStatus(status);
@@ -121,6 +122,27 @@ public class OauthAuthorizationProxyFilter extends OncePerRequestFilter {
             while (values.hasMoreElements()) {
                 connection.addRequestProperty(name, values.nextElement());
             }
+        }
+    }
+
+    private static void applyForwardedHeaders(
+            HttpServletRequest request,
+            HttpURLConnection connection) {
+        if (connection.getRequestProperty("X-Forwarded-Host") == null) {
+            String host = request.getHeader("Host");
+            if (host != null && !host.isBlank()) {
+                connection.setRequestProperty("X-Forwarded-Host", host);
+            }
+        }
+        if (connection.getRequestProperty("X-Forwarded-Proto") == null) {
+            String proto = request.getHeader("X-Forwarded-Proto");
+            if (proto == null || proto.isBlank()) {
+                proto = request.isSecure() ? "https" : "http";
+            }
+            connection.setRequestProperty("X-Forwarded-Proto", proto);
+        }
+        if (connection.getRequestProperty("X-Forwarded-Prefix") == null) {
+            connection.setRequestProperty("X-Forwarded-Prefix", "/auth");
         }
     }
 

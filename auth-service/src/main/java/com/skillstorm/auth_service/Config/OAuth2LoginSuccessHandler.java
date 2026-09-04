@@ -1,6 +1,7 @@
 package com.skillstorm.auth_service.Config;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -47,6 +48,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String email = oidcUser.getEmail();
         String firstName = oidcUser.getGivenName() != null ? oidcUser.getGivenName() : "";
         String lastName = oidcUser.getFamilyName() != null ? oidcUser.getFamilyName() : "";
+
+        if (email == null || email.isBlank()) {
+            URI callback = URI.create(frontendRedirectUri);
+            response.sendRedirect(
+                    callback.getScheme() + "://" + callback.getAuthority() + "/login?error=oauth");
+            return;
+        }
 
         User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
         boolean isNewUser = user == null;

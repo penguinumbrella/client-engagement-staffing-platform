@@ -42,7 +42,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtAuthenticationConverter jwtAuthenticationConverter,
-            OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler)
+            OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+            OAuth2LoginFailureHandler oAuth2LoginFailureHandler,
+            CookieOAuth2AuthorizationRequestRepository cookieOAuth2AuthorizationRequestRepository)
             throws Exception {
 
         return http
@@ -74,8 +76,12 @@ public class SecurityConfig {
                         oauth2.jwt(jwt ->
                                 jwt.jwtAuthenticationConverter(
                                         jwtAuthenticationConverter)))
-                .oauth2Login(oauth2 ->
-                        oauth2.successHandler(oAuth2LoginSuccessHandler))
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestRepository(
+                                        cookieOAuth2AuthorizationRequestRepository))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler))
 
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
