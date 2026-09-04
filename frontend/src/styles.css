@@ -113,19 +113,6 @@ body {
   animation: auth-fade-in 0.4s ease-out;
 }
 
-/* The bee sits near the top of the PNG; spin around the circular trail instead
-   of the image midpoint so the graphic stays visually centered. */
-@keyframes spinny-bee-spin {
-  to { transform: rotate(360deg); }
-}
-
-.spinny-bee {
-  animation: spinny-bee-spin 1.15s linear infinite;
-  transform-origin: 50% 42%;
-  position: relative;
-  top: 12%;
-}
-
 /* Routed views fill the main pane so loading states can center vertically. */
 main.flex-1 > *:not(router-outlet) {
   display: block;
