@@ -4,6 +4,8 @@ import com.skillstorm.staffing.model.Consultant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.lang.reflect.Constructor;
@@ -88,6 +90,19 @@ class ConsultantRepositoryTest {
         assertThat(
                 consultantRepository.findByActiveTrue()
         ).isEmpty();
+    }
+
+    @Test
+    void findByActiveTrue_pageable_returnsActivePage() {
+        newConsultant(true);
+        newConsultant(true);
+        newConsultant(false);
+
+        Page<Consultant> page = consultantRepository.findByActiveTrue(PageRequest.of(0, 1));
+
+        assertThat(page.getTotalElements()).isEqualTo(2);
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().get(0).isActive()).isTrue();
     }
 
     @Test

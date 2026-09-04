@@ -14,6 +14,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Constructor;
@@ -24,6 +28,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -163,37 +168,38 @@ class ConsultantServiceTest {
 
     @Test
     void getAllConsultants_returnsOnlyActiveConsultants() {
+        Pageable pageable = PageRequest.of(0, 10);
 
-        when(
-                consultantRepository.findByActiveTrue()
-        ).thenReturn(
-                List.of(
-                        activeConsultant(1L)
-                )
-        );
+        when(consultantRepository.findByActiveTrue(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(activeConsultant(1L)), pageable, 1));
 
-        List<ConsultantResponse> responses =
-                consultantService
-                        .getAllConsultants();
+        Page<ConsultantResponse> responses =
+                consultantService.getAllConsultants(0, 10, null);
 
-        assertThat(responses)
-                .hasSize(1);
-
-        assertThat(
-                responses.get(0).getId()
-        ).isEqualTo(1L);
+        assertThat(responses.getContent()).hasSize(1);
+        assertThat(responses.getContent().get(0).getId()).isEqualTo(1L);
     }
 
     @Test
-    void getAllConsultants_returnsEmptyListWhenNoneExist() {
+    void getAllConsultants_returnsEmptyPageWhenNoneExist() {
+        when(consultantRepository.findByActiveTrue(any(Pageable.class)))
+                .thenReturn(Page.empty());
 
-        when(
-                consultantRepository.findByActiveTrue()
-        ).thenReturn(List.of());
+        assertThat(consultantService.getAllConsultants(0, 10, null).getContent()).isEmpty();
+    }
 
-        assertThat(
-                consultantService.getAllConsultants()
-        ).isEmpty();
+    @Test
+    void getAllConsultants_filtersBySkillAreaWhenProvided() {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(consultantRepository.findByActiveTrueAndPrimarySkillAreaIn(eq(List.of("Audit")), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(activeConsultant(1L)), pageable, 1));
+
+        Page<ConsultantResponse> responses =
+                consultantService.getAllConsultants(0, 10, List.of("Audit"));
+
+        assertThat(responses.getContent()).hasSize(1);
+        verify(consultantRepository, never()).findByActiveTrue(any(Pageable.class));
     }
 
     @Test

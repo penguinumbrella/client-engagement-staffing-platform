@@ -6,6 +6,7 @@ import com.skillstorm.staffing.dto.ProvisionConsultantRequest;
 import com.skillstorm.staffing.dto.UpdateConsultantRequest;
 import com.skillstorm.staffing.service.ConsultantService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -63,10 +64,13 @@ public class ConsultantController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ConsultantResponse>> getAll() {
+    public ResponseEntity<Page<ConsultantResponse>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) List<String> skillArea) {
 
         return ResponseEntity.ok(
-                consultantService.getAllConsultants()
+                consultantService.getAllConsultants(page, size, skillArea)
         );
     }
 

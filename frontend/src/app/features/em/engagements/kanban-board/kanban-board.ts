@@ -109,7 +109,7 @@ export class KanbanBoard {
 
     this.consultantService.getAllResponse().subscribe({
       next: (response) => {
-        this.consultantsById.set(new Map((response.body ?? []).map((c) => [c.id, c])));
+        this.consultantsById.set(new Map((response.body?.content ?? []).map((c) => [c.id, c])));
         this.notifyIfStale(response, 'staffing');
       },
       error: (err) => this.notifyError('Failed to load consultants.', err, 'staffing'),

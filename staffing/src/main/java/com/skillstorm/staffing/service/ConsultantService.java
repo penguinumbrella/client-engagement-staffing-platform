@@ -8,6 +8,9 @@ import com.skillstorm.staffing.dto.ProvisionConsultantRequest;
 import com.skillstorm.staffing.dto.UpdateConsultantRequest;
 import com.skillstorm.staffing.model.Consultant;
 import com.skillstorm.staffing.repository.ConsultantRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,11 +77,14 @@ public class ConsultantService {
         );
     }
 
-    public List<ConsultantResponse> getAllConsultants() {
-        return consultantRepository.findByActiveTrue()
-                .stream()
-                .map(ConsultantResponse::from)
-                .toList();
+    public Page<ConsultantResponse> getAllConsultants(int page, int size, List<String> skillAreas) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Consultant> consultants = (skillAreas == null || skillAreas.isEmpty())
+                ? consultantRepository.findByActiveTrue(pageable)
+                : consultantRepository.findByActiveTrueAndPrimarySkillAreaIn(skillAreas, pageable);
+
+        return consultants.map(ConsultantResponse::from);
     }
 
     public List<ConsultantResponse> searchConsultants(String q) {

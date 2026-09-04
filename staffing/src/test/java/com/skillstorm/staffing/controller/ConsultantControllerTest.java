@@ -13,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -32,6 +34,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -106,12 +109,29 @@ class ConsultantControllerTest {
     }
 
     @Test
-    void getAll_returnsListOfConsultants() throws Exception {
-        when(consultantService.getAllConsultants()).thenReturn(List.of(sampleResponse(1L), sampleResponse(2L)));
+    void getAll_returnsPageOfConsultants() throws Exception {
+        PageImpl<ConsultantResponse> page = new PageImpl<>(
+                List.of(sampleResponse(1L), sampleResponse(2L)),
+                PageRequest.of(0, 10),
+                2);
+
+        when(consultantService.getAllConsultants(eq(0), eq(10), isNull())).thenReturn(page);
 
         mockMvc.perform(get("/api/consultants"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(2));
+    }
+
+    @Test
+    void getAll_passesPageAndSizeQueryParams() throws Exception {
+        when(consultantService.getAllConsultants(eq(1), eq(5), isNull()))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(1, 5), 0));
+
+        mockMvc.perform(get("/api/consultants").param("page", "1").param("size", "5"))
+                .andExpect(status().isOk());
+
+        verify(consultantService).getAllConsultants(1, 5, null);
     }
 
     @Test

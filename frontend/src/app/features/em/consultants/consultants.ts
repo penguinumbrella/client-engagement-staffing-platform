@@ -35,6 +35,11 @@ export class Consultants implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
+  readonly page = signal(0);
+  readonly pageSize = signal(10);
+  readonly totalElements = signal(0);
+  readonly totalPages = signal(0);
+
   readonly detailVisible = signal(false);
   readonly selectedConsultant = signal<Consultant | null>(null);
 
@@ -43,15 +48,24 @@ export class Consultants implements OnInit {
   readonly initialsOf = initialsOf;
   readonly colorOf = colorOf;
 
-  // --- Filters (client-side only) ---
+  // --- Filters ---
   readonly hiddenSkillAreas = signal<Set<SkillArea>>(new Set());
   readonly staffingFilter = signal<StaffingFilter>('all');
   readonly filtersModalOpen = signal(false);
 
-  // --- Sorting (client-side only) ---
+  // --- Sorting (client-side on the current page) ---
   readonly sortBy = signal<SortBy>('name');
 
   readonly skillAreas = Object.values(SkillArea);
+  readonly pageSizeOptions = [10, 25, 50];
+
+  readonly pageStart = computed(() =>
+    this.totalElements() === 0 ? 0 : this.page() * this.pageSize() + 1,
+  );
+
+  readonly pageEnd = computed(() =>
+    Math.min((this.page() + 1) * this.pageSize(), this.totalElements()),
+  );
 
   setSortBy(value: string): void {
     this.sortBy.set(value as SortBy);
@@ -71,6 +85,7 @@ export class Consultants implements OnInit {
       next.add(skillArea);
     }
     this.hiddenSkillAreas.set(next);
+    this.resetToFirstPageAndReload();
   }
 
   isSkillAreaHidden(skillArea: SkillArea): boolean {
@@ -79,10 +94,12 @@ export class Consultants implements OnInit {
 
   showAllSkillAreas(): void {
     this.hiddenSkillAreas.set(new Set());
+    this.resetToFirstPageAndReload();
   }
 
   hideAllSkillAreas(): void {
     this.hiddenSkillAreas.set(new Set(this.skillAreas));
+    this.resetToFirstPageAndReload();
   }
 
   setStaffingFilter(value: string): void {
@@ -92,6 +109,18 @@ export class Consultants implements OnInit {
   resetAllFilters(): void {
     this.hiddenSkillAreas.set(new Set());
     this.staffingFilter.set('all');
+    this.resetToFirstPageAndReload();
+  }
+
+  goToPage(page: number): void {
+    if (page < 0 || page >= this.totalPages()) return;
+    this.page.set(page);
+    this.loadConsultants();
+  }
+
+  setPageSize(value: string): void {
+    this.pageSize.set(Number(value));
+    this.resetToFirstPageAndReload();
   }
 
   readonly filteredConsultants = computed<ConsultantRow[]>(() => {
@@ -143,16 +172,41 @@ export class Consultants implements OnInit {
     this.loadConsultants();
   }
 
+  private resetToFirstPageAndReload(): void {
+    this.page.set(0);
+    this.loadConsultants();
+  }
+
+  private visibleSkillAreas(): SkillArea[] | undefined {
+    const hidden = this.hiddenSkillAreas();
+    if (hidden.size === 0) return undefined;
+    return this.skillAreas.filter((skillArea) => !hidden.has(skillArea));
+  }
+
   private loadConsultants(): void {
+    const skillAreas = this.visibleSkillAreas();
+    if (skillAreas && skillAreas.length === 0) {
+      this.consultants.set([]);
+      this.totalElements.set(0);
+      this.totalPages.set(0);
+      this.loading.set(false);
+      this.error.set(null);
+      return;
+    }
+
     this.loading.set(true);
     this.error.set(null);
 
     this.consultantService
-      .getAllResponse()
+      .getAllResponse(this.page(), this.pageSize(), skillAreas)
       .pipe(
         switchMap((response) => {
-          const consultants = response.body ?? [];
+          const page = response.body;
+          const consultants = page?.content ?? [];
           const stale = response.headers.get('X-Cache-Status') === 'stale';
+
+          this.totalElements.set(page?.totalElements ?? 0);
+          this.totalPages.set(page?.totalPages ?? 0);
 
           if (consultants.length === 0) return of({ rows: [] as ConsultantRow[], stale });
 
@@ -198,9 +252,17 @@ export class Consultants implements OnInit {
 
   private openDetailFromQueryParam(): void {
     const openId = Number(this.route.snapshot.queryParamMap.get('openId'));
-    if (!openId) return;
+    if (!openId || this.loading()) return;
 
     const consultant = this.consultants().find((c) => c.id === openId);
-    if (consultant) this.openDetail(consultant);
+    if (consultant) {
+      this.openDetail(consultant);
+      return;
+    }
+
+    this.consultantService.getById(openId).subscribe({
+      next: (found) => this.openDetail(found),
+      error: () => {},
+    });
   }
 }
