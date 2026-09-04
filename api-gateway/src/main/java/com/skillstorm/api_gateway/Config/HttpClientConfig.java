@@ -41,9 +41,14 @@ public class HttpClientConfig {
                 .setMaxConnPerRoute(100)
                 .build();
 
+        // Do not follow 302s. Apache does by default, which makes the gateway
+        // fetch Google's login HTML and serve it from our CloudFront origin;
+        // Google's scripts then fail CORS and the Next button does nothing.
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setConnectionManager(connectionManager)
+                .disableRedirectHandling()
                 .setDefaultRequestConfig(RequestConfig.custom()
+                        .setRedirectsEnabled(false)
                         .setConnectionRequestTimeout(Timeout.ofSeconds(5))
                         .setConnectTimeout(Timeout.ofSeconds(5))
                         .build())
