@@ -1,4 +1,4 @@
-<div class="flex h-full min-h-0 flex-col overflow-hidden px-4 pb-4" animate.enter="page-fade-in">
+<div class="flex h-full min-h-0 flex-col px-4 pb-4" animate.enter="page-fade-in">
   <div class="mb-4 flex shrink-0 items-center justify-between">
     <h1 class="m-0 text-lg font-semibold text-[var(--p-surface-50)]">Consultants</h1>
 
@@ -39,52 +39,54 @@
     </div>
   </div>
 
-  @if (loading()) {
+  @if (loading() && initialLoad()) {
     <app-spinny-bee />
-  } @else if (error()) {
+  } @else if (error() && initialLoad()) {
     <p class="text-sm text-red-600">{{ error() }}</p>
   } @else {
     <div class="flex min-h-0 flex-1 flex-col">
-      <div class="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[var(--p-surface-600)]">
+      <div
+        class="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[var(--p-surface-600)]"
+        [class.opacity-60]="loading()"
+      >
         <table class="w-full border-collapse text-left text-sm">
           <thead class="sticky top-0 z-10 bg-[var(--p-surface-700)]">
-          <tr>
-            <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Name</th>
-            <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Title</th>
-            <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Skill Area</th>
-            <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Engagements</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (consultant of filteredConsultants(); track consultant.id) {
-            <tr class="border-t border-[var(--p-surface-600)] even:bg-amber-500/10 hover:bg-amber-500/20">
-              <td class="px-3 py-2">
-                <button
-                  type="button"
-                  (click)="openDetail(consultant)"
-                  class="flex items-center gap-2 text-left"
-                >
-                  <span
-                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-                    [style.background-color]="colorOf(consultant.name)"
-                  >
-                    {{ initialsOf(consultant.name) }}
-                  </span>
-                  <span class="font-medium text-amber-500 hover:underline">{{ consultant.name }}</span>
-                </button>
-              </td>
-              <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.titleRole }}</td>
-              <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.primarySkillArea }}</td>
-              <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.engagementCount }}</td>
-            </tr>
-          } @empty {
             <tr>
-              <td colspan="4" class="px-3 py-4 text-center text-xs text-[var(--p-surface-400)]">No consultants found.</td>
+              <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Name</th>
+              <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Title</th>
+              <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Skill Area</th>
+              <th class="px-3 py-2 font-medium text-[var(--p-surface-300)]">Engagements</th>
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (consultant of filteredConsultants(); track consultant.id) {
+              <tr
+                class="cursor-pointer border-t border-[var(--p-surface-600)] even:bg-amber-500/10 hover:bg-amber-500/20"
+                (click)="openDetail(consultant)"
+              >
+                <td class="px-3 py-2">
+                  <div class="flex items-center gap-2 text-left">
+                    <span
+                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+                      [style.background-color]="colorOf(consultant.name)"
+                    >
+                      {{ initialsOf(consultant.name) }}
+                    </span>
+                    <span class="font-medium text-amber-500">{{ consultant.name }}</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.titleRole }}</td>
+                <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.primarySkillArea }}</td>
+                <td class="px-3 py-2 text-[var(--p-surface-200)]">{{ consultant.engagementCount }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="px-3 py-4 text-center text-xs text-[var(--p-surface-400)]">No consultants found.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
     <div class="mt-3 flex shrink-0 flex-wrap items-center justify-between gap-2 text-xs text-[var(--p-surface-300)]">
       <span>
@@ -95,7 +97,7 @@
         <label class="flex items-center gap-1.5">
           Rows
           <select
-            class="rounded-lg border border-[var(--p-surface-600)] bg-transparent px-2 py-1 outline-none"
+            class="rounded-lg border border-[var(--p-surface-600)] bg-[var(--p-surface-800)] px-2 py-1 outline-none"
             [value]="pageSize()"
             (change)="setPageSize($any($event.target).value)"
           >

@@ -33,6 +33,7 @@ export class Consultants implements OnInit {
 
   readonly consultants = signal<ConsultantRow[]>([]);
   readonly loading = signal(true);
+  readonly initialLoad = signal(true);
   readonly error = signal<string | null>(null);
 
   readonly page = signal(0);
@@ -190,6 +191,7 @@ export class Consultants implements OnInit {
       this.totalElements.set(0);
       this.totalPages.set(0);
       this.loading.set(false);
+      this.initialLoad.set(false);
       this.error.set(null);
       return;
     }
@@ -224,6 +226,7 @@ export class Consultants implements OnInit {
         next: ({ rows, stale }) => {
           this.consultants.set(rows);
           this.loading.set(false);
+          this.initialLoad.set(false);
           if (stale) {
             this.messageService.add({
               severity: 'error',
@@ -246,22 +249,29 @@ export class Consultants implements OnInit {
             this.error.set('Failed to load consultants.');
           }
           this.loading.set(false);
+          this.initialLoad.set(false);
         },
       });
   }
 
+  private handledOpenId: number | null = null;
+
   private openDetailFromQueryParam(): void {
     const openId = Number(this.route.snapshot.queryParamMap.get('openId'));
-    if (!openId || this.loading()) return;
+    if (!openId || this.loading() || this.handledOpenId === openId) return;
 
     const consultant = this.consultants().find((c) => c.id === openId);
     if (consultant) {
+      this.handledOpenId = openId;
       this.openDetail(consultant);
       return;
     }
 
     this.consultantService.getById(openId).subscribe({
-      next: (found) => this.openDetail(found),
+      next: (found) => {
+        this.handledOpenId = openId;
+        this.openDetail(found);
+      },
       error: () => {},
     });
   }
