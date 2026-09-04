@@ -5,7 +5,7 @@ import com.skillstorm.notification.dto.NotificationEvent;
 import com.skillstorm.notification.dto.NotificationResponse;
 import com.skillstorm.notification.enums.NotificationType;
 import com.skillstorm.notification.model.Notification;
-import com.skillstorm.notification.repository.NotificationRepository;
+import com.skillstorm.notification.repository.NotificationRepository; 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

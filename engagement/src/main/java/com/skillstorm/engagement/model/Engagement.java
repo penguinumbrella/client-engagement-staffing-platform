@@ -46,7 +46,7 @@ public class Engagement {
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
-
+ 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
