@@ -98,12 +98,12 @@
           Rows
           <select
             class="rounded-lg border border-[var(--p-surface-600)] bg-[var(--p-surface-800)] px-2 py-1 outline-none"
-            [value]="pageSize()"
+            [value]="'' + pageSize()"
             (change)="setPageSize($any($event.target).value)"
           >
-            @for (size of pageSizeOptions; track size) {
-              <option [value]="size">{{ size }}</option>
-            }
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
           </select>
         </label>
 

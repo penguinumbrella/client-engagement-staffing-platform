@@ -120,7 +120,9 @@ export class Consultants implements OnInit {
   }
 
   setPageSize(value: string): void {
-    this.pageSize.set(Number(value));
+    const size = Number(value);
+    if (!this.pageSizeOptions.includes(size) || size === this.pageSize()) return;
+    this.pageSize.set(size);
     this.resetToFirstPageAndReload();
   }
 
